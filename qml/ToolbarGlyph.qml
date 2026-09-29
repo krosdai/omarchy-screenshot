@@ -178,12 +178,6 @@ Canvas {
             ctx.lineTo(16.5, 17)
             ctx.lineTo(16.5, 15)
             break
-        case "cancel":
-            ctx.moveTo(4, 4)
-            ctx.lineTo(16, 16)
-            ctx.moveTo(16, 4)
-            ctx.lineTo(4, 16)
-            break
         }
         ctx.stroke()
     }

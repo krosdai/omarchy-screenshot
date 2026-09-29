@@ -293,7 +293,10 @@ int main(int argc, char **argv) {
   bool colorPickerWorked = false;
   bool colorPersistenceWorked = false;
   bool toolbarPaddingWorked = false;
+  bool toolbarOrderWorked = false;
   bool groupedToolbarWorked = false;
+  bool redoShortcutWorked = false;
+  bool escapeCloses = false;
   QString selectedTestColor;
   bool annotationColorsKept = false;
   bool coloredTextExported = false;
@@ -338,6 +341,23 @@ int main(int argc, char **argv) {
           views[0]->rootObject()->property("toolbarButtonCount").toInt() >=
               11 &&
           !hasOcrButton.toBool();
+      auto displayedAction = [&](int index) {
+        QVariant action;
+        QMetaObject::invokeMethod(views[0]->rootObject(),
+                                  "toolbarDisplayedTool",
+                                  Q_RETURN_ARG(QVariant, action),
+                                  Q_ARG(QVariant, index));
+        return action.toString();
+      };
+      QVariant closeButton;
+      QMetaObject::invokeMethod(views[0]->rootObject(), "toolbarHasAction",
+                                Q_RETURN_ARG(QVariant, closeButton),
+                                Q_ARG(QVariant, QStringLiteral("cancel")));
+      toolbarOrderWorked =
+          displayedAction(7) == QStringLiteral("marker") &&
+          displayedAction(8) == QStringLiteral("undo") &&
+          displayedAction(9) == QStringLiteral("redo") &&
+          !closeButton.toBool();
       handlesInitiallyVisible = visibleHandleCount() == 8;
       std::function<QQuickItem *(QQuickItem *, const QString &)>
           findVisualItem =
@@ -434,7 +454,8 @@ int main(int argc, char **argv) {
         QCoreApplication::sendEvent(views[0].get(), &colorKey);
         colorPickerWorked &=
             shortcutClosed && colorPanel->isVisible() && controller.selected();
-        QKeyEvent closePanel(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
+        QKeyEvent closePanel(QEvent::KeyPress, Qt::Key_Q, Qt::NoModifier,
+                             QStringLiteral("q"));
         QCoreApplication::sendEvent(views[0].get(), &closePanel);
         colorPickerWorked &= !colorPanel->isVisible();
         sendMouse(QEvent::MouseButtonPress, buttonCenter, Qt::LeftButton,
@@ -789,18 +810,35 @@ int main(int argc, char **argv) {
         const bool selectKeyWorked =
             controller.tool() == QStringLiteral("select") &&
             visibleHandleCount() == 8;
-        QKeyEvent mosaicKey(QEvent::KeyPress, Qt::Key_G, Qt::NoModifier,
+        QKeyEvent mosaicKey(QEvent::KeyPress, Qt::Key_G, Qt::ShiftModifier,
                             QStringLiteral("g"));
         QCoreApplication::sendEvent(views[0].get(), &mosaicKey);
         const bool mosaicKeyWorked =
             controller.tool() == QStringLiteral("mosaic") &&
             visibleHandleCount() == 0;
+        QKeyEvent markerKey(QEvent::KeyPress, Qt::Key_G, Qt::NoModifier,
+                            QStringLiteral("g"));
+        QCoreApplication::sendEvent(views[0].get(), &markerKey);
+        const bool markerKeyWorked =
+            controller.tool() == QStringLiteral("marker") &&
+            visibleHandleCount() == 0;
         QKeyEvent penKey(QEvent::KeyPress, Qt::Key_D, Qt::NoModifier,
                          QStringLiteral("d"));
         QCoreApplication::sendEvent(views[0].get(), &penKey);
         leftHandHotkeysWorked = selectKeyWorked && mosaicKeyWorked &&
+                                markerKeyWorked &&
                                 controller.tool() == QStringLiteral("pen") &&
                                 visibleHandleCount() == 0;
+        const int annotationCount = controller.annotations().size();
+        QKeyEvent undoKey(QEvent::KeyPress, Qt::Key_Z, Qt::NoModifier,
+                           QStringLiteral("z"));
+        QCoreApplication::sendEvent(views[0].get(), &undoKey);
+        const bool undone = controller.annotations().size() + 1 == annotationCount;
+        QKeyEvent redoKey(QEvent::KeyPress, Qt::Key_X, Qt::NoModifier,
+                           QStringLiteral("x"));
+        QCoreApplication::sendEvent(views[0].get(), &redoKey);
+        redoShortcutWorked = undone &&
+                             controller.annotations().size() == annotationCount;
         sendMouse(QEvent::MouseMove, toolbarCenter(6), Qt::NoButton,
                   Qt::NoButton);
         hoverDescriptionWorked =
@@ -963,8 +1001,39 @@ int main(int argc, char **argv) {
         else
           qunsetenv("OMARCHY_SCREENSHOT_TEST_CLIPBOARD");
       }
+      int escapeSignals = 0;
+      const auto escapeConnection =
+          QObject::connect(&controller, &CaptureController::done, &app,
+                           [&] { ++escapeSignals; });
+      const QPointF blankSpot(450, 350);
+      controller.setTool(QStringLiteral("text"));
+      QTest::mouseClick(views[0].get(), Qt::LeftButton, Qt::NoModifier,
+                        blankSpot.toPoint());
+      auto *textEditor =
+          root->findChild<QQuickItem *>(QStringLiteral("textEditor"));
+      const bool editorOpened = textEditor && textEditor->isVisible();
+      QKeyEvent escapeText(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
+      QCoreApplication::sendEvent(views[0].get(), &escapeText);
+      const bool editorEscapeClosed = editorOpened && escapeSignals == 1;
+      if (textEditor)
+        textEditor->setVisible(false);
+      controller.setTool(QStringLiteral("select"));
+      const_cast<QQuickItem *>(root)->forceActiveFocus();
+      const QPointF rectButton = toolbarCenter(1);
+      sendMouse(QEvent::MouseButtonPress, rectButton, Qt::LeftButton,
+                Qt::LeftButton);
+      sendMouse(QEvent::MouseButtonRelease, rectButton, Qt::LeftButton,
+                Qt::NoButton);
+      auto *variantPanel =
+          root->findChild<QQuickItem *>(QStringLiteral("variantPanel"));
+      const bool panelOpened = variantPanel && variantPanel->isVisible();
+      QKeyEvent escapePanel(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
+      QCoreApplication::sendEvent(views[0].get(), &escapePanel);
+      escapeCloses = editorEscapeClosed && panelOpened && escapeSignals == 2;
+      QObject::disconnect(escapeConnection);
       QTextStream(stdout) << "Mosaic preview: " << mosaicVisible
                           << ", toolbar: " << toolbarWorked
+                          << ", toolbar order: " << toolbarOrderWorked
                           << ", grouped tools: " << groupedToolbarWorked
                           << ", color picker: " << colorPickerWorked
                           << ", saved color: " << colorPersistenceWorked
@@ -981,6 +1050,8 @@ int main(int argc, char **argv) {
                           << ", held arrow resize: "
                           << repeatingArrowResizeWorked
                           << ", left-hand keys: " << leftHandHotkeysWorked
+                          << ", redo X: " << redoShortcutWorked
+                          << ", escape closes: " << escapeCloses
                           << ", hover text: " << hoverDescriptionWorked
                           << ", drag: " << dragPreviewWorked
                           << ", export changed: " << mosaicExportChanged
@@ -1002,7 +1073,9 @@ int main(int argc, char **argv) {
                           << ", editor focused: " << editorFocused
                           << ", captures ready: " << capturesReady
                           << ", double-click copy: " << doubleClickCopied << "\n";
-      app.exit(mosaicVisible && toolbarWorked && groupedToolbarWorked &&
+      app.exit(mosaicVisible && toolbarWorked && toolbarOrderWorked &&
+                       groupedToolbarWorked && redoShortcutWorked &&
+                       escapeCloses &&
                        colorPickerWorked &&
                        colorPersistenceWorked && toolbarPaddingWorked &&
                        annotationColorsKept && coloredTextExported &&

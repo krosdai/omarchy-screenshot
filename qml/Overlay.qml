@@ -166,8 +166,13 @@ Item {
     }
 
     Keys.onPressed: event => {
+        if (event.key === Qt.Key_Escape) {
+            captureController.cancel()
+            event.accepted = true
+            return
+        }
         if (colorPanel.visible) {
-            if (event.key === Qt.Key_Escape || event.key === Qt.Key_Q) {
+            if (event.key === Qt.Key_Q) {
                 colorPanel.visible = false
                 root.forceActiveFocus()
                 event.accepted = true
@@ -176,13 +181,8 @@ Item {
         }
         if (variantPanel.visible) {
             variantPanel.visible = false
-            if (event.key === Qt.Key_Escape) {
-                event.accepted = true
-                return
-            }
         }
-        if (event.key === Qt.Key_Escape) captureController.cancel()
-        else if (captureController.selected && captureController.tool === "select" &&
+        if (captureController.selected && captureController.tool === "select" &&
                  (event.key === Qt.Key_Up || event.key === Qt.Key_Down ||
                   event.key === Qt.Key_Left || event.key === Qt.Key_Right) &&
                  (event.modifiers === Qt.NoModifier || event.modifiers === Qt.ShiftModifier))
@@ -190,10 +190,10 @@ Item {
         else if (captureController.selected && event.key === Qt.Key_C) captureController.copy()
         else if (captureController.selected && event.key === Qt.Key_S) captureController.save()
         else if (captureController.selected && event.key === Qt.Key_F) captureController.ocr()
+        else if (captureController.selected && event.key === Qt.Key_X &&
+                 event.modifiers === Qt.NoModifier) captureController.redo()
         else if (captureController.selected && event.key === Qt.Key_Z &&
-                 (event.modifiers & Qt.ShiftModifier)) captureController.redo()
-        else if (captureController.selected && event.key === Qt.Key_Z) captureController.undo()
-        else if (event.key === Qt.Key_X) captureController.cancel()
+                 event.modifiers === Qt.NoModifier) captureController.undo()
         else if (captureController.selected && event.key === Qt.Key_Q) colorPanel.visible = true
         else if (captureController.selected && event.key === Qt.Key_V) captureController.tool = "select"
         else if (captureController.selected && event.key === Qt.Key_R &&
@@ -204,8 +204,8 @@ Item {
                  (event.modifiers & Qt.ShiftModifier)) captureController.tool = "curvedarrow"
         else if (captureController.selected && event.key === Qt.Key_D &&
                  (event.modifiers & Qt.ShiftModifier)) captureController.tool = "fillrect"
-        else if (captureController.selected && event.key === Qt.Key_T &&
-                 (event.modifiers & Qt.ShiftModifier)) captureController.tool = "marker"
+        else if (captureController.selected && event.key === Qt.Key_G &&
+                 (event.modifiers & Qt.ShiftModifier)) captureController.tool = "mosaic"
         else if (captureController.selected && event.key === Qt.Key_B &&
                  (event.modifiers & Qt.ShiftModifier)) captureController.tool = "spotlight"
         else if (captureController.selected && event.key === Qt.Key_W &&
@@ -216,8 +216,10 @@ Item {
         else if (captureController.selected && event.key === Qt.Key_E) captureController.activateToolGroup("ellipse")
         else if (captureController.selected && event.key === Qt.Key_A) captureController.activateToolGroup("arrow")
         else if (captureController.selected && event.key === Qt.Key_D) captureController.activateToolGroup("pen")
-        else if (captureController.selected && event.key === Qt.Key_T) captureController.tool = "text"
-        else if (captureController.selected && event.key === Qt.Key_G) captureController.tool = "mosaic"
+        else if (captureController.selected && event.key === Qt.Key_T &&
+                 event.modifiers === Qt.NoModifier) captureController.tool = "text"
+        else if (captureController.selected && event.key === Qt.Key_G &&
+                 event.modifiers === Qt.NoModifier) captureController.tool = "marker"
         else return
         event.accepted = true
     }
@@ -613,8 +615,7 @@ Item {
                 if (!activeFocus && editor.visible) editor.commitText()
             }
             Keys.onEscapePressed: event => {
-                editor.visible = false
-                root.forceActiveFocus()
+                captureController.cancel()
                 event.accepted = true
             }
         }
@@ -722,13 +723,12 @@ Item {
                     {key: "A", action: "arrow_group", hint: "箭头组：点击选择箭头、弯曲箭头、双向弯曲箭头或直线"},
                     {key: "D", action: "pen_group", hint: "画笔组：点击选择画笔或荧光笔"},
                     {key: "T", action: "text", hint: "文字：单击输入，Shift+Enter 换行"},
-                    {key: "G", action: "mosaic", hint: "马赛克：拖动选择矩形区域"},
+                    {key: "⇧G", action: "mosaic", hint: "马赛克：拖动选择矩形区域"},
+                    {key: "G", action: "marker", hint: "编号标记：单击放置自动编号"},
                     {key: "Z", action: "undo", hint: "撤销：移除上一项标注"},
+                    {key: "X", action: "redo", hint: "重做：恢复刚撤销的标注"},
                     {key: "C", action: "copy", hint: "复制：将截图复制到剪贴板"},
-                    {key: "S", action: "save", hint: "保存：将截图保存为 PNG"},
-                    {key: "X", action: "cancel", hint: "关闭：退出截图"},
-                    {key: "⇧T", action: "marker", hint: "编号标记：单击放置自动编号"},
-                    {key: "⇧Z", action: "redo", hint: "重做：恢复刚撤销的标注"}
+                    {key: "S", action: "save", hint: "保存：将截图保存为 PNG"}
                 ]
                 delegate: Rectangle {
                     required property var modelData
@@ -782,7 +782,6 @@ Item {
                                 case "undo": captureController.undo(); break
                                 case "copy": captureController.copy(); break
                                 case "save": captureController.save(); break
-                                case "cancel": captureController.cancel(); break
                                 case "redo": captureController.redo(); break
                                 default: captureController.tool = modelData.action
                                 }
