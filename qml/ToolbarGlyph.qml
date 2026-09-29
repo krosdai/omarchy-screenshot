@@ -40,6 +40,26 @@ Canvas {
         case "rect":
             ctx.rect(3, 3, 14, 14)
             break
+        case "roundrect":
+            ctx.moveTo(7, 3)
+            ctx.lineTo(13, 3)
+            ctx.quadraticCurveTo(17, 3, 17, 7)
+            ctx.lineTo(17, 13)
+            ctx.quadraticCurveTo(17, 17, 13, 17)
+            ctx.lineTo(7, 17)
+            ctx.quadraticCurveTo(3, 17, 3, 13)
+            ctx.lineTo(3, 7)
+            ctx.quadraticCurveTo(3, 3, 7, 3)
+            break
+        case "fillrect":
+            ctx.fillStyle = accentColor
+            ctx.fillRect(3, 3, 14, 14)
+            break
+        case "fillellipse":
+            ctx.fillStyle = accentColor
+            ctx.arc(10, 10, 7, 0, Math.PI * 2)
+            ctx.fill()
+            break
         case "ellipse":
             ctx.arc(10, 10, 7, 0, Math.PI * 2)
             break
@@ -49,6 +69,67 @@ Canvas {
             ctx.moveTo(10, 3.2)
             ctx.lineTo(16.8, 3.2)
             ctx.lineTo(16.8, 10)
+            break
+        case "curvedarrow":
+        case "doublearrow":
+            ctx.moveTo(3, 16)
+            ctx.quadraticCurveTo(4, 3, 17, 4)
+            ctx.moveTo(11, 3)
+            ctx.lineTo(17, 4)
+            ctx.lineTo(15, 10)
+            if (action === "doublearrow") {
+                ctx.moveTo(3, 16)
+                ctx.lineTo(3, 10)
+                ctx.moveTo(3, 16)
+                ctx.lineTo(9, 16)
+            }
+            break
+        case "line":
+            ctx.moveTo(3, 17)
+            ctx.lineTo(17, 3)
+            break
+        case "highlighter":
+            ctx.lineWidth = 5
+            ctx.strokeStyle = accentColor
+            ctx.moveTo(3, 15)
+            ctx.lineTo(17, 5)
+            break
+        case "spotlight":
+            ctx.arc(10, 10, 5, 0, Math.PI * 2)
+            ctx.rect(2, 2, 16, 16)
+            break
+        case "marker":
+            ctx.arc(10, 10, 7, 0, Math.PI * 2)
+            ctx.fillStyle = accentColor
+            ctx.fill()
+            ctx.fillStyle = "#ffffff"
+            ctx.font = "bold 12px sans-serif"
+            ctx.textAlign = "center"
+            ctx.textBaseline = "middle"
+            ctx.fillText("1", 10, 10)
+            break
+        case "scroll":
+        case "scroll_horizontal":
+        case "scroll_auto":
+        case "scroll_auto_horizontal":
+            ctx.rect(3, 3, 14, 14)
+            if (action === "scroll" || action === "scroll_auto") {
+                ctx.moveTo(10, 5)
+                ctx.lineTo(10, 15)
+                ctx.moveTo(7, 12)
+                ctx.lineTo(10, 15)
+                ctx.lineTo(13, 12)
+            } else {
+                ctx.moveTo(5, 10)
+                ctx.lineTo(15, 10)
+                ctx.moveTo(12, 7)
+                ctx.lineTo(15, 10)
+                ctx.lineTo(12, 13)
+            }
+            if (action === "scroll_auto" || action === "scroll_auto_horizontal") {
+                ctx.fillStyle = accentColor
+                ctx.fillRect(2, 2, 4, 4)
+            }
             break
         case "pen":
             ctx.moveTo(3.2, 17)
@@ -88,6 +169,14 @@ Canvas {
             ctx.moveTo(8, 3.5)
             ctx.lineTo(4.5, 7)
             ctx.lineTo(8, 10.5)
+            break
+        case "redo":
+            ctx.moveTo(15.5, 7)
+            ctx.lineTo(10, 7)
+            ctx.bezierCurveTo(4.8, 7, 2.6, 11.2, 4.8, 16)
+            ctx.moveTo(12, 3.5)
+            ctx.lineTo(15.5, 7)
+            ctx.lineTo(12, 10.5)
             break
         case "copy":
             ctx.moveTo(6, 14)

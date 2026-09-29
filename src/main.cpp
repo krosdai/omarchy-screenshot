@@ -1,5 +1,8 @@
+#include "../third_party/omasnap/auto-capture.hpp"
+#include "../third_party/omasnap/stitch.hpp"
 #include "capturecontroller.h"
 #include "mosaicoverlay.h"
+#include "scrollpreview.h"
 
 #include <LayerShellQt/window.h>
 #include <QGuiApplication>
@@ -11,6 +14,7 @@
 #include <QQuickItem>
 #include <QQuickItemGrabResult>
 #include <QQuickView>
+#include <QRegion>
 #include <QSettings>
 #include <QTemporaryDir>
 #include <QTextStream>
@@ -34,7 +38,9 @@ public:
       return {};
     bool valid = false;
     const int index = parts[1].toInt(&valid);
-    if (!valid || index < 0 || index >= m_controller->monitors().size())
+    if (!valid || index < 0)
+      return {};
+    if (index >= m_controller->monitors().size())
       return {};
     const QImage *image = nullptr;
     if (parts[0] == QStringLiteral("screen"))
@@ -120,9 +126,9 @@ int main(int argc, char **argv) {
       return 2;
     }
     QVariantList jitter;
-    for (const QPointF &point : {QPointF(0, 0), QPointF(10, 10),
-                                 QPointF(20, -10), QPointF(30, 10),
-                                 QPointF(40, 0)})
+    for (const QPointF &point :
+         {QPointF(0, 0), QPointF(10, 10), QPointF(20, -10), QPointF(30, 10),
+          QPointF(40, 0)})
       jitter.append(QVariantMap{{QStringLiteral("x"), point.x()},
                                 {QStringLiteral("y"), point.y()}});
     const auto smoothed = controller.smoothedFreehandPoints(jitter);
@@ -136,13 +142,95 @@ int main(int argc, char **argv) {
       qCritical() << "Freehand smoothing failed";
       return 2;
     }
-    QTextStream(stdout) << "Cross-monitor capture OK: " << image.width() << "x"
-                        << image.height() << ", curve smoothing OK\n";
+    controller.undo();
+    if (!controller.annotations().isEmpty()) {
+      qCritical() << "Undo failed";
+      return 2;
+    }
+    controller.redo();
+    if (controller.annotations().size() != 1) {
+      qCritical() << "Redo failed";
+      return 2;
+    }
+    controller.undo();
+    controller.setTool(QStringLiteral("line"));
+    controller.pointerPress(0, first.width() * .25, first.height() * .25);
+    controller.pointerMove(0, first.width() * .5, first.height() * .4);
+    controller.pointerRelease(0, first.width() * .5, first.height() * .4);
+    controller.redo();
+    if (controller.annotations().size() != 1 ||
+        controller.annotations().first().toMap().value(
+            QStringLiteral("type")) != QStringLiteral("line")) {
+      qCritical() << "Redo history was not cleared after drawing";
+      return 2;
+    }
+    controller.setTool(QStringLiteral("marker"));
+    controller.pointerPress(0, first.width() * .3, first.height() * .3);
+    controller.pointerRelease(0, first.width() * .3, first.height() * .3);
+    if (controller.annotations().size() != 2 ||
+        controller.annotations()
+                .last()
+                .toMap()
+                .value(QStringLiteral("number"))
+                .toInt() != 1) {
+      qCritical() << "Numbered marker failed";
+      return 2;
+    }
+    auto patternedFrame = [](int offset) {
+      QImage frame(192, 160, QImage::Format_RGBA8888);
+      for (int y = 0; y < frame.height(); ++y) {
+        for (int x = 0; x < frame.width(); ++x) {
+          quint32 value =
+              quint32(y + offset) * 747796405u + quint32(x) * 2891336453u;
+          value ^= value >> 16;
+          value *= 2246822519u;
+          frame.setPixel(
+              x, y, qRgb(value & 255, (value >> 8) & 255, (value >> 16) & 255));
+        }
+      }
+      return frame;
+    };
+    stitch::ManualCapture manual(stitch::Axis::Vertical);
+    const QImage frame0 = patternedFrame(0);
+    const QImage frame1 = patternedFrame(48);
+    const QImage frame2 = patternedFrame(96);
+    const auto manualSeed = manual.feed(frame0);
+    const auto manualFirst = manual.feed(frame1);
+    const auto manualSecond = manual.feed(frame2);
+    QString stitchError;
+    const QImage stitched = manual.finish(stitchError);
+    if (manualSeed.event != stitch::ManualCapture::Event::Seeded ||
+        manualFirst.event != stitch::ManualCapture::Event::Kept ||
+        manualSecond.event != stitch::ManualCapture::Event::Kept ||
+        stitched.isNull() || stitched.width() != 192 ||
+        stitched.height() != 256) {
+      qCritical() << "Manual stitch failed" << stitchError << stitched.size();
+      return 2;
+    }
+    stitch::AutoCapture automatic(stitch::Axis::Vertical);
+    const auto autoSeed = automatic.feed(frame0);
+    const auto autoFirst = automatic.feed(frame1);
+    const auto autoSecond = automatic.feed(frame2);
+    const auto autoStill = automatic.feed(frame2);
+    const auto autoEnd = automatic.feed(frame2);
+    if (autoSeed.event != stitch::AutoCapture::Event::Seeded ||
+        autoFirst.event != stitch::AutoCapture::Event::Appended ||
+        autoSecond.event != stitch::AutoCapture::Event::Appended ||
+        autoStill.event != stitch::AutoCapture::Event::StillOnce ||
+        autoEnd.event != stitch::AutoCapture::Event::ReachedEnd ||
+        automatic.finish(stitchError).height() != 256) {
+      qCritical() << "Auto stitch failed" << stitchError;
+      return 2;
+    }
+    QTextStream(stdout)
+        << "Cross-monitor capture OK: " << image.width() << "x"
+        << image.height()
+        << ", curve smoothing, redo, marker and scroll stitch OK\n";
     return 0;
   }
 
-  qmlRegisterType<MosaicOverlay>("ScreenshotInternals", 1, 0,
-                                 "MosaicOverlay");
+  qmlRegisterType<MosaicOverlay>("ScreenshotInternals", 1, 0, "MosaicOverlay");
+  qmlRegisterType<ScrollPreview>("ScreenshotInternals", 1, 0, "ScrollPreview");
   QQmlEngine engine;
   QObject::connect(&engine, &QQmlEngine::warnings, &app,
                    [](const QList<QQmlError> &warnings) {
@@ -177,7 +265,8 @@ int main(int argc, char **argv) {
         LayerShellQt::Window::AnchorRight);
     // Ignore the bar's reserved area: the frozen image uses the full output.
     layer->setExclusiveZone(-1);
-    const bool uiTest = app.arguments().contains(QStringLiteral("--ui-self-test"));
+    const bool uiTest =
+        app.arguments().contains(QStringLiteral("--ui-self-test"));
     layer->setKeyboardInteractivity(
         uiTest ? (i == 0 ? LayerShellQt::Window::KeyboardInteractivityExclusive
                          : LayerShellQt::Window::KeyboardInteractivityNone)
@@ -204,14 +293,31 @@ int main(int argc, char **argv) {
     views.push_back(std::move(view));
   }
   if (!views.empty())
-    (app.arguments().contains(QStringLiteral("--ui-self-test"))
-         ? views.front()
-         : views.back())->requestActivate();
+    (app.arguments().contains(QStringLiteral("--ui-self-test")) ? views.front()
+                                                                : views.back())
+        ->requestActivate();
+
+  auto updateScrollInputRegion = [&] {
+    for (int i = 0; i < static_cast<int>(views.size()); ++i) {
+      auto *view = views[i].get();
+      if (!controller.scrolling() || controller.scrollMonitor() != i) {
+        view->setMask(QRegion());
+        continue;
+      }
+      const QRectF local = controller.selection().translated(
+          -controller.monitors()[i].geometry.topLeft());
+      QRegion inputRegion(QRect(QPoint(), view->size()));
+      inputRegion -=
+          local.toAlignedRect().intersected(QRect(QPoint(), view->size()));
+      view->setMask(inputRegion);
+    }
+  };
+  QObject::connect(&controller, &CaptureController::scrollingChanged, &app,
+                   updateScrollInputRegion);
 
   auto sendMouse = [&](QEvent::Type type, const QPointF &local,
                        Qt::MouseButton button, Qt::MouseButtons buttons) {
-    const QPointF global =
-        controller.monitors()[0].geometry.topLeft() + local;
+    const QPointF global = controller.monitors()[0].geometry.topLeft() + local;
     QMouseEvent event(type, local, global, button, buttons, Qt::NoModifier);
     QCoreApplication::sendEvent(views[0].get(), &event);
   };
@@ -276,11 +382,13 @@ int main(int argc, char **argv) {
                                 Q_RETURN_ARG(QVariant, hasOcrButton),
                                 Q_ARG(QVariant, QStringLiteral("ocr")));
       ocrButtonRemoved =
-          views[0]->rootObject()->property("toolbarButtonCount").toInt() == 11 &&
+          views[0]->rootObject()->property("toolbarButtonCount").toInt() >=
+              11 &&
           !hasOcrButton.toBool();
       handlesInitiallyVisible = visibleHandleCount() == 8;
-      std::function<QQuickItem *(QQuickItem *, const QString &)> findVisualItem =
-          [&](QQuickItem *item, const QString &name) -> QQuickItem * {
+      std::function<QQuickItem *(QQuickItem *, const QString &)>
+          findVisualItem =
+              [&](QQuickItem *item, const QString &name) -> QQuickItem * {
         if (item->objectName() == name)
           return item;
         for (QQuickItem *child : item->childItems())
@@ -288,8 +396,8 @@ int main(int argc, char **argv) {
             return found;
         return nullptr;
       };
-      auto *cursorIcon = findVisualItem(
-          views[0]->rootObject(), QStringLiteral("selectCursorGlyph"));
+      auto *cursorIcon = findVisualItem(views[0]->rootObject(),
+                                        QStringLiteral("selectCursorGlyph"));
       if (!cursorIcon)
         QTextStream(stdout) << "Cursor diagnostic: visual item missing\n";
       if (cursorIcon) {
@@ -297,36 +405,37 @@ int main(int argc, char **argv) {
         if (!grab)
           QTextStream(stdout) << "Cursor diagnostic: grab unavailable\n";
         if (grab)
-          QObject::connect(grab.get(), &QQuickItemGrabResult::ready, &app,
-                           [&, grab] {
-                             const QImage image = grab->image();
-                             cursorIconRendered =
-                                 image.width() >= 16 && image.height() >= 20 &&
-                                 image.pixelColor(2, 3).alpha() > 0 &&
-                                 image.pixelColor(15, 19).alpha() == 0;
-                             if (!cursorIconRendered)
-                               QTextStream(stdout)
-                                   << "Cursor diagnostic: " << image.width()
-                                   << "x" << image.height() << " alpha="
-                                   << image.pixelColor(2, 3).alpha() << ","
-                                   << image.pixelColor(15, 19).alpha() << "\n";
-                           });
+          QObject::connect(
+              grab.get(), &QQuickItemGrabResult::ready, &app, [&, grab] {
+                const QImage image = grab->image();
+                cursorIconRendered = image.width() >= 16 &&
+                                     image.height() >= 20 &&
+                                     image.pixelColor(2, 3).alpha() > 0 &&
+                                     image.pixelColor(15, 19).alpha() == 0;
+                if (!cursorIconRendered)
+                  QTextStream(stdout)
+                      << "Cursor diagnostic: " << image.width() << "x"
+                      << image.height()
+                      << " alpha=" << image.pixelColor(2, 3).alpha() << ","
+                      << image.pixelColor(15, 19).alpha() << "\n";
+              });
       }
       auto *colorButton = views[0]->rootObject()->findChild<QQuickItem *>(
           QStringLiteral("colorButton"));
       auto *colorPanel = views[0]->rootObject()->findChild<QQuickItem *>(
           QStringLiteral("colorPanel"));
-      auto *saturationValueField = views[0]->rootObject()->findChild<QQuickItem *>(
-          QStringLiteral("saturationValueField"));
+      auto *saturationValueField =
+          views[0]->rootObject()->findChild<QQuickItem *>(
+              QStringLiteral("saturationValueField"));
       auto *hueField = views[0]->rootObject()->findChild<QQuickItem *>(
           QStringLiteral("hueField"));
-      auto *highlight = findVisualItem(
-          views[0]->rootObject(), QStringLiteral("selectHighlight"));
-      auto *content = findVisualItem(
-          views[0]->rootObject(), QStringLiteral("selectContent"));
+      auto *highlight = findVisualItem(views[0]->rootObject(),
+                                       QStringLiteral("selectHighlight"));
+      auto *content = findVisualItem(views[0]->rootObject(),
+                                     QStringLiteral("selectContent"));
       toolbarPaddingWorked = highlight && content &&
-          highlight->width() - content->width() >= 8 &&
-          highlight->height() - content->height() >= 8;
+                             highlight->width() - content->width() >= 8 &&
+                             highlight->height() - content->height() >= 8;
       if (colorButton && colorPanel && saturationValueField && hueField) {
         const QPointF buttonCenter = colorButton->mapToItem(
             views[0]->rootObject(),
@@ -355,12 +464,12 @@ int main(int argc, char **argv) {
                   Qt::NoButton);
         selectedTestColor = controller.annotationColor();
         colorPickerWorked = opened && colorButtonUnselected &&
-            colorPanel->isVisible() && selectedTestColor !=
-                QStringLiteral("#ff4b55") &&
-            !views[0]->rootObject()->findChild<QQuickItem *>(
-                QStringLiteral("colorHexInput")) &&
-            !views[0]->rootObject()->findChild<QQuickItem *>(
-                QStringLiteral("colorApplyButton"));
+                            colorPanel->isVisible() &&
+                            selectedTestColor != QStringLiteral("#ff4b55") &&
+                            !views[0]->rootObject()->findChild<QQuickItem *>(
+                                QStringLiteral("colorHexInput")) &&
+                            !views[0]->rootObject()->findChild<QQuickItem *>(
+                                QStringLiteral("colorApplyButton"));
         QKeyEvent colorKey(QEvent::KeyPress, Qt::Key_Q, Qt::NoModifier,
                            QStringLiteral("q"));
         QCoreApplication::sendEvent(views[0].get(), &colorKey);
@@ -370,8 +479,8 @@ int main(int argc, char **argv) {
         colorPersistenceWorked =
             restored.annotationColor() == selectedTestColor;
         QCoreApplication::sendEvent(views[0].get(), &colorKey);
-        colorPickerWorked &= shortcutClosed && colorPanel->isVisible() &&
-                             controller.selected();
+        colorPickerWorked &=
+            shortcutClosed && colorPanel->isVisible() && controller.selected();
         QKeyEvent closePanel(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
         QCoreApplication::sendEvent(views[0].get(), &closePanel);
         colorPickerWorked &= !colorPanel->isVisible();
@@ -393,10 +502,9 @@ int main(int argc, char **argv) {
           sendMouse(QEvent::MouseButtonRelease, swatchCenter, Qt::LeftButton,
                     Qt::NoButton);
         }
-        colorPickerWorked &= swatchCenter.x() >= 0 &&
-                             !colorPanel->isVisible() &&
-                             controller.annotationColor() ==
-                                 QStringLiteral("#ff9d42");
+        colorPickerWorked &=
+            swatchCenter.x() >= 0 && !colorPanel->isVisible() &&
+            controller.annotationColor() == QStringLiteral("#ff9d42");
         controller.setAnnotationColor(selectedTestColor);
       }
       const QPointF mosaicButton = toolbarCenter(6);
@@ -421,29 +529,29 @@ int main(int argc, char **argv) {
               start.value(QStringLiteral("x")).toDouble() &&
           end.value(QStringLiteral("y")).toDouble() >
               start.value(QStringLiteral("y")).toDouble() &&
-          views[0]->rootObject()
-              ->property("mosaicDraftBorderVisible").toBool();
+          views[0]->rootObject()->property("mosaicDraftBorderVisible").toBool();
       auto *border = views[0]->rootObject()->findChild<QQuickItem *>(
           QStringLiteral("mosaicDraftBorder"));
       if (border) {
         auto grab = border->grabToImage();
         if (grab)
-          QObject::connect(grab.get(), &QQuickItemGrabResult::ready, &app,
-                           [&, grab] {
-                             const QImage image = grab->image();
-                             dragBorderPixelsVisible =
-                                 image.width() > 10 && image.height() > 10 &&
-                                 image.pixelColor(1, 1).alpha() > 0 &&
-                                 image.pixelColor(image.width() / 2,
-                                                  image.height() / 2)
-                                         .alpha() == 0;
-                           });
+          QObject::connect(
+              grab.get(), &QQuickItemGrabResult::ready, &app, [&, grab] {
+                const QImage image = grab->image();
+                dragBorderPixelsVisible =
+                    image.width() > 10 && image.height() > 10 &&
+                    image.pixelColor(1, 1).alpha() > 0 &&
+                    image.pixelColor(image.width() / 2, image.height() / 2)
+                            .alpha() == 0;
+              });
       }
       QTimer::singleShot(100, &app, [&] {
-        sendMouse(QEvent::MouseButtonRelease, QPointF(700, 500),
-                  Qt::LeftButton, Qt::NoButton);
-        dragBorderGone = !views[0]->rootObject()
-                              ->property("mosaicDraftBorderVisible").toBool();
+        sendMouse(QEvent::MouseButtonRelease, QPointF(700, 500), Qt::LeftButton,
+                  Qt::NoButton);
+        dragBorderGone = !views[0]
+                              ->rootObject()
+                              ->property("mosaicDraftBorderVisible")
+                              .toBool();
         const QImage withMosaic = controller.renderedImage();
         if (withMosaic.size() == baseline.size()) {
           for (int y = 0; y < baseline.height() && !mosaicExportChanged; ++y)
@@ -470,16 +578,15 @@ int main(int argc, char **argv) {
           auto grab = overlay->grabToImage();
           if (!grab)
             return;
-          QObject::connect(grab.get(), &QQuickItemGrabResult::ready, &app,
-                           [&, grab] {
-                             const QImage image = grab->image();
-                             if (image.width() > 710 && image.height() > 500) {
-                               mosaicPixelsVisible =
-                                   image.pixelColor(475, 375).alpha() > 0;
-                               mosaicMaskTransparent =
-                                   image.pixelColor(710, 260).alpha() == 0;
-                             }
-                           });
+          QObject::connect(
+              grab.get(), &QQuickItemGrabResult::ready, &app, [&, grab] {
+                const QImage image = grab->image();
+                if (image.width() > 710 && image.height() > 500) {
+                  mosaicPixelsVisible = image.pixelColor(475, 375).alpha() > 0;
+                  mosaicMaskTransparent =
+                      image.pixelColor(710, 260).alpha() == 0;
+                }
+              });
         });
       });
       QTimer::singleShot(300, &app, [&] {
@@ -498,16 +605,15 @@ int main(int argc, char **argv) {
         editorFocused =
             views[0]->rootObject()->property("editorFocused").toBool();
         if (!editorFocused)
-          QTextStream(stdout) << "Text focus diagnostic: active="
-                              << views[0]->isActive()
-                              << " focusWindow="
-                              << (QGuiApplication::focusWindow() == views[0].get())
-                              << "\n";
+          QTextStream(stdout)
+              << "Text focus diagnostic: active=" << views[0]->isActive()
+              << " focusWindow="
+              << (QGuiApplication::focusWindow() == views[0].get()) << "\n";
         QKeyEvent letters(QEvent::KeyPress, Qt::Key_H, Qt::NoModifier,
                           QStringLiteral("HI"));
         QCoreApplication::sendEvent(views[0].get(), &letters);
-        QKeyEvent newline(QEvent::KeyPress, Qt::Key_Return,
-                          Qt::ShiftModifier, QStringLiteral("\r"));
+        QKeyEvent newline(QEvent::KeyPress, Qt::Key_Return, Qt::ShiftModifier,
+                          QStringLiteral("\r"));
         QCoreApplication::sendEvent(views[0].get(), &newline);
         QKeyEvent secondLine(QEvent::KeyPress, Qt::Key_B, Qt::NoModifier,
                              QStringLiteral("BY"));
@@ -524,21 +630,19 @@ int main(int argc, char **argv) {
           auto grab = editor->grabToImage();
           if (!grab)
             return;
-          QObject::connect(grab.get(), &QQuickItemGrabResult::ready, &app,
-                           [&, grab] {
-                             const QImage image = grab->image();
-                             if (image.width() < 40 || image.height() < 40)
-                               return;
-                             int painted = 0, clear = 0;
-                             for (int x = 2; x < image.width() - 2; ++x)
-                               image.pixelColor(x, 0).alpha() > 16 ? ++painted
-                                                                    : ++clear;
-                             editorBorderDashed = painted > 5 && clear > 5;
-                             editorBackgroundTransparent =
-                                 image.pixelColor(image.width() - 10,
-                                                  image.height() / 2)
-                                     .alpha() == 0;
-                           });
+          QObject::connect(
+              grab.get(), &QQuickItemGrabResult::ready, &app, [&, grab] {
+                const QImage image = grab->image();
+                if (image.width() < 40 || image.height() < 40)
+                  return;
+                int painted = 0, clear = 0;
+                for (int x = 2; x < image.width() - 2; ++x)
+                  image.pixelColor(x, 0).alpha() > 16 ? ++painted : ++clear;
+                editorBorderDashed = painted > 5 && clear > 5;
+                editorBackgroundTransparent =
+                    image.pixelColor(image.width() - 10, image.height() / 2)
+                        .alpha() == 0;
+              });
         });
         QTimer::singleShot(120, &app, [&, beforeText] {
           QKeyEvent enter(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier,
@@ -551,19 +655,23 @@ int main(int argc, char **argv) {
           const QImage afterText = controller.renderedImage();
           if (afterText.size() != beforeText.size())
             return;
-          const qreal scale = afterText.width() / controller.selection().width();
-          const int textX = qRound((start.value(QStringLiteral("x")).toDouble() -
-                                    controller.selection().x()) * scale);
-          const qreal firstY =
-              (start.value(QStringLiteral("y")).toDouble() -
-               controller.selection().y()) * scale;
+          const qreal scale =
+              afterText.width() / controller.selection().width();
+          const int textX =
+              qRound((start.value(QStringLiteral("x")).toDouble() -
+                      controller.selection().x()) *
+                     scale);
+          const qreal firstY = (start.value(QStringLiteral("y")).toDouble() -
+                                controller.selection().y()) *
+                               scale;
           const qreal lineHeight =
               views[0]->rootObject()->property("textLineHeight").toDouble() *
               scale;
           bool rowsChanged[2] = {false, false};
           bool customColorPainted = false;
           for (int row = 0; row < 2; ++row)
-            for (int y = qMax(0, qFloor(firstY + row * lineHeight - lineHeight / 2));
+            for (int y = qMax(
+                     0, qFloor(firstY + row * lineHeight - lineHeight / 2));
                  y < qMin(afterText.height(),
                           qCeil(firstY + row * lineHeight + lineHeight / 2));
                  ++y)
@@ -572,8 +680,7 @@ int main(int argc, char **argv) {
                 if (afterText.pixel(x, y) != beforeText.pixel(x, y)) {
                   rowsChanged[row] = true;
                   customColorPainted |=
-                      afterText.pixelColor(x, y).name() ==
-                      selectedTestColor;
+                      afterText.pixelColor(x, y).name() == selectedTestColor;
                 }
           exportedTextRows = rowsChanged[0] && rowsChanged[1];
           coloredTextExported = customColorPainted;
@@ -589,8 +696,10 @@ int main(int argc, char **argv) {
         controller.pointerMove(0, 250, 192);
         controller.pointerMove(0, 300, 208);
         controller.pointerMove(0, 350, 200);
-        penDraftWorked =
-            controller.draft().value(QStringLiteral("points")).toList().size() >= 5;
+        penDraftWorked = controller.draft()
+                             .value(QStringLiteral("points"))
+                             .toList()
+                             .size() >= 5;
         controller.pointerRelease(0, 350, 200);
         const QImage afterPen = controller.renderedImage();
         penExportChanged = beforePen != afterPen;
@@ -603,12 +712,12 @@ int main(int argc, char **argv) {
                 coloredPenExported = true;
                 break;
               }
-        annotationColorsKept = oldImageUnchanged &&
-            controller.annotations().size() == 3 &&
-            controller.annotations()[1].toMap().value(QStringLiteral("color")) ==
-                selectedTestColor &&
-            controller.annotations()[2].toMap().value(QStringLiteral("color")) ==
-                QStringLiteral("#4d94ff");
+        annotationColorsKept =
+            oldImageUnchanged && controller.annotations().size() == 3 &&
+            controller.annotations()[1].toMap().value(
+                QStringLiteral("color")) == selectedTestColor &&
+            controller.annotations()[2].toMap().value(
+                QStringLiteral("color")) == QStringLiteral("#4d94ff");
         QTimer::singleShot(50, &app, [&] {
           auto *canvas = views[0]->rootObject()->findChild<QQuickItem *>(
               QStringLiteral("marksCanvas"));
@@ -617,19 +726,18 @@ int main(int argc, char **argv) {
           auto grab = canvas->grabToImage();
           if (!grab)
             return;
-          QObject::connect(grab.get(), &QQuickItemGrabResult::ready, &app,
-                           [&, grab] {
-                             const QImage image = grab->image();
-                             const QColor stroke = image.width() > 200 &&
-                                                       image.height() > 202
-                                                       ? image.pixelColor(200, 202)
-                                                       : QColor();
-                             penPreviewVisible =
-                                 image.width() > 200 && image.height() > 208 &&
-                                 stroke.alpha() > 0 &&
-                                 stroke.blue() > stroke.red() &&
-                                 image.pixelColor(200, 208).alpha() == 0;
-                           });
+          QObject::connect(
+              grab.get(), &QQuickItemGrabResult::ready, &app, [&, grab] {
+                const QImage image = grab->image();
+                const QColor stroke =
+                    image.width() > 200 && image.height() > 202
+                        ? image.pixelColor(200, 202)
+                        : QColor();
+                penPreviewVisible =
+                    image.width() > 200 && image.height() > 208 &&
+                    stroke.alpha() > 0 && stroke.blue() > stroke.red() &&
+                    image.pixelColor(200, 208).alpha() == 0;
+              });
         });
       });
       QTimer::singleShot(800, &app, [&] {
@@ -650,10 +758,9 @@ int main(int argc, char **argv) {
         QKeyEvent penKey(QEvent::KeyPress, Qt::Key_D, Qt::NoModifier,
                          QStringLiteral("d"));
         QCoreApplication::sendEvent(views[0].get(), &penKey);
-        leftHandHotkeysWorked =
-            selectKeyWorked && mosaicKeyWorked &&
-            controller.tool() == QStringLiteral("pen") &&
-            visibleHandleCount() == 0;
+        leftHandHotkeysWorked = selectKeyWorked && mosaicKeyWorked &&
+                                controller.tool() == QStringLiteral("pen") &&
+                                visibleHandleCount() == 0;
         sendMouse(QEvent::MouseMove, toolbarCenter(6), Qt::NoButton,
                   Qt::NoButton);
         hoverDescriptionWorked =
@@ -714,8 +821,8 @@ int main(int argc, char **argv) {
       const qreal topY = afterResize.top() - monitorGeometry.y();
       sendMouse(QEvent::MouseButtonPress, QPointF(middleX, topY - 12),
                 Qt::LeftButton, Qt::LeftButton);
-      sendMouse(QEvent::MouseMove, QPointF(middleX, topY - 30),
-                Qt::NoButton, Qt::LeftButton);
+      sendMouse(QEvent::MouseMove, QPointF(middleX, topY - 30), Qt::NoButton,
+                Qt::LeftButton);
       sendMouse(QEvent::MouseButtonRelease, QPointF(middleX, topY - 30),
                 Qt::LeftButton, Qt::NoButton);
       const QRectF afterTopResize = controller.selection();
@@ -736,8 +843,7 @@ int main(int argc, char **argv) {
       pressArrow(Qt::Key_Left, Qt::NoModifier);
       pressArrow(Qt::Key_Right, Qt::NoModifier);
       const QRectF expanded = controller.selection();
-      arrowResizeWorked =
-          expanded == afterTopResize.adjusted(-1, -1, 1, 1);
+      arrowResizeWorked = expanded == afterTopResize.adjusted(-1, -1, 1, 1);
       pressArrow(Qt::Key_Up, Qt::ShiftModifier);
       pressArrow(Qt::Key_Down, Qt::ShiftModifier);
       pressArrow(Qt::Key_Left, Qt::ShiftModifier);
@@ -766,7 +872,8 @@ int main(int argc, char **argv) {
                           << ", handles hidden: " << handlesHiddenForMosaic
                           << ", enlarged hit: " << handleResizeWorked
                           << ", arrow resize: " << arrowResizeWorked
-                          << ", held arrow resize: " << repeatingArrowResizeWorked
+                          << ", held arrow resize: "
+                          << repeatingArrowResizeWorked
                           << ", left-hand keys: " << leftHandHotkeysWorked
                           << ", hover text: " << hoverDescriptionWorked
                           << ", drag: " << dragPreviewWorked
@@ -782,7 +889,8 @@ int main(int argc, char **argv) {
                           << ", text preview: " << textVisible
                           << ", multiline edit: " << multilineEditing
                           << ", dashed border: " << editorBorderDashed
-                          << ", transparent editor: " << editorBackgroundTransparent
+                          << ", transparent editor: "
+                          << editorBackgroundTransparent
                           << ", centered lines: " << previewRowsCentered
                           << ", exported rows: " << exportedTextRows
                           << ", editor focused: " << editorFocused
@@ -790,17 +898,15 @@ int main(int argc, char **argv) {
       app.exit(mosaicVisible && toolbarWorked && colorPickerWorked &&
                        colorPersistenceWorked && toolbarPaddingWorked &&
                        annotationColorsKept && coloredTextExported &&
-                       coloredPenExported &&
-                       ocrButtonRemoved &&
+                       coloredPenExported && ocrButtonRemoved &&
                        cursorIconRendered && handlesInitiallyVisible &&
                        handlesHiddenForMosaic && handleResizeWorked &&
                        arrowResizeWorked && repeatingArrowResizeWorked &&
-                       leftHandHotkeysWorked &&
-                       hoverDescriptionWorked && dragPreviewWorked &&
-                       mosaicExportChanged && rectangleShapeWorked &&
-                       mosaicPixelsVisible && mosaicMaskTransparent &&
-                       dragBorderPixelsVisible && dragBorderGone &&
-                       penDraftWorked && penExportChanged &&
+                       leftHandHotkeysWorked && hoverDescriptionWorked &&
+                       dragPreviewWorked && mosaicExportChanged &&
+                       rectangleShapeWorked && mosaicPixelsVisible &&
+                       mosaicMaskTransparent && dragBorderPixelsVisible &&
+                       dragBorderGone && penDraftWorked && penExportChanged &&
                        penPreviewVisible && textVisible && multilineEditing &&
                        editorBorderDashed && editorBackgroundTransparent &&
                        previewRowsCentered && exportedTextRows &&

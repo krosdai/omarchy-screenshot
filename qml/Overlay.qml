@@ -106,6 +106,14 @@ Item {
     }
 
     Keys.onPressed: event => {
+        if (captureController.scrolling) {
+            if (event.key === Qt.Key_Escape) captureController.cancelScrollCapture()
+            else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter)
+                captureController.finishScrollCapture()
+            else return
+            event.accepted = true
+            return
+        }
         if (colorPanel.visible) {
             if (event.key === Qt.Key_Escape || event.key === Qt.Key_Q) {
                 colorPanel.visible = false
@@ -115,18 +123,45 @@ Item {
             return
         }
         if (event.key === Qt.Key_Escape) captureController.cancel()
-        else if (captureController.selected && captureController.tool === "select" &&
+        else if (captureController.selected && !captureController.hasScrollImage &&
+                 captureController.tool === "select" &&
                  (event.key === Qt.Key_Up || event.key === Qt.Key_Down ||
                   event.key === Qt.Key_Left || event.key === Qt.Key_Right) &&
                  (event.modifiers === Qt.NoModifier || event.modifiers === Qt.ShiftModifier))
             captureController.adjustSelectionEdge(event.key, (event.modifiers & Qt.ShiftModifier) !== 0)
+        else if (captureController.selected && event.key === Qt.Key_C &&
+                 (event.modifiers & Qt.ShiftModifier)) captureController.startAutoScrollCapture(false)
+        else if (captureController.selected && event.key === Qt.Key_V &&
+                 (event.modifiers & Qt.ShiftModifier)) captureController.startAutoScrollCapture(true)
         else if (captureController.selected && event.key === Qt.Key_C) captureController.copy()
+        else if (captureController.selected && event.key === Qt.Key_S &&
+                 (event.modifiers & Qt.ShiftModifier)) captureController.startScrollCapture(false)
+        else if (captureController.selected && event.key === Qt.Key_G &&
+                 (event.modifiers & Qt.ShiftModifier)) captureController.startScrollCapture(true)
         else if (captureController.selected && event.key === Qt.Key_S) captureController.save()
         else if (captureController.selected && event.key === Qt.Key_F) captureController.ocr()
+        else if (captureController.selected && event.key === Qt.Key_Z &&
+                 (event.modifiers & Qt.ShiftModifier)) captureController.redo()
         else if (captureController.selected && event.key === Qt.Key_Z) captureController.undo()
         else if (event.key === Qt.Key_X) captureController.cancel()
         else if (captureController.selected && event.key === Qt.Key_Q) colorPanel.visible = true
         else if (captureController.selected && event.key === Qt.Key_V) captureController.tool = "select"
+        else if (captureController.selected && event.key === Qt.Key_R &&
+                 (event.modifiers & Qt.ShiftModifier)) captureController.tool = "roundrect"
+        else if (captureController.selected && event.key === Qt.Key_E &&
+                 (event.modifiers & Qt.ShiftModifier)) captureController.tool = "fillellipse"
+        else if (captureController.selected && event.key === Qt.Key_A &&
+                 (event.modifiers & Qt.ShiftModifier)) captureController.tool = "curvedarrow"
+        else if (captureController.selected && event.key === Qt.Key_D &&
+                 (event.modifiers & Qt.ShiftModifier)) captureController.tool = "fillrect"
+        else if (captureController.selected && event.key === Qt.Key_T &&
+                 (event.modifiers & Qt.ShiftModifier)) captureController.tool = "marker"
+        else if (captureController.selected && event.key === Qt.Key_B &&
+                 (event.modifiers & Qt.ShiftModifier)) captureController.tool = "spotlight"
+        else if (captureController.selected && event.key === Qt.Key_W &&
+                 (event.modifiers & Qt.ShiftModifier)) captureController.tool = "doublearrow"
+        else if (captureController.selected && event.key === Qt.Key_W) captureController.tool = "line"
+        else if (captureController.selected && event.key === Qt.Key_B) captureController.tool = "highlighter"
         else if (captureController.selected && event.key === Qt.Key_R) captureController.tool = "rect"
         else if (captureController.selected && event.key === Qt.Key_E) captureController.tool = "ellipse"
         else if (captureController.selected && event.key === Qt.Key_A) captureController.tool = "arrow"
@@ -145,6 +180,38 @@ Item {
         fillMode: Image.Stretch
         smooth: true
         cache: true
+        visible: !(captureController.scrolling && captureController.scrollMonitor === screenIndex)
+    }
+
+    Item {
+        x: root.localX
+        y: root.localY
+        width: captureController.selection.width
+        height: captureController.selection.height
+        clip: true
+        visible: !captureController.scrolling && captureController.hasScrollImage
+                 && captureController.scrollMonitor === screenIndex
+        ScrollPreview {
+            anchors.fill: parent
+            controller: captureController
+            screenIndex: root.screenIndex
+        }
+    }
+
+    Rectangle {
+        visible: captureController.hasScrollImage && !captureController.scrolling &&
+                 captureController.scrollMonitor === screenIndex &&
+                 captureController.scrollDocumentHeight > captureController.selection.height
+        z: 7
+        x: root.localX + captureController.selection.width - width - 3
+        y: root.localY + captureController.scrollOffset /
+           captureController.scrollDocumentHeight * captureController.selection.height
+        width: 5
+        height: Math.max(24, captureController.selection.height *
+                         captureController.selection.height /
+                         captureController.scrollDocumentHeight)
+        radius: 2
+        color: "#cceef5ff"
     }
 
     Rectangle { x: 0; y: 0; width: root.width; height: root.holeTop; color: "#85000000" }
@@ -161,6 +228,18 @@ Item {
         color: "transparent"
         border.color: captureController.selected ? "#ffffff" : "#59bdff"
         border.width: 2
+        opacity: captureController.scrolling ? 0 : 1
+    }
+
+    Rectangle {
+        visible: captureController.scrolling && captureController.scrollMonitor === screenIndex
+        x: root.localX - 2
+        y: root.localY - 2
+        width: captureController.selection.width + 4
+        height: captureController.selection.height + 4
+        color: "transparent"
+        border.color: "#59bdff"
+        border.width: 2
     }
 
     MosaicOverlay {
@@ -169,7 +248,7 @@ Item {
         anchors.fill: parent
         controller: captureController
         screenIndex: root.screenIndex
-        visible: captureController.selected
+        visible: captureController.selected && !captureController.scrolling
     }
 
     Rectangle {
@@ -191,15 +270,19 @@ Item {
         id: marks
         objectName: "marksCanvas"
         anchors.fill: parent
-        visible: captureController.selected
+        visible: captureController.selected && !captureController.scrolling
         antialiasing: true
 
         function drawShape(context, item) {
             if (!item || !item.type) return
+            if (item.type === "mosaic" || item.type === "text") return
             let sx = item.start.x - screenRect.x
-            let sy = item.start.y - screenRect.y
+            let sy = item.start.y - screenRect.y -
+                     (captureController.hasScrollImage ? captureController.scrollOffset : 0)
             let ex = item.end ? item.end.x - screenRect.x : sx
-            let ey = item.end ? item.end.y - screenRect.y : sy
+            let ey = item.end ? item.end.y - screenRect.y -
+                     (captureController.hasScrollImage ? captureController.scrollOffset : 0) : sy
+            context.save()
             context.strokeStyle = item.color || "#ff4b55"
             context.fillStyle = item.color || "#ff4b55"
             context.lineWidth = 3
@@ -207,9 +290,40 @@ Item {
             context.lineJoin = "round"
             context.beginPath()
             if (item.type === "rect") context.rect(sx, sy, ex - sx, ey - sy)
+            else if (item.type === "roundrect") {
+                let left = Math.min(sx, ex), top = Math.min(sy, ey)
+                let w = Math.abs(ex - sx), h = Math.abs(ey - sy)
+                let r = Math.min(10, w / 2, h / 2)
+                context.moveTo(left + r, top)
+                context.lineTo(left + w - r, top)
+                context.quadraticCurveTo(left + w, top, left + w, top + r)
+                context.lineTo(left + w, top + h - r)
+                context.quadraticCurveTo(left + w, top + h, left + w - r, top + h)
+                context.lineTo(left + r, top + h)
+                context.quadraticCurveTo(left, top + h, left, top + h - r)
+                context.lineTo(left, top + r)
+                context.quadraticCurveTo(left, top, left + r, top)
+                context.closePath()
+            }
+            else if (item.type === "fillrect") {
+                context.fillRect(Math.min(sx, ex), Math.min(sy, ey),
+                                 Math.abs(ex - sx), Math.abs(ey - sy))
+                context.restore()
+                return
+            }
+            else if (item.type === "fillellipse") {
+                context.ellipse(Math.min(sx, ex), Math.min(sy, ey),
+                                Math.abs(ex - sx), Math.abs(ey - sy))
+                context.fill()
+                context.restore()
+                return
+            }
             else if (item.type === "ellipse") context.ellipse(Math.min(sx, ex), Math.min(sy, ey),
                 Math.abs(ex - sx), Math.abs(ey - sy))
-            else if (item.type === "mosaic" || item.type === "text") return
+            else if (item.type === "line") {
+                context.moveTo(sx, sy)
+                context.lineTo(ex, ey)
+            }
             else if (item.type === "arrow") {
                 context.moveTo(sx, sy)
                 context.lineTo(ex, ey)
@@ -218,31 +332,62 @@ Item {
                 context.lineTo(ex - Math.cos(a - 0.55) * 12, ey - Math.sin(a - 0.55) * 12)
                 context.moveTo(ex, ey)
                 context.lineTo(ex - Math.cos(a + 0.55) * 12, ey - Math.sin(a + 0.55) * 12)
-            } else if (item.type === "pen") {
+            } else if (item.type === "curvedarrow" || item.type === "doublearrow") {
+                let cx = (sx + ex) / 2 - (ey - sy) * 0.22
+                let cy = (sy + ey) / 2 + (ex - sx) * 0.22
+                context.moveTo(sx, sy)
+                context.quadraticCurveTo(cx, cy, ex, ey)
+                function head(tx, ty, fx, fy) {
+                    let angle = Math.atan2(ty - fy, tx - fx)
+                    context.moveTo(tx, ty)
+                    context.lineTo(tx - Math.cos(angle - 0.55) * 12,
+                                   ty - Math.sin(angle - 0.55) * 12)
+                    context.moveTo(tx, ty)
+                    context.lineTo(tx - Math.cos(angle + 0.55) * 12,
+                                   ty - Math.sin(angle + 0.55) * 12)
+                }
+                head(ex, ey, cx, cy)
+                if (item.type === "doublearrow") head(sx, sy, cx, cy)
+            } else if (item.type === "marker") {
+                context.arc(sx, sy, 13, 0, Math.PI * 2)
+                context.fill()
+                context.fillStyle = "white"
+                context.font = "bold 14px sans-serif"
+                context.textAlign = "center"
+                context.textBaseline = "middle"
+                context.fillText(item.number || "", sx, sy)
+                context.restore()
+                return
+            } else if (item.type === "pen" || item.type === "highlighter") {
+                if (item.type === "highlighter") {
+                    context.globalAlpha = 0.34
+                    context.lineWidth = 18
+                }
                 let points = captureController.smoothedFreehandPoints(item.points)
-                if (points.length === 0) return
+                if (points.length === 0) { context.restore(); return }
                 context.moveTo(points[0].x - screenRect.x,
-                               points[0].y - screenRect.y)
+                               points[0].y - screenRect.y - captureController.scrollOffset)
                 if (points.length === 2) {
                     context.lineTo(points[1].x - screenRect.x,
-                                   points[1].y - screenRect.y)
+                                   points[1].y - screenRect.y - captureController.scrollOffset)
                 } else if (points.length > 2) {
                     for (let i = 1; i + 1 < points.length; ++i) {
                         let control = points[i]
                         let next = points[i + 1]
                         context.quadraticCurveTo(control.x - screenRect.x,
-                                                 control.y - screenRect.y,
+                                                 control.y - screenRect.y - captureController.scrollOffset,
                                                  (control.x + next.x) / 2 - screenRect.x,
-                                                 (control.y + next.y) / 2 - screenRect.y)
+                                                 (control.y + next.y) / 2 - screenRect.y - captureController.scrollOffset)
                     }
                     let last = points[points.length - 1]
                     context.quadraticCurveTo(last.x - screenRect.x,
-                                             last.y - screenRect.y,
+                                             last.y - screenRect.y - captureController.scrollOffset,
                                              last.x - screenRect.x,
-                                             last.y - screenRect.y)
+                                             last.y - screenRect.y - captureController.scrollOffset)
                 }
             }
             context.stroke()
+            context.restore()
         }
 
         onPaint: {
@@ -253,8 +398,34 @@ Item {
             context.rect(root.localX, root.localY,
                          captureController.selection.width, captureController.selection.height)
             context.clip()
-            for (let item of captureController.annotations) drawShape(context, item)
-            drawShape(context, captureController.draft)
+            let spotlights = []
+            for (let item of captureController.annotations)
+                if (item.type === "spotlight") spotlights.push(item)
+            if (captureController.draft.type === "spotlight")
+                spotlights.push(captureController.draft)
+            if (spotlights.length > 0) {
+                context.save()
+                context.fillStyle = "rgba(0, 0, 0, 0.59)"
+                context.fillRect(root.localX, root.localY,
+                                 captureController.selection.width,
+                                 captureController.selection.height)
+                context.globalCompositeOperation = "destination-out"
+                for (let item of spotlights) {
+                    let sx = item.start.x - screenRect.x
+                    let sy = item.start.y - screenRect.y - captureController.scrollOffset
+                    let ex = item.end.x - screenRect.x
+                    let ey = item.end.y - screenRect.y - captureController.scrollOffset
+                    context.beginPath()
+                    context.ellipse(Math.min(sx, ex), Math.min(sy, ey),
+                                    Math.abs(ex - sx), Math.abs(ey - sy))
+                    context.fill()
+                }
+                context.restore()
+            }
+            for (let item of captureController.annotations)
+                if (item.type !== "spotlight") drawShape(context, item)
+            if (captureController.draft.type !== "spotlight")
+                drawShape(context, captureController.draft)
             context.restore()
         }
     }
@@ -265,7 +436,7 @@ Item {
         width: captureController.selection.width
         height: captureController.selection.height
         clip: true
-        visible: captureController.selected
+        visible: captureController.selected && !captureController.scrolling
         Repeater {
             id: textRepeater
             objectName: "textRepeater"
@@ -277,6 +448,7 @@ Item {
                 visible: annotation && annotation.type === "text"
                 x: visible ? annotation.start.x - captureController.selection.x : 0
                 y: visible ? annotation.start.y - captureController.selection.y
+                             - captureController.scrollOffset
                              - root.textLineHeight / 2 : 0
                 readonly property string text: visible ? annotation.text : ""
                 readonly property var lines: text.split("\n")
@@ -325,7 +497,8 @@ Item {
             height: 9
             x: root.localX + captureController.selection.width * modelData.horizontal - width / 2
             y: root.localY + captureController.selection.height * modelData.vertical - height / 2
-            visible: captureController.selected && captureController.tool === "select"
+            visible: captureController.selected && !captureController.scrolling &&
+                     !captureController.hasScrollImage && captureController.tool === "select"
             color: "white"
             border.color: "#397eb8"
             border.width: 1
@@ -338,7 +511,13 @@ Item {
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         cursorShape: captureController.selected && captureController.tool !== "select"
-                     ? Qt.CrossCursor : Qt.ArrowCursor
+                     ? Qt.CrossCursor : captureController.hasScrollImage ? Qt.OpenHandCursor : Qt.ArrowCursor
+        onWheel: wheel => {
+            if (captureController.hasScrollImage && !captureController.scrolling) {
+                captureController.scrollPreviewBy(-wheel.angleDelta.y / 120 * 80)
+                wheel.accepted = true
+            }
+        }
         onPositionChanged: mouse => captureController.pointerMove(screenIndex, mouse.x, mouse.y)
         onPressed: mouse => {
             if (mouse.button === Qt.RightButton) {
@@ -453,15 +632,45 @@ Item {
     }
 
     Rectangle {
+        id: scrollControls
+        visible: captureController.scrolling && captureController.scrollMonitor === screenIndex
+        z: 12
+        width: 290
+        height: 44
+        radius: 6
+        color: "#f8ffffff"
+        border.color: "#cbd4de"
+        x: Math.max(8, Math.min(root.localX + captureController.selection.width / 2 - width / 2,
+                                root.width - width - 8))
+        y: root.localY + captureController.selection.height + height + 8 < root.height
+           ? root.localY + captureController.selection.height + 8
+           : Math.max(8, root.localY - height - 8)
+        Row {
+            anchors.centerIn: parent
+            spacing: 8
+            Rectangle {
+                width: 170; height: 32; radius: 4; color: "#dcecff"
+                Text { anchors.centerIn: parent; text: "完成长截图 ↵"; color: "#26313d" }
+                MouseArea { anchors.fill: parent; onClicked: captureController.finishScrollCapture() }
+            }
+            Rectangle {
+                width: 92; height: 32; radius: 4; color: "#edf3f9"
+                Text { anchors.centerIn: parent; text: "取消 Esc"; color: "#26313d" }
+                MouseArea { anchors.fill: parent; onClicked: captureController.cancelScrollCapture() }
+            }
+        }
+    }
+
+    Rectangle {
         id: toolbar
-        visible: captureController.selected && captureController.toolbarScreen === screenIndex
+        visible: captureController.selected && !captureController.scrolling && captureController.toolbarScreen === screenIndex
         onVisibleChanged: if (!visible) {
             root.hideToolbarTooltip()
             colorPanel.visible = false
         }
         z: 10
         width: toolsRow.width + 12
-        height: 46
+        height: toolsRow.height + 10
         radius: 6
         color: "#f8ffffff"
         border.color: "#cbd4de"
@@ -471,10 +680,12 @@ Item {
            ? root.localY + captureController.selection.height + 8
            : Math.max(8, root.localY - height - 8)
 
-        Row {
+        Flow {
             id: toolsRow
             anchors.centerIn: parent
             spacing: 2
+            width: Math.max(60, Math.min(root.width - 28, (toolbarRepeater.count + 1) * 62))
+            height: childrenRect.height
             Rectangle {
                 id: colorButton
                 objectName: "colorButton"
@@ -517,7 +728,7 @@ Item {
             Repeater {
                 id: toolbarRepeater
                 model: [
-                    {key: "V", action: "select", hint: "选区：拖动方块调整边框；方向键扩展 1px，Shift+方向键收缩 1px"},
+                    {key: "V", action: "select", hint: captureController.hasScrollImage ? "长图：拖动画面平移，滚轮浏览" : "选区：拖动方块调整边框；方向键扩展 1px，Shift+方向键收缩 1px"},
                     {key: "R", action: "rect", hint: "矩形：拖动绘制矩形"},
                     {key: "E", action: "ellipse", hint: "椭圆：拖动绘制椭圆"},
                     {key: "A", action: "arrow", hint: "箭头：拖动绘制箭头"},
@@ -527,7 +738,21 @@ Item {
                     {key: "Z", action: "undo", hint: "撤销：移除上一项标注"},
                     {key: "C", action: "copy", hint: "复制：将截图复制到剪贴板"},
                     {key: "S", action: "save", hint: "保存：将截图保存为 PNG"},
-                    {key: "X", action: "cancel", hint: "关闭：退出截图"}
+                    {key: "X", action: "cancel", hint: "关闭：退出截图"},
+                    {key: "⇧S", action: "scroll", hint: "纵向长截图：滚动页面后自动拼接"},
+                    {key: "⇧G", action: "scroll_horizontal", hint: "横向长截图：横向滚动页面后自动拼接"},
+                    {key: "⇧C", action: "scroll_auto", hint: "纵向自动长截图：自动滚动到页面末尾"},
+                    {key: "⇧V", action: "scroll_auto_horizontal", hint: "横向自动长截图：自动向右滚动并拼接"},
+                    {key: "W", action: "line", hint: "直线：拖动绘制"},
+                    {key: "B", action: "highlighter", hint: "荧光笔：半透明自由轨迹"},
+                    {key: "⇧B", action: "spotlight", hint: "聚光灯：突出椭圆区域"},
+                    {key: "⇧T", action: "marker", hint: "编号标记：单击放置自动编号"},
+                    {key: "⇧R", action: "roundrect", hint: "圆角矩形：拖动绘制"},
+                    {key: "⇧D", action: "fillrect", hint: "实心矩形：拖动绘制"},
+                    {key: "⇧E", action: "fillellipse", hint: "实心椭圆：拖动绘制"},
+                    {key: "⇧A", action: "curvedarrow", hint: "弯曲箭头：拖动绘制"},
+                    {key: "⇧W", action: "doublearrow", hint: "双向弯曲箭头：拖动绘制"},
+                    {key: "⇧Z", action: "redo", hint: "重做：恢复刚撤销的标注"}
                 ]
                 delegate: Rectangle {
                     required property var modelData
@@ -560,6 +785,7 @@ Item {
                         ToolbarGlyph {
                             objectName: modelData.action === "select" ? "selectCursorGlyph" : ""
                             action: modelData.action
+                            accentColor: captureController.annotationColor
                         }
                     }
                     MouseArea {
@@ -577,6 +803,11 @@ Item {
                             case "copy": captureController.copy(); break
                             case "save": captureController.save(); break
                             case "cancel": captureController.cancel(); break
+                            case "scroll": captureController.startScrollCapture(false); break
+                            case "scroll_horizontal": captureController.startScrollCapture(true); break
+                            case "scroll_auto": captureController.startAutoScrollCapture(false); break
+                            case "scroll_auto_horizontal": captureController.startAutoScrollCapture(true); break
+                            case "redo": captureController.redo(); break
                             default: captureController.tool = modelData.action
                             }
                             root.forceActiveFocus()
@@ -831,10 +1062,11 @@ Item {
     }
 
     Rectangle {
-        visible: captureController.status.length > 0
+        visible: captureController.status.length > 0 &&
+                 (!captureController.scrolling || root.localY >= 56)
         z: 20
         anchors.horizontalCenter: parent.horizontalCenter
-        y: 20
+        y: 8
         width: statusText.contentWidth + 24
         height: 32
         radius: 5
@@ -853,5 +1085,6 @@ Item {
         function onAnnotationsChanged() { marks.requestPaint() }
         function onDraftChanged() { marks.requestPaint() }
         function onSelectedChanged() { marks.requestPaint() }
+        function onScrollOffsetChanged() { marks.requestPaint() }
     }
 }

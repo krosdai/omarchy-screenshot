@@ -1,9 +1,13 @@
 #include "capturecontroller.h"
+#include "../third_party/omasnap/auto-capture.hpp"
+#include "../third_party/omasnap/scroll-inject.hpp"
+#include "../third_party/omasnap/stitch.hpp"
 
 #include <QBuffer>
 #include <QDateTime>
 #include <QDir>
 #include <QFontMetricsF>
+#include <QFutureWatcher>
 #include <QGuiApplication>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -16,6 +20,7 @@
 #include <QSettings>
 #include <QStandardPaths>
 #include <QTextStream>
+#include <QtConcurrent>
 
 #include <algorithm>
 #include <cmath>
@@ -133,11 +138,30 @@ QVariantMap translatedAnnotation(QVariantMap item, const QPointF &delta) {
   }
   return item;
 }
+
+QPainterPath spotlightHoles(const QVariantList &annotations) {
+  QPainterPath holes;
+  holes.setFillRule(Qt::WindingFill);
+  for (const QVariant &annotation : annotations) {
+    const QVariantMap item = annotation.toMap();
+    if (item.value(QStringLiteral("type")).toString() ==
+        QStringLiteral("spotlight"))
+      holes.addEllipse(QRectF(fromMap(item.value(QStringLiteral("start"))),
+                              fromMap(item.value(QStringLiteral("end"))))
+                           .normalized());
+  }
+  return holes;
+}
 } // namespace
 
 CaptureController::CaptureController(QObject *parent) : QObject(parent) {
-  const QColor stored(QSettings().value(QStringLiteral("drawing/color"),
-                                        m_annotationColor).toString());
+  m_scrollTimer.setInterval(280);
+  connect(&m_scrollTimer, &QTimer::timeout, this,
+          &CaptureController::pollScrollFrame);
+  const QColor stored(
+      QSettings()
+          .value(QStringLiteral("drawing/color"), m_annotationColor)
+          .toString());
   if (stored.isValid() && stored.alpha() == 255)
     m_annotationColor = stored.name(QColor::HexRgb);
   m_colorSaveTimer.setSingleShot(true);
@@ -146,7 +170,10 @@ CaptureController::CaptureController(QObject *parent) : QObject(parent) {
           &CaptureController::saveAnnotationColor);
 }
 
-CaptureController::~CaptureController() { saveAnnotationColor(); }
+CaptureController::~CaptureController() {
+  cancelScrollCapture();
+  saveAnnotationColor();
+}
 
 bool CaptureController::initialize(QString *error) {
   if (qEnvironmentVariable("XDG_SESSION_TYPE") != QStringLiteral("wayland") ||
@@ -321,7 +348,14 @@ void CaptureController::setTool(const QString &tool) {
   if (tool != QStringLiteral("select") && tool != QStringLiteral("rect") &&
       tool != QStringLiteral("ellipse") && tool != QStringLiteral("arrow") &&
       tool != QStringLiteral("pen") && tool != QStringLiteral("text") &&
-      tool != QStringLiteral("mosaic"))
+      tool != QStringLiteral("mosaic") && tool != QStringLiteral("line") &&
+      tool != QStringLiteral("highlighter") &&
+      tool != QStringLiteral("spotlight") && tool != QStringLiteral("marker") &&
+      tool != QStringLiteral("roundrect") &&
+      tool != QStringLiteral("fillrect") &&
+      tool != QStringLiteral("fillellipse") &&
+      tool != QStringLiteral("curvedarrow") &&
+      tool != QStringLiteral("doublearrow"))
     return;
   if (m_tool == tool)
     return;
@@ -363,7 +397,7 @@ void CaptureController::saveAnnotationColor() {
 
 void CaptureController::adjustSelectionEdge(int key, bool shrink) {
   if (!m_selected || m_tool != QStringLiteral("select") ||
-      m_selection.isEmpty() || m_monitors.isEmpty())
+      m_selection.isEmpty() || m_monitors.isEmpty() || hasScrollImage())
     return;
 
   QRectF desktop = m_monitors.first().geometry;
@@ -394,7 +428,11 @@ void CaptureController::adjustSelectionEdge(int key, bool shrink) {
   default:
     return;
   }
-  setSelection(QRectF(QPointF(left, top), QPointF(right, bottom)));
+  const QRectF next(QPointF(left, top), QPointF(right, bottom));
+  if (next != m_selection) {
+    m_redoAnnotations.clear();
+    setSelection(next);
+  }
 }
 
 void CaptureController::pointerMove(int screenIndex, qreal x, qreal y) {
@@ -406,7 +444,10 @@ void CaptureController::pointerMove(int screenIndex, qreal x, qreal y) {
   }
   if (QLineF(m_press, point).length() > 4)
     m_moved = true;
-  if (m_drag == Drag::Select) {
+  if (m_drag == Drag::Pan) {
+    scrollPreviewBy(m_initialScrollOffset + m_press.y() - point.y() -
+                    m_scrollOffset);
+  } else if (m_drag == Drag::Select) {
     if (m_moved)
       setSelection(QRectF(m_press, point).normalized());
   } else if (m_drag == Drag::Move) {
@@ -431,8 +472,13 @@ void CaptureController::pointerMove(int screenIndex, qreal x, qreal y) {
       bottom = std::max(point.y(), top + 2);
     setSelection(QRectF(QPointF(left, top), QPointF(right, bottom)));
   } else if (m_drag == Drag::Draw) {
-    const QPointF inside = limited(point, m_selection);
-    if (m_tool == QStringLiteral("pen")) {
+    const QPointF virtualPoint =
+        point + QPointF(0, hasScrollImage() ? m_scrollOffset : 0);
+    const QPointF inside = limited(
+        virtualPoint,
+        m_selection.translated(0, hasScrollImage() ? m_scrollOffset : 0));
+    if (m_tool == QStringLiteral("pen") ||
+        m_tool == QStringLiteral("highlighter")) {
       auto points = m_draft.value(QStringLiteral("points")).toList();
       if (points.isEmpty() ||
           QLineF(fromMap(points.last()), inside).length() >= 2) {
@@ -446,19 +492,31 @@ void CaptureController::pointerMove(int screenIndex, qreal x, qreal y) {
 }
 
 void CaptureController::pointerPress(int screenIndex, qreal x, qreal y) {
+  if (m_scrolling)
+    return;
   const QPointF point = globalPoint(screenIndex, x, y);
   m_press = point;
   m_moved = false;
+  if (hasScrollImage() && m_selected && m_tool == QStringLiteral("select") &&
+      m_selection.contains(point)) {
+    m_initialScrollOffset = m_scrollOffset;
+    m_drag = Drag::Pan;
+    return;
+  }
   if (m_selected && m_tool != QStringLiteral("select")) {
     if (!m_selection.contains(point) || m_tool == QStringLiteral("text"))
       return;
     m_drag = Drag::Draw;
+    const QPointF drawPoint =
+        point + QPointF(0, hasScrollImage() ? m_scrollOffset : 0);
     m_draft = {{QStringLiteral("type"), m_tool},
                {QStringLiteral("color"), m_annotationColor},
-               {QStringLiteral("start"), pointMap(point)},
-               {QStringLiteral("end"), pointMap(point)}};
-    if (m_tool == QStringLiteral("pen"))
-      m_draft.insert(QStringLiteral("points"), QVariantList{pointMap(point)});
+               {QStringLiteral("start"), pointMap(drawPoint)},
+               {QStringLiteral("end"), pointMap(drawPoint)}};
+    if (m_tool == QStringLiteral("pen") ||
+        m_tool == QStringLiteral("highlighter"))
+      m_draft.insert(QStringLiteral("points"),
+                     QVariantList{pointMap(drawPoint)});
     emit draftChanged();
     return;
   }
@@ -490,6 +548,14 @@ void CaptureController::pointerPress(int screenIndex, qreal x, qreal y) {
     m_annotations.clear();
     emit annotationsChanged();
   }
+  m_redoAnnotations.clear();
+  if (!m_scrollImage.isNull()) {
+    m_scrollImage = {};
+    m_scrollMosaicImage = {};
+    m_scrollOffset = 0;
+    emit scrollOffsetChanged();
+    emit scrollImageChanged();
+  }
   m_selected = false;
   emit selectedChanged();
   setSelection({});
@@ -501,8 +567,12 @@ void CaptureController::pointerRelease(int screenIndex, qreal x, qreal y) {
   if (m_drag == Drag::None)
     return;
   pointerMove(screenIndex, x, y);
-  if (m_drag == Drag::Draw && m_tool == QStringLiteral("pen")) {
-    const QPointF release = limited(globalPoint(screenIndex, x, y), m_selection);
+  if (m_drag == Drag::Draw && (m_tool == QStringLiteral("pen") ||
+                               m_tool == QStringLiteral("highlighter"))) {
+    const QPointF release = limited(
+        globalPoint(screenIndex, x, y) +
+            QPointF(0, hasScrollImage() ? m_scrollOffset : 0),
+        m_selection.translated(0, hasScrollImage() ? m_scrollOffset : 0));
     auto points = m_draft.value(QStringLiteral("points")).toList();
     if (!points.isEmpty() && fromMap(points.last()) != release) {
       points.append(pointMap(release));
@@ -519,21 +589,32 @@ void CaptureController::pointerRelease(int screenIndex, qreal x, qreal y) {
       setHovered({});
     } else
       setSelection({});
-  } else if (m_drag == Drag::Draw && m_moved) {
-    const QRectF area =
-        QRectF(fromMap(m_draft.value(QStringLiteral("start"))),
-               fromMap(m_draft.value(QStringLiteral("end"))))
-            .normalized();
+  } else if (m_drag == Drag::Draw &&
+             (m_moved || m_tool == QStringLiteral("marker"))) {
+    const QRectF area = QRectF(fromMap(m_draft.value(QStringLiteral("start"))),
+                               fromMap(m_draft.value(QStringLiteral("end"))))
+                            .normalized();
     if (m_tool != QStringLiteral("mosaic") ||
         (area.width() >= 2 && area.height() >= 2)) {
-      m_annotations.append(m_draft);
-      emit annotationsChanged();
+      if (m_tool == QStringLiteral("marker")) {
+        int number = 1;
+        for (const QVariant &mark : m_annotations)
+          if (mark.toMap().value(QStringLiteral("type")).toString() ==
+              QStringLiteral("marker"))
+            number = std::max(
+                number,
+                mark.toMap().value(QStringLiteral("number")).toInt() + 1);
+        m_draft.insert(QStringLiteral("number"), number);
+      }
+      appendAnnotation(m_draft);
     }
   }
   if (m_drag == Drag::Draw) {
     m_draft.clear();
     emit draftChanged();
   }
+  if (m_moved && (m_drag == Drag::Move || m_drag == Drag::Resize))
+    m_redoAnnotations.clear();
   m_drag = Drag::None;
   m_initialAnnotations.clear();
 }
@@ -541,20 +622,328 @@ void CaptureController::pointerRelease(int screenIndex, qreal x, qreal y) {
 void CaptureController::addText(qreal x, qreal y, const QString &text) {
   if (!m_selected || text.trimmed().isEmpty())
     return;
-  const QPointF point = limited(QPointF(x, y), m_selection);
-  m_annotations.append(
-      QVariantMap{{QStringLiteral("type"), QStringLiteral("text")},
-                  {QStringLiteral("start"), pointMap(point)},
-                  {QStringLiteral("color"), m_annotationColor},
-                  {QStringLiteral("text"), text}});
+  const QPointF point =
+      limited(QPointF(x, y) + QPointF(0, hasScrollImage() ? m_scrollOffset : 0),
+              m_selection.translated(0, hasScrollImage() ? m_scrollOffset : 0));
+  appendAnnotation(QVariantMap{{QStringLiteral("type"), QStringLiteral("text")},
+                               {QStringLiteral("start"), pointMap(point)},
+                               {QStringLiteral("color"), m_annotationColor},
+                               {QStringLiteral("text"), text}});
+}
+
+void CaptureController::appendAnnotation(const QVariantMap &item) {
+  m_annotations.append(item);
+  m_redoAnnotations.clear();
   emit annotationsChanged();
 }
 
 void CaptureController::undo() {
   if (m_annotations.isEmpty())
     return;
+  m_redoAnnotations.append(m_annotations.last());
   m_annotations.removeLast();
   emit annotationsChanged();
+}
+
+void CaptureController::redo() {
+  if (m_redoAnnotations.isEmpty())
+    return;
+  m_annotations.append(m_redoAnnotations.takeLast());
+  emit annotationsChanged();
+}
+
+qreal CaptureController::scrollDocumentHeight() const {
+  if (m_scrollImage.isNull() || m_scrollImage.width() <= 0)
+    return m_selection.height();
+  return m_scrollImage.height() * m_selection.width() / m_scrollImage.width();
+}
+
+void CaptureController::scrollPreviewBy(qreal distance) {
+  if (m_scrollImage.isNull())
+    return;
+  const qreal maxOffset =
+      std::max<qreal>(0, scrollDocumentHeight() - m_selection.height());
+  const qreal next = std::clamp(m_scrollOffset + distance, qreal(0), maxOffset);
+  if (qFuzzyCompare(next + 1, m_scrollOffset + 1))
+    return;
+  m_scrollOffset = next;
+  emit scrollOffsetChanged();
+}
+
+void CaptureController::startScrollCapture(bool horizontal) {
+  beginScrollCapture(horizontal, false);
+}
+
+void CaptureController::startAutoScrollCapture(bool horizontal) {
+  beginScrollCapture(horizontal, true);
+}
+
+void CaptureController::beginScrollCapture(bool horizontal, bool automatic) {
+  if (!m_selected || m_scrolling)
+    return;
+  if (hasScrollImage()) {
+    setStatus(QStringLiteral("请重新选择区域后开始新的滚动截图"));
+    return;
+  }
+  int monitorIndex = -1;
+  for (int i = 0; i < m_monitors.size(); ++i) {
+    if (m_monitors[i].geometry.contains(m_selection)) {
+      monitorIndex = i;
+      break;
+    }
+  }
+  if (monitorIndex < 0 || m_selection.width() < 64 ||
+      m_selection.height() < 64) {
+    setStatus(
+        QStringLiteral("滚动截图需要在单个显示器内选择至少 64×64 的区域"));
+    return;
+  }
+  const QRectF display = m_monitors[monitorIndex].geometry;
+  if (m_selection.top() - display.top() < 56 &&
+      display.bottom() - m_selection.bottom() < 56) {
+    setStatus(QStringLiteral("请在选区上方或下方为完成按钮留出 56px 空间"));
+    return;
+  }
+  m_scrollMonitor = monitorIndex;
+  const quint64 generation = ++m_scrollGeneration;
+  const auto axis =
+      horizontal ? stitch::Axis::Horizontal : stitch::Axis::Vertical;
+  m_autoScroll = automatic;
+  m_lastAutoCycle = 0;
+  if (automatic) {
+    m_autoSession = std::make_unique<stitch::AutoCapture>(axis);
+    m_scrollHandshake = std::make_shared<stitch::CaptureHandshake>();
+    m_injectStop = std::make_shared<std::atomic<bool>>(false);
+    m_scrollTimer.setInterval(450);
+  } else {
+    m_scrollSession = std::make_unique<stitch::ManualCapture>(axis);
+    m_scrollTimer.setInterval(280);
+  }
+  m_scrolling = true;
+  emit scrollingChanged();
+  setStatus(automatic
+                ? QStringLiteral("自动滚动准备中…")
+                : QStringLiteral("在选区内滚动页面，完成后点击“完成长截图”"));
+  // Wait for the live input hole and hidden frozen frame to reach the display.
+  QTimer::singleShot(350, this, [this, axis, generation] {
+    if (m_scrolling && m_scrollGeneration == generation) {
+      if (m_autoScroll) {
+        const auto &monitor = m_monitors[m_scrollMonitor];
+        const qreal sx = monitor.image.width() / monitor.geometry.width();
+        const qreal sy = monitor.image.height() / monitor.geometry.height();
+        const QPointF local = m_selection.center() - monitor.geometry.topLeft();
+        const int parkX = qRound(local.x() * sx);
+        const int parkY = qRound(local.y() * sy);
+        const auto stop = m_injectStop;
+        const auto handshake = m_scrollHandshake;
+        const QString output = monitor.name;
+        auto *watcher = new QFutureWatcher<QString>(this);
+        connect(watcher, &QFutureWatcher<QString>::finished, this,
+                [this, watcher, stop, axis] {
+                  const QString error = watcher->result();
+                  watcher->deleteLater();
+                  if (!m_scrolling || m_injectStop != stop)
+                    return;
+                  if (!error.isEmpty()) {
+                    stop->store(true, std::memory_order_release);
+                    m_autoSession.reset();
+                    m_autoScroll = false;
+                    m_scrollSession =
+                        std::make_unique<stitch::ManualCapture>(axis);
+                    setStatus(
+                        QStringLiteral("自动滚动不可用：%1；可手动滚动继续截图")
+                            .arg(error));
+                  }
+                });
+        watcher->setFuture(
+            QtConcurrent::run([stop, handshake, parkX, parkY, axis, output] {
+              QString error;
+              if (!spawnScrollInjector(stop, handshake, parkX, parkY, axis,
+                                       output, error) &&
+                  error.isEmpty())
+                error = QStringLiteral("滚动注入已取消");
+              return error;
+            }));
+      }
+      pollScrollFrame();
+      m_scrollTimer.start();
+    }
+  });
+}
+
+void CaptureController::pollScrollFrame() {
+  if (!m_scrolling || m_scrollProcess || m_scrollMonitor < 0)
+    return;
+  if (m_autoScroll) {
+    if (!m_scrollHandshake ||
+        m_scrollHandshake->readyCycle() <= m_lastAutoCycle) {
+      if (m_injectStop && m_injectStop->load(std::memory_order_acquire) &&
+          m_scrollHandshake && m_scrollHandshake->readyCycle() > 0) {
+        m_scrollTimer.stop();
+        setStatus(QStringLiteral("自动滚动已停止，可点击完成保存已拼接部分"));
+      }
+      return;
+    }
+    m_captureAutoCycle = m_scrollHandshake->readyCycle();
+  }
+  const auto &monitor = m_monitors[m_scrollMonitor];
+  const quint64 generation = m_scrollGeneration;
+  auto *process = new QProcess(this);
+  m_scrollProcess = process;
+  connect(
+      process, &QProcess::errorOccurred, this,
+      [this, process, generation](QProcess::ProcessError error) {
+        if (error != QProcess::FailedToStart || !m_scrolling ||
+            m_scrollGeneration != generation)
+          return;
+        if (m_scrollProcess == process)
+          m_scrollProcess = nullptr;
+        m_scrollTimer.stop();
+        setStatus(
+            QStringLiteral("无法启动 grim：%1").arg(process->errorString()));
+        process->deleteLater();
+      });
+  connect(
+      process, &QProcess::finished, this,
+      [this, process, generation](int exitCode,
+                                  QProcess::ExitStatus exitStatus) {
+        if (m_scrollProcess == process)
+          m_scrollProcess = nullptr;
+        if (m_scrolling && m_scrollGeneration == generation &&
+            exitStatus == QProcess::NormalExit && exitCode == 0) {
+          const auto &monitor = m_monitors[m_scrollMonitor];
+          const QImage screen =
+              QImage::fromData(process->readAllStandardOutput());
+          if (!screen.isNull()) {
+            const qreal sx = screen.width() / monitor.geometry.width();
+            const qreal sy = screen.height() / monitor.geometry.height();
+            const QRectF local =
+                m_selection.translated(-monitor.geometry.topLeft());
+            const QRect crop(qRound(local.x() * sx), qRound(local.y() * sy),
+                             qRound(local.width() * sx),
+                             qRound(local.height() * sy));
+            const QImage frame = screen.copy(crop.intersected(screen.rect()))
+                                     .convertToFormat(QImage::Format_RGBA8888);
+            if (!frame.isNull() && m_autoScroll && m_autoSession) {
+              const auto result = m_autoSession->feed(frame);
+              using Event = stitch::AutoCapture::Event;
+              using Ack = stitch::AutoCapture::Ack;
+              if (result.event != Event::Blank)
+                m_lastAutoCycle = m_captureAutoCycle;
+              if (result.event == Event::ReachedEnd ||
+                  result.event == Event::ReachedEndAtSeam) {
+                finishScrollCapture();
+                process->deleteLater();
+                return;
+              }
+              if (result.event == Event::Halted ||
+                  result.event == Event::Paused) {
+                m_scrollTimer.stop();
+                if (m_injectStop)
+                  m_injectStop->store(true, std::memory_order_release);
+                setStatus(result.error.isEmpty()
+                              ? QStringLiteral("自动滚动已暂停：画面无法可靠匹"
+                                               "配，可点击完成保存已拼接部分")
+                              : result.error);
+              } else if (result.ack == Ack::Normal) {
+                m_scrollHandshake->acknowledge(m_captureAutoCycle);
+                m_scrollTimer.start();
+                setStatus(QStringLiteral("自动滚动中，已拼接 %1 帧")
+                              .arg(m_autoSession->keptFrames()));
+              } else if (result.ack == Ack::Probe) {
+                m_scrollHandshake->acknowledgeWithNotches(m_captureAutoCycle,
+                                                          1);
+                m_scrollTimer.start();
+              }
+            } else if (!frame.isNull() && m_scrollSession) {
+              const auto result = m_scrollSession->feed(frame);
+              using Event = stitch::ManualCapture::Event;
+              if (result.event == Event::Kept)
+                setStatus(
+                    QStringLiteral("长截图已拼接 %1 帧，继续滚动或点击完成")
+                        .arg(result.keptFrames));
+              else if (result.event == Event::Unmatchable ||
+                       result.event == Event::Ambiguous)
+                setStatus(QStringLiteral(
+                    "当前画面无法可靠匹配，请缓慢滚动并保持相邻画面重叠"));
+              else if (result.event == Event::Full ||
+                       result.event == Event::Error)
+                setStatus(
+                    result.error.isEmpty()
+                        ? QStringLiteral("长截图已达到大小上限，请点击完成")
+                        : result.error);
+            }
+          }
+        } else if (m_scrolling && m_scrollGeneration == generation) {
+          m_scrollTimer.stop();
+          setStatus(QStringLiteral("抓取滚动画面失败：%1")
+                        .arg(QString::fromUtf8(process->readAllStandardError())
+                                 .trimmed()));
+        }
+        process->deleteLater();
+      });
+  process->start(QStringLiteral("grim"),
+                 {QStringLiteral("-o"), monitor.name, QStringLiteral("-")});
+}
+
+void CaptureController::finishScrollCapture() {
+  if (!m_scrolling)
+    return;
+  m_scrollTimer.stop();
+  if (m_scrollProcess)
+    m_scrollProcess->kill();
+  QString error;
+  QImage result = m_autoScroll && m_autoSession ? m_autoSession->finish(error)
+                  : m_scrollSession             ? m_scrollSession->finish(error)
+                                                : QImage();
+  if (result.isNull()) {
+    setStatus(error.isEmpty() ? QStringLiteral("尚未获得可用的滚动画面")
+                              : error);
+    if (error == QStringLiteral("no frames were captured"))
+      m_scrollTimer.start();
+    return;
+  }
+  m_scrollImage = std::move(result);
+  m_redoAnnotations.clear();
+  m_scrollOffset = 0;
+  emit scrollOffsetChanged();
+  const QImage coarse = m_scrollImage.scaled(
+      qMax(1, m_scrollImage.width() / 12), qMax(1, m_scrollImage.height() / 12),
+      Qt::IgnoreAspectRatio, Qt::FastTransformation);
+  m_scrollMosaicImage = coarse;
+  m_scrollSession.reset();
+  m_autoSession.reset();
+  if (m_injectStop)
+    m_injectStop->store(true, std::memory_order_release);
+  m_scrollHandshake.reset();
+  m_injectStop.reset();
+  m_autoScroll = false;
+  ++m_scrollGeneration;
+  m_scrolling = false;
+  emit scrollImageChanged();
+  emit scrollingChanged();
+  setStatus(QStringLiteral("长截图已拼接：%1 × %2")
+                .arg(m_scrollImage.width())
+                .arg(m_scrollImage.height()));
+}
+
+void CaptureController::cancelScrollCapture() {
+  if (!m_scrolling)
+    return;
+  m_scrollTimer.stop();
+  if (m_scrollProcess)
+    m_scrollProcess->kill();
+  m_scrollSession.reset();
+  m_autoSession.reset();
+  if (m_injectStop)
+    m_injectStop->store(true, std::memory_order_release);
+  m_scrollHandshake.reset();
+  m_injectStop.reset();
+  m_autoScroll = false;
+  ++m_scrollGeneration;
+  m_scrolling = false;
+  emit scrollingChanged();
+  setStatus({});
 }
 
 void CaptureController::paintAnnotation(QPainter &painter,
@@ -565,13 +954,22 @@ void CaptureController::paintAnnotation(QPainter &painter,
   QColor color(item.value(QStringLiteral("color")).toString());
   if (!color.isValid())
     color = QColor(QStringLiteral("#ff4b55"));
-  painter.setPen(QPen(color, 3, Qt::SolidLine,
-                      Qt::RoundCap, Qt::RoundJoin));
+  painter.setPen(QPen(color, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
   painter.setBrush(Qt::NoBrush);
   if (type == QStringLiteral("rect"))
     painter.drawRect(QRectF(start, end).normalized());
-  else if (type == QStringLiteral("ellipse"))
+  else if (type == QStringLiteral("roundrect"))
+    painter.drawRoundedRect(QRectF(start, end).normalized(), 10, 10);
+  else if (type == QStringLiteral("fillrect"))
+    painter.fillRect(QRectF(start, end).normalized(), color);
+  else if (type == QStringLiteral("fillellipse")) {
+    painter.setBrush(color);
+    painter.setPen(Qt::NoPen);
     painter.drawEllipse(QRectF(start, end).normalized());
+  } else if (type == QStringLiteral("ellipse"))
+    painter.drawEllipse(QRectF(start, end).normalized());
+  else if (type == QStringLiteral("line"))
+    painter.drawLine(start, end);
   else if (type == QStringLiteral("arrow")) {
     painter.drawLine(start, end);
     const qreal angle = std::atan2(end.y() - start.y(), end.x() - start.x());
@@ -580,11 +978,46 @@ void CaptureController::paintAnnotation(QPainter &painter,
                                         std::sin(angle - .55) * wing));
     painter.drawLine(end, end - QPointF(std::cos(angle + .55) * wing,
                                         std::sin(angle + .55) * wing));
-  } else if (type == QStringLiteral("pen")) {
+  } else if (type == QStringLiteral("curvedarrow") ||
+             type == QStringLiteral("doublearrow")) {
+    const QPointF delta = end - start;
+    const QPointF control =
+        (start + end) / 2 + QPointF(-delta.y(), delta.x()) * .22;
+    QPainterPath curve(start);
+    curve.quadTo(control, end);
+    painter.drawPath(curve);
+    const auto head = [&](const QPointF &tip, const QPointF &from) {
+      const qreal angle = std::atan2(tip.y() - from.y(), tip.x() - from.x());
+      painter.drawLine(tip, tip - QPointF(std::cos(angle - .55) * 12,
+                                          std::sin(angle - .55) * 12));
+      painter.drawLine(tip, tip - QPointF(std::cos(angle + .55) * 12,
+                                          std::sin(angle + .55) * 12));
+    };
+    head(end, control);
+    if (type == QStringLiteral("doublearrow"))
+      head(start, control);
+  } else if (type == QStringLiteral("pen") ||
+             type == QStringLiteral("highlighter")) {
     const auto points = item.value(QStringLiteral("points")).toList();
     if (points.isEmpty())
       return;
+    if (type == QStringLiteral("highlighter")) {
+      color.setAlpha(88);
+      painter.setPen(
+          QPen(color, 18, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    }
     painter.drawPath(freehandPath(points));
+  } else if (type == QStringLiteral("marker")) {
+    painter.setBrush(color);
+    painter.drawEllipse(start, 13, 13);
+    painter.setPen(QColor(Qt::white));
+    QFont font = painter.font();
+    font.setBold(true);
+    font.setPixelSize(14);
+    painter.setFont(font);
+    painter.drawText(
+        QRectF(start.x() - 13, start.y() - 13, 26, 26), Qt::AlignCenter,
+        QString::number(item.value(QStringLiteral("number")).toInt()));
   } else if (type == QStringLiteral("text")) {
     QFont font = painter.font();
     font.setPixelSize(22);
@@ -592,19 +1025,20 @@ void CaptureController::paintAnnotation(QPainter &painter,
     painter.setFont(font);
     const QFontMetricsF metrics(font);
     const qreal lineHeight = metrics.lineSpacing();
-    const qreal baseline = (lineHeight - metrics.height()) / 2 + metrics.ascent();
+    const qreal baseline =
+        (lineHeight - metrics.height()) / 2 + metrics.ascent();
     const auto lines = item.value(QStringLiteral("text"))
                            .toString()
                            .split(QLatin1Char('\n'), Qt::KeepEmptyParts);
     for (int i = 0; i < lines.size(); ++i)
       painter.drawText(QPointF(start.x(), start.y() - lineHeight / 2 +
-                                             i * lineHeight + baseline),
+                                              i * lineHeight + baseline),
                        lines[i]);
   }
 }
 
-QVariantList CaptureController::smoothedFreehandPoints(
-    const QVariantList &raw) const {
+QVariantList
+CaptureController::smoothedFreehandPoints(const QVariantList &raw) const {
   QVariantList smoothed;
   for (const QPointF &point : filteredFreehandPoints(raw))
     smoothed.append(pointMap(point));
@@ -631,19 +1065,53 @@ QPainterPath CaptureController::freehandPath(const QVariantList &raw) {
 
 QPainterPath CaptureController::mosaicPath(const QVariantMap &item) {
   QPainterPath result;
-  if (item.value(QStringLiteral("type")).toString() !=
-      QStringLiteral("mosaic"))
+  if (item.value(QStringLiteral("type")).toString() != QStringLiteral("mosaic"))
     return result;
-  result.addRect(
-      QRectF(fromMap(item.value(QStringLiteral("start"))),
-             fromMap(item.value(QStringLiteral("end"))))
-          .normalized());
+  result.addRect(QRectF(fromMap(item.value(QStringLiteral("start"))),
+                        fromMap(item.value(QStringLiteral("end"))))
+                     .normalized());
   return result;
 }
 
 QImage CaptureController::renderedImage() const {
   if (!m_selected || m_selection.isEmpty())
     return {};
+  if (!m_scrollImage.isNull()) {
+    QImage result =
+        m_scrollImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+    const qreal scaleX = result.width() / m_selection.width();
+    const QRectF document(m_selection.topLeft(),
+                          QSizeF(m_selection.width(), scrollDocumentHeight()));
+    const QPainterPath holes = spotlightHoles(m_annotations);
+    if (!holes.isEmpty()) {
+      QPainter painter(&result);
+      painter.scale(scaleX, scaleX);
+      painter.translate(-m_selection.topLeft());
+      QPainterPath outer;
+      outer.addRect(document);
+      painter.fillPath(outer.subtracted(holes), QColor(0, 0, 0, 150));
+    }
+    for (const QVariant &annotation : m_annotations) {
+      const auto item = annotation.toMap();
+      if (item.value(QStringLiteral("type")).toString() ==
+          QStringLiteral("spotlight"))
+        continue;
+      QPainter painter(&result);
+      painter.scale(scaleX, scaleX);
+      painter.translate(-m_selection.topLeft());
+      painter.setClipRect(document);
+      if (item.value(QStringLiteral("type")).toString() ==
+          QStringLiteral("mosaic")) {
+        painter.setClipPath(mosaicPath(item), Qt::IntersectClip);
+        painter.setRenderHint(QPainter::SmoothPixmapTransform, false);
+        painter.drawImage(document, m_scrollMosaicImage);
+      } else {
+        painter.setRenderHint(QPainter::Antialiasing);
+        paintAnnotation(painter, item);
+      }
+    }
+    return result;
+  }
   qreal scale = 1;
   for (const auto &monitor : m_monitors)
     scale = std::max(scale, monitor.image.width() / monitor.geometry.width());
@@ -693,10 +1161,21 @@ QImage CaptureController::renderedImage() const {
       painter.drawImage(monitor.geometry, monitor.mosaicImage);
     }
   }
+  const QPainterPath holes = spotlightHoles(m_annotations);
+  if (!holes.isEmpty()) {
+    QPainter painter(&result);
+    painter.scale(scale, scale);
+    painter.translate(-m_selection.topLeft());
+    QPainterPath outer;
+    outer.addRect(m_selection);
+    painter.fillPath(outer.subtracted(holes), QColor(0, 0, 0, 150));
+  }
   for (const QVariant &annotation : m_annotations) {
     const auto item = annotation.toMap();
     if (item.value(QStringLiteral("type")).toString() ==
-        QStringLiteral("mosaic"))
+            QStringLiteral("mosaic") ||
+        item.value(QStringLiteral("type")).toString() ==
+            QStringLiteral("spotlight"))
       continue;
     QPainter painter(&result);
     painter.setRenderHint(QPainter::Antialiasing);
