@@ -1,8 +1,5 @@
-#include "../third_party/omasnap/auto-capture.hpp"
-#include "../third_party/omasnap/stitch.hpp"
 #include "capturecontroller.h"
 #include "mosaicoverlay.h"
-#include "scrollpreview.h"
 
 #include <LayerShellQt/window.h>
 #include <QGuiApplication>
@@ -14,7 +11,6 @@
 #include <QQuickItem>
 #include <QQuickItemGrabResult>
 #include <QQuickView>
-#include <QRegion>
 #include <QSettings>
 #include <QTemporaryDir>
 #include <QTextStream>
@@ -176,61 +172,28 @@ int main(int argc, char **argv) {
       qCritical() << "Numbered marker failed";
       return 2;
     }
-    auto patternedFrame = [](int offset) {
-      QImage frame(192, 160, QImage::Format_RGBA8888);
-      for (int y = 0; y < frame.height(); ++y) {
-        for (int x = 0; x < frame.width(); ++x) {
-          quint32 value =
-              quint32(y + offset) * 747796405u + quint32(x) * 2891336453u;
-          value ^= value >> 16;
-          value *= 2246822519u;
-          frame.setPixel(
-              x, y, qRgb(value & 255, (value >> 8) & 255, (value >> 16) & 255));
-        }
+    for (const auto &variant :
+         {QPair(QStringLiteral("rect"), QStringLiteral("fillrect")),
+          QPair(QStringLiteral("ellipse"), QStringLiteral("fillellipse")),
+          QPair(QStringLiteral("arrow"), QStringLiteral("doublearrow")),
+          QPair(QStringLiteral("pen"), QStringLiteral("highlighter"))}) {
+      controller.setTool(variant.second);
+      controller.setTool(QStringLiteral("line"));
+      controller.activateToolGroup(variant.first);
+      if (controller.tool() != variant.second ||
+          controller.toolVariants().value(variant.first) != variant.second) {
+        qCritical() << "Grouped tool selection failed" << variant.first;
+        return 2;
       }
-      return frame;
-    };
-    stitch::ManualCapture manual(stitch::Axis::Vertical);
-    const QImage frame0 = patternedFrame(0);
-    const QImage frame1 = patternedFrame(48);
-    const QImage frame2 = patternedFrame(96);
-    const auto manualSeed = manual.feed(frame0);
-    const auto manualFirst = manual.feed(frame1);
-    const auto manualSecond = manual.feed(frame2);
-    QString stitchError;
-    const QImage stitched = manual.finish(stitchError);
-    if (manualSeed.event != stitch::ManualCapture::Event::Seeded ||
-        manualFirst.event != stitch::ManualCapture::Event::Kept ||
-        manualSecond.event != stitch::ManualCapture::Event::Kept ||
-        stitched.isNull() || stitched.width() != 192 ||
-        stitched.height() != 256) {
-      qCritical() << "Manual stitch failed" << stitchError << stitched.size();
-      return 2;
-    }
-    stitch::AutoCapture automatic(stitch::Axis::Vertical);
-    const auto autoSeed = automatic.feed(frame0);
-    const auto autoFirst = automatic.feed(frame1);
-    const auto autoSecond = automatic.feed(frame2);
-    const auto autoStill = automatic.feed(frame2);
-    const auto autoEnd = automatic.feed(frame2);
-    if (autoSeed.event != stitch::AutoCapture::Event::Seeded ||
-        autoFirst.event != stitch::AutoCapture::Event::Appended ||
-        autoSecond.event != stitch::AutoCapture::Event::Appended ||
-        autoStill.event != stitch::AutoCapture::Event::StillOnce ||
-        autoEnd.event != stitch::AutoCapture::Event::ReachedEnd ||
-        automatic.finish(stitchError).height() != 256) {
-      qCritical() << "Auto stitch failed" << stitchError;
-      return 2;
     }
     QTextStream(stdout)
         << "Cross-monitor capture OK: " << image.width() << "x"
         << image.height()
-        << ", curve smoothing, redo, marker and scroll stitch OK\n";
+        << ", curve smoothing, grouped tools, redo and marker OK\n";
     return 0;
   }
 
   qmlRegisterType<MosaicOverlay>("ScreenshotInternals", 1, 0, "MosaicOverlay");
-  qmlRegisterType<ScrollPreview>("ScreenshotInternals", 1, 0, "ScrollPreview");
   QQmlEngine engine;
   QObject::connect(&engine, &QQmlEngine::warnings, &app,
                    [](const QList<QQmlError> &warnings) {
@@ -297,24 +260,6 @@ int main(int argc, char **argv) {
                                                                 : views.back())
         ->requestActivate();
 
-  auto updateScrollInputRegion = [&] {
-    for (int i = 0; i < static_cast<int>(views.size()); ++i) {
-      auto *view = views[i].get();
-      if (!controller.scrolling() || controller.scrollMonitor() != i) {
-        view->setMask(QRegion());
-        continue;
-      }
-      const QRectF local = controller.selection().translated(
-          -controller.monitors()[i].geometry.topLeft());
-      QRegion inputRegion(QRect(QPoint(), view->size()));
-      inputRegion -=
-          local.toAlignedRect().intersected(QRect(QPoint(), view->size()));
-      view->setMask(inputRegion);
-    }
-  };
-  QObject::connect(&controller, &CaptureController::scrollingChanged, &app,
-                   updateScrollInputRegion);
-
   auto sendMouse = [&](QEvent::Type type, const QPointF &local,
                        Qt::MouseButton button, Qt::MouseButtons buttons) {
     const QPointF global = controller.monitors()[0].geometry.topLeft() + local;
@@ -342,6 +287,7 @@ int main(int argc, char **argv) {
   bool colorPickerWorked = false;
   bool colorPersistenceWorked = false;
   bool toolbarPaddingWorked = false;
+  bool groupedToolbarWorked = false;
   QString selectedTestColor;
   bool annotationColorsKept = false;
   bool coloredTextExported = false;
@@ -507,6 +453,46 @@ int main(int argc, char **argv) {
             controller.annotationColor() == QStringLiteral("#ff9d42");
         controller.setAnnotationColor(selectedTestColor);
       }
+      const QPointF rectGroupButton = toolbarCenter(1);
+      sendMouse(QEvent::MouseButtonPress, rectGroupButton, Qt::LeftButton,
+                Qt::LeftButton);
+      sendMouse(QEvent::MouseButtonRelease, rectGroupButton, Qt::LeftButton,
+                Qt::NoButton);
+      QCoreApplication::processEvents();
+      auto *variantPanel = views[0]->rootObject()->findChild<QQuickItem *>(
+          QStringLiteral("variantPanel"));
+      QVariant optionPosition;
+      QMetaObject::invokeMethod(views[0]->rootObject(), "variantOptionCenter",
+                                Q_RETURN_ARG(QVariant, optionPosition),
+                                Q_ARG(QVariant, 1));
+      const auto optionPoint = optionPosition.toMap();
+      const QPointF roundRectOption(
+          optionPoint.value(QStringLiteral("x"), -1).toDouble(),
+          optionPoint.value(QStringLiteral("y"), -1).toDouble());
+      const bool groupOpened = variantPanel && variantPanel->isVisible() &&
+                               roundRectOption.x() >= 0;
+      if (groupOpened) {
+        sendMouse(QEvent::MouseButtonPress, roundRectOption, Qt::LeftButton,
+                  Qt::LeftButton);
+        sendMouse(QEvent::MouseButtonRelease, roundRectOption, Qt::LeftButton,
+                  Qt::NoButton);
+      }
+      QVariant displayedTool;
+      QMetaObject::invokeMethod(views[0]->rootObject(), "toolbarDisplayedTool",
+                                Q_RETURN_ARG(QVariant, displayedTool),
+                                Q_ARG(QVariant, 1));
+      groupedToolbarWorked =
+          groupOpened && !variantPanel->isVisible() &&
+          controller.tool() == QStringLiteral("roundrect") &&
+          controller.toolVariants().value(QStringLiteral("rect")) ==
+              QStringLiteral("roundrect") &&
+          displayedTool.toString() == QStringLiteral("roundrect");
+      controller.setTool(QStringLiteral("line"));
+      QKeyEvent groupShortcut(QEvent::KeyPress, Qt::Key_R, Qt::NoModifier,
+                              QStringLiteral("r"));
+      QCoreApplication::sendEvent(views[0].get(), &groupShortcut);
+      groupedToolbarWorked &=
+          controller.tool() == QStringLiteral("roundrect");
       const QPointF mosaicButton = toolbarCenter(6);
       sendMouse(QEvent::MouseButtonPress, mosaicButton, Qt::LeftButton,
                 Qt::LeftButton);
@@ -860,6 +846,7 @@ int main(int argc, char **argv) {
       repeatingArrowResizeWorked &= controller.selection() == afterTopResize;
       QTextStream(stdout) << "Mosaic preview: " << mosaicVisible
                           << ", toolbar: " << toolbarWorked
+                          << ", grouped tools: " << groupedToolbarWorked
                           << ", color picker: " << colorPickerWorked
                           << ", saved color: " << colorPersistenceWorked
                           << ", button padding: " << toolbarPaddingWorked
@@ -895,7 +882,8 @@ int main(int argc, char **argv) {
                           << ", exported rows: " << exportedTextRows
                           << ", editor focused: " << editorFocused
                           << ", captures ready: " << capturesReady << "\n";
-      app.exit(mosaicVisible && toolbarWorked && colorPickerWorked &&
+      app.exit(mosaicVisible && toolbarWorked && groupedToolbarWorked &&
+                       colorPickerWorked &&
                        colorPersistenceWorked && toolbarPaddingWorked &&
                        annotationColorsKept && coloredTextExported &&
                        coloredPenExported && ocrButtonRemoved &&

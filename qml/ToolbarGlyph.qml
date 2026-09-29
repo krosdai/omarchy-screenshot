@@ -108,29 +108,6 @@ Canvas {
             ctx.textBaseline = "middle"
             ctx.fillText("1", 10, 10)
             break
-        case "scroll":
-        case "scroll_horizontal":
-        case "scroll_auto":
-        case "scroll_auto_horizontal":
-            ctx.rect(3, 3, 14, 14)
-            if (action === "scroll" || action === "scroll_auto") {
-                ctx.moveTo(10, 5)
-                ctx.lineTo(10, 15)
-                ctx.moveTo(7, 12)
-                ctx.lineTo(10, 15)
-                ctx.lineTo(13, 12)
-            } else {
-                ctx.moveTo(5, 10)
-                ctx.lineTo(15, 10)
-                ctx.moveTo(12, 7)
-                ctx.lineTo(15, 10)
-                ctx.lineTo(12, 13)
-            }
-            if (action === "scroll_auto" || action === "scroll_auto_horizontal") {
-                ctx.fillStyle = accentColor
-                ctx.fillRect(2, 2, 4, 4)
-            }
-            break
         case "pen":
             ctx.moveTo(3.2, 17)
             ctx.lineTo(4.2, 13.5)
