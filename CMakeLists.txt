@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Qml Quick)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Qml Quick Test)
 find_package(LayerShellQt REQUIRED)
 qt_policy(SET QTP0001 NEW)
 qt_policy(SET QTP0004 NEW)
@@ -27,7 +27,7 @@ qt_add_qml_module(omarchy-screenshot
 )
 
 target_link_libraries(omarchy-screenshot PRIVATE
-    Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick LayerShellQt::Interface
+    Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test LayerShellQt::Interface
 )
 
 install(TARGETS omarchy-screenshot RUNTIME DESTINATION bin)

@@ -607,6 +607,16 @@ void CaptureController::pointerRelease(int screenIndex, qreal x, qreal y) {
   m_initialAnnotations.clear();
 }
 
+void CaptureController::cancelPointerAction() {
+  m_drag = Drag::None;
+  m_resizeEdges = 0;
+  m_initialAnnotations.clear();
+  if (!m_draft.isEmpty()) {
+    m_draft.clear();
+    emit draftChanged();
+  }
+}
+
 void CaptureController::addText(qreal x, qreal y, const QString &text) {
   if (!m_selected || text.trimmed().isEmpty())
     return;

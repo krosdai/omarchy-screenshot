@@ -107,6 +107,25 @@ Item {
         return {x: point.x, y: point.y}
     }
 
+    function copySelectionAt(localX, localY) {
+        const x = screenRect.x + localX
+        const y = screenRect.y + localY
+        const selection = captureController.selection
+        if (!captureController.selected ||
+            x <= selection.x || y <= selection.y ||
+            x >= selection.x + selection.width ||
+            y >= selection.y + selection.height)
+            return false
+        const removeMarker = captureController.tool === "marker" && picker.lastMarkerClickAdded
+        picker.lastMarkerClickAdded = false
+        if (editor.visible) editor.commitText()
+        root.forceActiveFocus()
+        captureController.cancelPointerAction()
+        if (removeMarker) captureController.undo()
+        captureController.copy()
+        return true
+    }
+
     function visibleResizeHandleCount() {
         let count = 0
         for (let i = 0; i < resizeHandles.count; ++i) {
@@ -488,6 +507,7 @@ Item {
 
     MouseArea {
         id: picker
+        property bool lastMarkerClickAdded: false
         anchors.fill: parent
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -515,7 +535,16 @@ Item {
             }
             captureController.pointerPress(screenIndex, mouse.x, mouse.y)
         }
-        onReleased: mouse => captureController.pointerRelease(screenIndex, mouse.x, mouse.y)
+        onReleased: mouse => {
+            const wasMarker = captureController.tool === "marker"
+            const before = captureController.annotations.length
+            captureController.pointerRelease(screenIndex, mouse.x, mouse.y)
+            lastMarkerClickAdded = wasMarker && captureController.annotations.length > before
+        }
+        onDoubleClicked: mouse => {
+            if (mouse.button === Qt.LeftButton)
+                root.copySelectionAt(mouse.x, mouse.y)
+        }
     }
 
     Item {
@@ -585,6 +614,16 @@ Item {
                 editor.visible = false
                 root.forceActiveFocus()
                 event.accepted = true
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            visible: editor.visible && textInput.text.length === 0
+            acceptedButtons: Qt.LeftButton
+            onDoubleClicked: mouse => {
+                if (mouse.button === Qt.LeftButton)
+                    root.copySelectionAt(editor.x + mouse.x, editor.y + mouse.y)
             }
         }
     }

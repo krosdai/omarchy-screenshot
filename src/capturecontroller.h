@@ -70,6 +70,7 @@ public:
   Q_INVOKABLE void cancel();
   Q_INVOKABLE void setTool(const QString &tool);
   Q_INVOKABLE void activateToolGroup(const QString &group);
+  Q_INVOKABLE void cancelPointerAction();
   Q_INVOKABLE void setAnnotationColor(const QString &color);
   Q_INVOKABLE void setAnnotationColorFromHsv(qreal hue, qreal saturation,
                                              qreal value);

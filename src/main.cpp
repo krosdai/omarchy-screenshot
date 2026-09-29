@@ -2,6 +2,8 @@
 #include "mosaicoverlay.h"
 
 #include <LayerShellQt/window.h>
+#include <QDir>
+#include <QFile>
 #include <QGuiApplication>
 #include <QKeyEvent>
 #include <QMouseEvent>
@@ -13,6 +15,7 @@
 #include <QQuickView>
 #include <QSettings>
 #include <QTemporaryDir>
+#include <QTest>
 #include <QTextStream>
 #include <QTimer>
 
@@ -316,6 +319,7 @@ int main(int argc, char **argv) {
   bool editorBorderDashed = false;
   bool editorBackgroundTransparent = false;
   bool exportedTextRows = false;
+  bool doubleClickCopied = false;
   if (app.arguments().contains(QStringLiteral("--ui-self-test"))) {
     controller.pointerPress(0, 100, 100);
     controller.pointerMove(0, 900, 600);
@@ -844,6 +848,71 @@ int main(int argc, char **argv) {
       for (int i = 0; i < 3; ++i)
         pressArrow(Qt::Key_Right, Qt::ShiftModifier, true);
       repeatingArrowResizeWorked &= controller.selection() == afterTopResize;
+
+      // Replace wl-copy only for this event test so the user's clipboard stays intact.
+      QTemporaryDir clipboardTest;
+      const QString fakeCopy = clipboardTest.filePath(QStringLiteral("wl-copy"));
+      const QString clipboardFile =
+          clipboardTest.filePath(QStringLiteral("copied.png"));
+      QFile copyScript(fakeCopy);
+      const bool stubReady =
+          clipboardTest.isValid() && copyScript.open(QIODevice::WriteOnly) &&
+          copyScript.write("#!/bin/sh\ncat > \"$OMARCHY_SCREENSHOT_TEST_CLIPBOARD\"\n") > 0;
+      copyScript.close();
+      if (stubReady) {
+        QFile::setPermissions(fakeCopy, QFile::ReadOwner | QFile::WriteOwner |
+                                           QFile::ExeOwner | QFile::ReadGroup |
+                                           QFile::ExeGroup | QFile::ReadOther |
+                                           QFile::ExeOther);
+        const QByteArray originalPath = qgetenv("PATH");
+        const bool hadTestClipboard =
+            qEnvironmentVariableIsSet("OMARCHY_SCREENSHOT_TEST_CLIPBOARD");
+        const QByteArray originalTestClipboard =
+            qgetenv("OMARCHY_SCREENSHOT_TEST_CLIPBOARD");
+        qputenv("PATH", QFile::encodeName(clipboardTest.path()) + ':' +
+                            originalPath);
+        qputenv("OMARCHY_SCREENSHOT_TEST_CLIPBOARD",
+                QFile::encodeName(clipboardFile));
+        bool closedAfterCopy = false;
+        const auto doneConnection =
+            QObject::connect(&controller, &CaptureController::done, &app,
+                             [&] { closedAfterCopy = true; });
+        auto *textEditor =
+            root->findChild<QQuickItem *>(QStringLiteral("textEditor"));
+        if (textEditor)
+          textEditor->setVisible(false);
+        const_cast<QQuickItem *>(root)->forceActiveFocus();
+        const QPointF blankSpot(450, 350);
+        auto verifyDoubleClick = [&](const QString &tool) {
+          controller.setTool(tool);
+          const QImage expectedCopy = controller.renderedImage();
+          const int annotationCount = controller.annotations().size();
+          closedAfterCopy = false;
+          QFile::remove(clipboardFile);
+          QTest::mouseDClick(views[0].get(), Qt::LeftButton, Qt::NoModifier,
+                             blankSpot.toPoint());
+          QFile captured(clipboardFile);
+          const QImage clipboardImage = captured.open(QIODevice::ReadOnly)
+                                            ? QImage::fromData(captured.readAll())
+                                            : QImage();
+          const bool passed =
+              closedAfterCopy && !clipboardImage.isNull() &&
+              clipboardImage.convertToFormat(QImage::Format_ARGB32) ==
+                  expectedCopy.convertToFormat(QImage::Format_ARGB32) &&
+              controller.annotations().size() == annotationCount;
+          return passed;
+        };
+        doubleClickCopied = verifyDoubleClick(QStringLiteral("select")) &&
+                            verifyDoubleClick(QStringLiteral("marker")) &&
+                            verifyDoubleClick(QStringLiteral("text"));
+        QObject::disconnect(doneConnection);
+        qputenv("PATH", originalPath);
+        if (hadTestClipboard)
+          qputenv("OMARCHY_SCREENSHOT_TEST_CLIPBOARD",
+                  originalTestClipboard);
+        else
+          qunsetenv("OMARCHY_SCREENSHOT_TEST_CLIPBOARD");
+      }
       QTextStream(stdout) << "Mosaic preview: " << mosaicVisible
                           << ", toolbar: " << toolbarWorked
                           << ", grouped tools: " << groupedToolbarWorked
@@ -881,7 +950,8 @@ int main(int argc, char **argv) {
                           << ", centered lines: " << previewRowsCentered
                           << ", exported rows: " << exportedTextRows
                           << ", editor focused: " << editorFocused
-                          << ", captures ready: " << capturesReady << "\n";
+                          << ", captures ready: " << capturesReady
+                          << ", double-click copy: " << doubleClickCopied << "\n";
       app.exit(mosaicVisible && toolbarWorked && groupedToolbarWorked &&
                        colorPickerWorked &&
                        colorPersistenceWorked && toolbarPaddingWorked &&
@@ -898,7 +968,7 @@ int main(int argc, char **argv) {
                        penPreviewVisible && textVisible && multilineEditing &&
                        editorBorderDashed && editorBackgroundTransparent &&
                        previewRowsCentered && exportedTextRows &&
-                       editorFocused && capturesReady
+                       editorFocused && capturesReady && doubleClickCopied
                    ? 0
                    : 2);
     });
