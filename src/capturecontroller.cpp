@@ -353,11 +353,13 @@ void CaptureController::setTool(const QString &tool) {
       tool == QStringLiteral("fillrect"))
     group = QStringLiteral("rect");
   else if (tool == QStringLiteral("ellipse") ||
-           tool == QStringLiteral("fillellipse"))
+           tool == QStringLiteral("fillellipse") ||
+           tool == QStringLiteral("spotlight"))
     group = QStringLiteral("ellipse");
   else if (tool == QStringLiteral("arrow") ||
            tool == QStringLiteral("curvedarrow") ||
-           tool == QStringLiteral("doublearrow"))
+           tool == QStringLiteral("doublearrow") ||
+           tool == QStringLiteral("line"))
     group = QStringLiteral("arrow");
   else if (tool == QStringLiteral("pen") ||
            tool == QStringLiteral("highlighter"))

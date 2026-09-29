@@ -21,6 +21,7 @@
 
 #include <functional>
 #include <memory>
+#include <tuple>
 #include <vector>
 
 class CaptureImageProvider final : public QQuickImageProvider {
@@ -178,10 +179,12 @@ int main(int argc, char **argv) {
     for (const auto &variant :
          {QPair(QStringLiteral("rect"), QStringLiteral("fillrect")),
           QPair(QStringLiteral("ellipse"), QStringLiteral("fillellipse")),
+          QPair(QStringLiteral("ellipse"), QStringLiteral("spotlight")),
           QPair(QStringLiteral("arrow"), QStringLiteral("doublearrow")),
+          QPair(QStringLiteral("arrow"), QStringLiteral("line")),
           QPair(QStringLiteral("pen"), QStringLiteral("highlighter"))}) {
       controller.setTool(variant.second);
-      controller.setTool(QStringLiteral("line"));
+      controller.setTool(QStringLiteral("text"));
       controller.activateToolGroup(variant.first);
       if (controller.tool() != variant.second ||
           controller.toolVariants().value(variant.first) != variant.second) {
@@ -497,6 +500,53 @@ int main(int argc, char **argv) {
       QCoreApplication::sendEvent(views[0].get(), &groupShortcut);
       groupedToolbarWorked &=
           controller.tool() == QStringLiteral("roundrect");
+      QVariant standaloneLine;
+      QVariant standaloneSpotlight;
+      QMetaObject::invokeMethod(views[0]->rootObject(), "toolbarHasAction",
+                                Q_RETURN_ARG(QVariant, standaloneLine),
+                                Q_ARG(QVariant, QStringLiteral("line")));
+      QMetaObject::invokeMethod(views[0]->rootObject(), "toolbarHasAction",
+                                Q_RETURN_ARG(QVariant, standaloneSpotlight),
+                                Q_ARG(QVariant, QStringLiteral("spotlight")));
+      groupedToolbarWorked &=
+          !standaloneLine.toBool() && !standaloneSpotlight.toBool();
+      for (const auto &variant :
+           {std::tuple(3, 3, QStringLiteral("arrow"), QStringLiteral("line")),
+            std::tuple(2, 2, QStringLiteral("ellipse"),
+                       QStringLiteral("spotlight"))}) {
+        const int buttonIndex = std::get<0>(variant);
+        const QPointF groupButton = toolbarCenter(buttonIndex);
+        sendMouse(QEvent::MouseButtonPress, groupButton, Qt::LeftButton,
+                  Qt::LeftButton);
+        sendMouse(QEvent::MouseButtonRelease, groupButton, Qt::LeftButton,
+                  Qt::NoButton);
+        QCoreApplication::processEvents();
+        QVariant variantPosition;
+        QMetaObject::invokeMethod(views[0]->rootObject(), "variantOptionCenter",
+                                  Q_RETURN_ARG(QVariant, variantPosition),
+                                  Q_ARG(QVariant, std::get<1>(variant)));
+        const auto point = variantPosition.toMap();
+        const QPointF option(point.value(QStringLiteral("x"), -1).toDouble(),
+                             point.value(QStringLiteral("y"), -1).toDouble());
+        const bool opened = variantPanel->isVisible() && option.x() >= 0;
+        if (opened) {
+          sendMouse(QEvent::MouseButtonPress, option, Qt::LeftButton,
+                    Qt::LeftButton);
+          sendMouse(QEvent::MouseButtonRelease, option, Qt::LeftButton,
+                    Qt::NoButton);
+        }
+        QVariant shown;
+        QMetaObject::invokeMethod(views[0]->rootObject(),
+                                  "toolbarDisplayedTool",
+                                  Q_RETURN_ARG(QVariant, shown),
+                                  Q_ARG(QVariant, buttonIndex));
+        groupedToolbarWorked &=
+            opened && !variantPanel->isVisible() &&
+            controller.tool() == std::get<3>(variant) &&
+            controller.toolVariants().value(std::get<2>(variant)) ==
+                std::get<3>(variant) &&
+            shown.toString() == std::get<3>(variant);
+      }
       const QPointF mosaicButton = toolbarCenter(6);
       sendMouse(QEvent::MouseButtonPress, mosaicButton, Qt::LeftButton,
                 Qt::LeftButton);

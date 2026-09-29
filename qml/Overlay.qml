@@ -41,19 +41,21 @@ Item {
     function toolGroupOptions(group) {
         switch (group) {
         case "rect": return [
-            {key: "R", action: "rect", label: "矩形"},
-            {key: "⇧R", action: "roundrect", label: "圆角矩形"},
-            {key: "⇧D", action: "fillrect", label: "实心矩形"}]
+            {action: "rect", label: "矩形"},
+            {action: "roundrect", label: "圆角矩形"},
+            {action: "fillrect", label: "实心矩形"}]
         case "ellipse": return [
-            {key: "E", action: "ellipse", label: "椭圆"},
-            {key: "⇧E", action: "fillellipse", label: "实心椭圆"}]
+            {action: "ellipse", label: "椭圆"},
+            {action: "fillellipse", label: "实心椭圆"},
+            {action: "spotlight", label: "聚光灯"}]
         case "arrow": return [
-            {key: "A", action: "arrow", label: "箭头"},
-            {key: "⇧A", action: "curvedarrow", label: "弯曲箭头"},
-            {key: "⇧W", action: "doublearrow", label: "双向弯曲箭头"}]
+            {action: "arrow", label: "箭头"},
+            {action: "curvedarrow", label: "弯曲箭头"},
+            {action: "doublearrow", label: "双向弯曲箭头"},
+            {action: "line", label: "直线"}]
         case "pen": return [
-            {key: "D", action: "pen", label: "画笔"},
-            {key: "B", action: "highlighter", label: "荧光笔"}]
+            {action: "pen", label: "画笔"},
+            {action: "highlighter", label: "荧光笔"}]
         }
         return []
     }
@@ -716,8 +718,8 @@ Item {
                 model: [
                     {key: "V", action: "select", hint: "选区：拖动方块调整边框；方向键扩展 1px，Shift+方向键收缩 1px"},
                     {key: "R", action: "rect_group", hint: "矩形组：点击选择矩形、圆角矩形或实心矩形"},
-                    {key: "E", action: "ellipse_group", hint: "椭圆组：点击选择椭圆或实心椭圆"},
-                    {key: "A", action: "arrow_group", hint: "箭头组：点击选择直箭头、弯曲箭头或双向弯曲箭头"},
+                    {key: "E", action: "ellipse_group", hint: "圆形组：点击选择椭圆、实心椭圆或聚光灯"},
+                    {key: "A", action: "arrow_group", hint: "箭头组：点击选择箭头、弯曲箭头、双向弯曲箭头或直线"},
                     {key: "D", action: "pen_group", hint: "画笔组：点击选择画笔或荧光笔"},
                     {key: "T", action: "text", hint: "文字：单击输入，Shift+Enter 换行"},
                     {key: "G", action: "mosaic", hint: "马赛克：拖动选择矩形区域"},
@@ -725,8 +727,6 @@ Item {
                     {key: "C", action: "copy", hint: "复制：将截图复制到剪贴板"},
                     {key: "S", action: "save", hint: "保存：将截图保存为 PNG"},
                     {key: "X", action: "cancel", hint: "关闭：退出截图"},
-                    {key: "W", action: "line", hint: "直线：拖动绘制"},
-                    {key: "⇧B", action: "spotlight", hint: "聚光灯：突出椭圆区域"},
                     {key: "⇧T", action: "marker", hint: "编号标记：单击放置自动编号"},
                     {key: "⇧Z", action: "redo", hint: "重做：恢复刚撤销的标注"}
                 ]
@@ -814,8 +814,8 @@ Item {
         readonly property var options: root.toolGroupOptions(group)
         visible: false
         z: 20
-        width: options.length * 82 + 16
-        height: 74
+        width: options.length * 38 + 10
+        height: 48
         radius: 7
         color: "#ffffff"
         border.color: "#cbd4de"
@@ -833,72 +833,40 @@ Item {
             visible = !wasOpen
         }
 
-        Column {
+        Row {
             anchors.centerIn: parent
-            width: variantPanel.options.length * 82
-            height: 60
-            spacing: 3
-            Text {
-                text: variantPanel.group === "rect" ? "矩形" :
-                      variantPanel.group === "ellipse" ? "椭圆" :
-                      variantPanel.group === "arrow" ? "箭头" : "画笔"
-                color: "#596674"
-                font.pixelSize: 11
-                anchors.horizontalCenter: parent.horizontalCenter
-            }
-            Row {
-                width: parent.width
-                height: 45
-                spacing: 0
-                Repeater {
-                    id: variantOptionRepeater
-                    model: variantPanel.options
-                    delegate: Rectangle {
-                        required property var modelData
-                        width: 82
-                        height: 45
-                        color: "transparent"
-                        Rectangle {
-                            anchors.fill: parent
-                            anchors.margins: 4
-                            radius: 5
-                            color: captureController.tool === modelData.action
-                                   ? "#dcecff" : optionMouse.containsMouse ? "#edf3f9" : "transparent"
-                        }
-                        Row {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            y: 5
-                            spacing: 2
-                            Text {
-                                text: modelData.key + "："
-                                width: 25
-                                height: 20
-                                color: "#26313d"
-                                font.pixelSize: 13
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
-                            }
-                            ToolbarGlyph {
-                                action: modelData.action
-                                accentColor: captureController.annotationColor
-                            }
-                        }
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            y: 26
-                            text: modelData.label
-                            color: "#45515e"
-                            font.pixelSize: 11
-                        }
-                        MouseArea {
-                            id: optionMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onClicked: {
-                                captureController.tool = modelData.action
-                                variantPanel.visible = false
-                                root.forceActiveFocus()
-                            }
+            spacing: 2
+            Repeater {
+                id: variantOptionRepeater
+                model: variantPanel.options
+                delegate: Rectangle {
+                    required property var modelData
+                    width: 36
+                    height: 36
+                    color: "transparent"
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.margins: 3
+                        radius: 5
+                        color: captureController.tool === modelData.action
+                               ? "#dcecff" : optionMouse.containsMouse ? "#edf3f9" : "transparent"
+                    }
+                    ToolbarGlyph {
+                        anchors.centerIn: parent
+                        action: modelData.action
+                        accentColor: captureController.annotationColor
+                    }
+                    MouseArea {
+                        id: optionMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onEntered: root.showToolbarTooltip(modelData.label, optionMouse)
+                        onExited: root.hideToolbarTooltip()
+                        onClicked: {
+                            root.hideToolbarTooltip()
+                            captureController.tool = modelData.action
+                            variantPanel.visible = false
+                            root.forceActiveFocus()
                         }
                     }
                 }
