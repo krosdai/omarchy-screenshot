@@ -75,6 +75,7 @@ public:
   Q_INVOKABLE void save();
   Q_INVOKABLE void cancel();
   Q_INVOKABLE void setTool(const QString &tool);
+  Q_INVOKABLE void restoreToolBeforeText();
   Q_INVOKABLE void activateToolGroup(const QString &group);
   Q_INVOKABLE void cancelPointerAction();
   Q_INVOKABLE void setAnnotationColor(const QString &color);
@@ -125,6 +126,7 @@ private:
   bool m_moved = false;
   int m_resizeEdges = 0;
   QString m_tool = QStringLiteral("select");
+  QString m_toolBeforeText = QStringLiteral("select");
   QVariantMap m_toolVariants = {
       {QStringLiteral("rect"), QStringLiteral("rect")},
       {QStringLiteral("ellipse"), QStringLiteral("ellipse")},

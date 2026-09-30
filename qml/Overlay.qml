@@ -176,6 +176,13 @@ Item {
         toolbarTooltipVisible = false
     }
 
+    function leaveTextTool() {
+        if (captureController.tool !== "text") return
+        if (editor.visible) editor.commitText()
+        captureController.restoreToolBeforeText()
+        root.forceActiveFocus()
+    }
+
     Timer {
         id: tooltipDelay
         interval: 450
@@ -185,6 +192,12 @@ Item {
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
             captureController.cancel()
+            event.accepted = true
+            return
+        }
+        if (event.key === Qt.Key_Alt && captureController.tool === "text" &&
+            (event.modifiers === Qt.NoModifier || event.modifiers === Qt.AltModifier)) {
+            root.leaveTextTool()
             event.accepted = true
             return
         }
@@ -627,6 +640,13 @@ Item {
             selectByMouse: true
             Keys.onReturnPressed: event => editor.handleReturn(event)
             Keys.onEnterPressed: event => editor.handleReturn(event)
+            Keys.onPressed: event => {
+                if (event.key === Qt.Key_Alt &&
+                    (event.modifiers === Qt.NoModifier || event.modifiers === Qt.AltModifier)) {
+                    root.leaveTextTool()
+                    event.accepted = true
+                }
+            }
             onActiveFocusChanged: {
                 if (!activeFocus && editor.visible) editor.commitText()
             }
@@ -740,7 +760,7 @@ Item {
                     {key: "E", action: "ellipse_group", hint: "圆形组：点击选择椭圆、实心椭圆或聚光灯"},
                     {key: "A", action: "arrow_group", hint: "箭头组：点击选择箭头、弯曲箭头、双向弯曲箭头或直线"},
                     {key: "D", action: "pen_group", hint: "画笔组：点击选择画笔或荧光笔"},
-                    {key: "T", action: "text", hint: "文字：单击输入，Shift+Enter 换行"},
+                    {key: "T", action: "text", hint: "文字：单击输入，Shift+Enter 换行；按 Alt 确认文字并返回上一个工具"},
                     {key: "G", action: "mosaic", hint: "马赛克：拖动选择矩形区域"},
                     {key: "B", action: "marker", hint: "编号标记：单击放置自动编号"},
                     {key: "Z", action: "undo", hint: "撤销：移除上一项标注"},

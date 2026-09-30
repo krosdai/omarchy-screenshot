@@ -880,9 +880,18 @@ int main(int argc, char **argv) {
                              controller.annotations().size() == annotationCount;
         sendMouse(QEvent::MouseMove, toolbarCenter(6), Qt::NoButton,
                   Qt::NoButton);
+        const QString mosaicTooltip =
+            views[0]->rootObject()->property("toolbarTooltipText").toString();
+        sendMouse(QEvent::MouseMove, toolbarCenter(5), Qt::NoButton,
+                  Qt::NoButton);
+        const QString textTooltip =
+            views[0]->rootObject()->property("toolbarTooltipText").toString();
         hoverDescriptionWorked =
-            views[0]->rootObject()->property("toolbarTooltipText").toString() ==
-            QStringLiteral("马赛克：拖动选择矩形区域");
+            mosaicTooltip == QStringLiteral("马赛克：拖动选择矩形区域") &&
+            textTooltip.contains(QStringLiteral("Alt"));
+        if (!hoverDescriptionWorked)
+          QTextStream(stdout) << "Tooltip diagnostic: text=" << textTooltip
+                              << " mosaic=" << mosaicTooltip << "\n";
       });
     });
     QTimer::singleShot(1600, &app, [&] {
@@ -975,6 +984,36 @@ int main(int argc, char **argv) {
       for (int i = 0; i < 3; ++i)
         pressArrow(Qt::Key_Right, Qt::ShiftModifier, true);
       repeatingArrowResizeWorked &= controller.selection() == afterTopResize;
+
+      controller.setTool(QStringLiteral("pen"));
+      controller.setTool(QStringLiteral("text"));
+      const QPointF altTextSpot(450, 350);
+      QTest::mouseClick(views[0].get(), Qt::LeftButton, Qt::NoModifier,
+                        altTextSpot.toPoint());
+      auto *altTextEditor =
+          root->findChild<QQuickItem *>(QStringLiteral("textEditor"));
+      const bool altEditorOpened = altTextEditor && altTextEditor->isVisible();
+      const int beforeAltAnnotations = controller.annotations().size();
+      QKeyEvent altText(QEvent::KeyPress, Qt::Key_H, Qt::NoModifier,
+                        QStringLiteral("ALT"));
+      QCoreApplication::sendEvent(views[0].get(), &altText);
+      QKeyEvent altFromEditor(QEvent::KeyPress, Qt::Key_Alt, Qt::AltModifier);
+      QCoreApplication::sendEvent(views[0].get(), &altFromEditor);
+      const bool altFromEditorWorked =
+          altEditorOpened && !altTextEditor->isVisible() &&
+          controller.tool() == QStringLiteral("pen") &&
+          controller.annotations().size() == beforeAltAnnotations + 1 &&
+          controller.annotations()
+                  .last()
+                  .toMap()
+                  .value(QStringLiteral("text"))
+                  .toString() == QStringLiteral("ALT");
+      controller.setTool(QStringLiteral("text"));
+      QKeyEvent altFromTool(QEvent::KeyPress, Qt::Key_Alt, Qt::AltModifier);
+      QCoreApplication::sendEvent(views[0].get(), &altFromTool);
+      const bool altFromToolWorked =
+          controller.tool() == QStringLiteral("pen") &&
+          controller.annotations().size() == beforeAltAnnotations + 1;
 
       // Replace wl-copy only for this event test so the user's clipboard stays intact.
       QTemporaryDir clipboardTest;
@@ -1093,6 +1132,8 @@ int main(int argc, char **argv) {
                           << ", redo X: " << redoShortcutWorked
                           << ", escape closes: " << escapeCloses
                           << ", hover text: " << hoverDescriptionWorked
+                          << ", text Alt: " << altFromEditorWorked
+                          << ", tool Alt: " << altFromToolWorked
                           << ", drag: " << dragPreviewWorked
                           << ", export changed: " << mosaicExportChanged
                           << ", rectangle shape: " << rectangleShapeWorked
@@ -1125,6 +1166,7 @@ int main(int argc, char **argv) {
                        handlesHiddenForMosaic && handleResizeWorked &&
                        arrowResizeWorked && repeatingArrowResizeWorked &&
                        leftHandHotkeysWorked && hoverDescriptionWorked &&
+                       altFromEditorWorked && altFromToolWorked &&
                        dragPreviewWorked && mosaicExportChanged &&
                        rectangleShapeWorked && mosaicPixelsVisible &&
                        mosaicMaskTransparent && dragBorderPixelsVisible &&

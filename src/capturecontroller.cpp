@@ -374,8 +374,15 @@ void CaptureController::setTool(const QString &tool) {
   }
   if (m_tool == tool)
     return;
+  if (tool == QStringLiteral("text"))
+    m_toolBeforeText = m_tool;
   m_tool = tool;
   emit toolChanged();
+}
+
+void CaptureController::restoreToolBeforeText() {
+  if (m_tool == QStringLiteral("text"))
+    setTool(m_toolBeforeText);
 }
 
 void CaptureController::activateToolGroup(const QString &group) {
