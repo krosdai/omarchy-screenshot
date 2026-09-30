@@ -204,14 +204,11 @@ Item {
                  (event.modifiers & Qt.ShiftModifier)) captureController.tool = "curvedarrow"
         else if (captureController.selected && event.key === Qt.Key_D &&
                  (event.modifiers & Qt.ShiftModifier)) captureController.tool = "fillrect"
-        else if (captureController.selected && event.key === Qt.Key_G &&
-                 (event.modifiers & Qt.ShiftModifier)) captureController.tool = "mosaic"
         else if (captureController.selected && event.key === Qt.Key_B &&
                  (event.modifiers & Qt.ShiftModifier)) captureController.tool = "spotlight"
         else if (captureController.selected && event.key === Qt.Key_W &&
                  (event.modifiers & Qt.ShiftModifier)) captureController.tool = "doublearrow"
         else if (captureController.selected && event.key === Qt.Key_W) captureController.tool = "line"
-        else if (captureController.selected && event.key === Qt.Key_B) captureController.tool = "highlighter"
         else if (captureController.selected && event.key === Qt.Key_R) captureController.activateToolGroup("rect")
         else if (captureController.selected && event.key === Qt.Key_E) captureController.activateToolGroup("ellipse")
         else if (captureController.selected && event.key === Qt.Key_A) captureController.activateToolGroup("arrow")
@@ -219,6 +216,8 @@ Item {
         else if (captureController.selected && event.key === Qt.Key_T &&
                  event.modifiers === Qt.NoModifier) captureController.tool = "text"
         else if (captureController.selected && event.key === Qt.Key_G &&
+                 event.modifiers === Qt.NoModifier) captureController.tool = "mosaic"
+        else if (captureController.selected && event.key === Qt.Key_B &&
                  event.modifiers === Qt.NoModifier) captureController.tool = "marker"
         else return
         event.accepted = true
@@ -723,8 +722,8 @@ Item {
                     {key: "A", action: "arrow_group", hint: "箭头组：点击选择箭头、弯曲箭头、双向弯曲箭头或直线"},
                     {key: "D", action: "pen_group", hint: "画笔组：点击选择画笔或荧光笔"},
                     {key: "T", action: "text", hint: "文字：单击输入，Shift+Enter 换行"},
-                    {key: "⇧G", action: "mosaic", hint: "马赛克：拖动选择矩形区域"},
-                    {key: "G", action: "marker", hint: "编号标记：单击放置自动编号"},
+                    {key: "G", action: "mosaic", hint: "马赛克：拖动选择矩形区域"},
+                    {key: "B", action: "marker", hint: "编号标记：单击放置自动编号"},
                     {key: "Z", action: "undo", hint: "撤销：移除上一项标注"},
                     {key: "X", action: "redo", hint: "重做：恢复刚撤销的标注"},
                     {key: "C", action: "copy", hint: "复制：将截图复制到剪贴板"},

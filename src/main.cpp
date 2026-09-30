@@ -810,14 +810,14 @@ int main(int argc, char **argv) {
         const bool selectKeyWorked =
             controller.tool() == QStringLiteral("select") &&
             visibleHandleCount() == 8;
-        QKeyEvent mosaicKey(QEvent::KeyPress, Qt::Key_G, Qt::ShiftModifier,
+        QKeyEvent mosaicKey(QEvent::KeyPress, Qt::Key_G, Qt::NoModifier,
                             QStringLiteral("g"));
         QCoreApplication::sendEvent(views[0].get(), &mosaicKey);
         const bool mosaicKeyWorked =
             controller.tool() == QStringLiteral("mosaic") &&
             visibleHandleCount() == 0;
-        QKeyEvent markerKey(QEvent::KeyPress, Qt::Key_G, Qt::NoModifier,
-                            QStringLiteral("g"));
+        QKeyEvent markerKey(QEvent::KeyPress, Qt::Key_B, Qt::NoModifier,
+                            QStringLiteral("b"));
         QCoreApplication::sendEvent(views[0].get(), &markerKey);
         const bool markerKeyWorked =
             controller.tool() == QStringLiteral("marker") &&
