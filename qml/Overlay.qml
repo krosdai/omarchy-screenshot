@@ -299,7 +299,7 @@ Item {
         height: active ? Math.abs(mark.end.y - mark.start.y) : 0
         visible: active && width >= 2 && height >= 2
         color: "transparent"
-        border.color: "#ff4b55"
+        border.color: captureController.annotationColor
         border.width: 2
     }
 

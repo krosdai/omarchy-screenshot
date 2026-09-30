@@ -641,6 +641,7 @@ int main(int argc, char **argv) {
                 dragBorderPixelsVisible =
                     image.width() > 10 && image.height() > 10 &&
                     image.pixelColor(1, 1).alpha() > 0 &&
+                    image.pixelColor(1, 1).name() == selectedTestColor &&
                     image.pixelColor(image.width() / 2, image.height() / 2)
                             .alpha() == 0;
               });
