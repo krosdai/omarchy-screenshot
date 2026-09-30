@@ -52,64 +52,52 @@
             <translation>Маркер</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Ранг: ранги омодаро интихоб кунед ё рӯйи палитра кашед</translation>
+            <source>Color</source>
+            <translation>Ранг</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Интихоб: барои тағйир додани андоза дастакҳоро кашед; тугмаҳои тирча ба андозаи 1 px калон мекунанд, Shift+тугмаҳои тирча ба андозаи 1 px хурд мекунанд</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Интихоб · Тирчаҳо калон мекунанд, Shift+тирчаҳо хурд мекунанд (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Росткунҷаҳо: росткунҷаи контурӣ, кунҷҳояш мудаввар ё пуршударо интихоб кунед</translation>
+            <source>Text · Click to type</source>
+            <translation>Матн · Барои навиштан пахш кунед</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Эллипсҳо: эллипси контурӣ, эллипси пуршуда ё равшаннамоиро интихоб кунед</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Мозаика · Барои пинҳон кардан кашед</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Тирчаҳо: тирчаи рост, каҷ, дусара ё хатро интихоб кунед</translation>
+            <source>Number · Click to add</source>
+            <translation>Рақам · Барои илова кардан пахш кунед</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Расмкашӣ: қалам ё маркерро интихоб кунед</translation>
+            <source>Undo</source>
+            <translation>Бекор кардан</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Матн: барои навиштан пахш кунед, Shift+Enter барои сатри нав; Alt тасдиқ мекунад ва ба абзори пешина бармегардонад</translation>
+            <source>Redo</source>
+            <translation>Такрор кардан</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Мозаика: барои интихоби минтақаи росткунҷа кашед</translation>
+            <source>Copy screenshot</source>
+            <translation>Нусхабардории акси экран</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Нишонаи рақамдор: барои гузоштани рақами навбатӣ пахш кунед</translation>
+            <source>Save PNG</source>
+            <translation>Захираи PNG</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Бекор кардан: шарҳи охиринро нест кунед</translation>
+            <source>Light</source>
+            <translation>Равшан</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Такрор кардан: шарҳи бекоршударо барқарор кунед</translation>
+            <source>Dark</source>
+            <translation>Торик</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Нусхабардорӣ: акси экранро ба буфери мубодила нусхабардорӣ кунед</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Захира кардан: акси экранро ҳамчун PNG захира кунед</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>Навори абзорҳои равшан</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>Навори абзорҳои торик</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: тасдиқ · Shift+Enter: сатри нав · Alt: тасдиқ ва бозгашт ба абзори пешина</translation>
         </message>
     </context>
     <context>

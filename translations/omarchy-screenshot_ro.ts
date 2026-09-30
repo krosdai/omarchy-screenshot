@@ -52,64 +52,52 @@
             <translation>Marker</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Culoare: alegeți o culoare predefinită sau trageți pe paletă</translation>
+            <source>Color</source>
+            <translation>Culoare</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Selecție: trageți mânerele pentru redimensionare; tastele săgeți măresc cu 1 px, Shift+tastele săgeți micșorează cu 1 px</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Selecție · Săgețile măresc, Shift+săgeți micșorează (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Dreptunghiuri: alegeți un dreptunghi cu contur, rotunjit sau umplut</translation>
+            <source>Text · Click to type</source>
+            <translation>Text · Clic pentru a scrie</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Elipse: alegeți o elipsă cu contur, o elipsă umplută sau evidențierea</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mozaic · Trageți pentru a ascunde conținutul</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Săgeți: alegeți o săgeată dreaptă, curbată, cu două capete sau o linie</translation>
+            <source>Number · Click to add</source>
+            <translation>Număr · Clic pentru a adăuga</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Desen: alegeți un stilou sau un marker</translation>
+            <source>Undo</source>
+            <translation>Anulare</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Text: faceți clic pentru a scrie, Shift+Enter pentru un rând nou; Alt confirmă și revine la instrumentul anterior</translation>
+            <source>Redo</source>
+            <translation>Refacere</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mozaic: trageți pentru a selecta o zonă dreptunghiulară</translation>
+            <source>Copy screenshot</source>
+            <translation>Copiați captura de ecran</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Marcaj numerotat: faceți clic pentru a plasa următorul număr</translation>
+            <source>Save PNG</source>
+            <translation>Salvați PNG</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Anulare: eliminați ultima adnotare</translation>
+            <source>Light</source>
+            <translation>Deschis</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Refacere: restabiliți adnotarea anulată</translation>
+            <source>Dark</source>
+            <translation>Închis</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Copiere: copiați captura de ecran în clipboard</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Salvare: salvați captura de ecran ca PNG</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>Bară de instrumente deschisă la culoare</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>Bară de instrumente închisă la culoare</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: confirmare · Shift+Enter: rând nou · Alt: confirmare și revenire la instrumentul anterior</translation>
         </message>
     </context>
     <context>

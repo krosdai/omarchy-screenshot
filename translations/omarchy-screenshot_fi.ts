@@ -52,64 +52,52 @@
             <translation>Korostuskynä</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Väri: valitse valmis väri tai vedä paletilla</translation>
+            <source>Color</source>
+            <translation>Väri</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Valinta: muuta kokoa vetämällä kahvoista; nuolinäppäimet suurentavat 1 px, Shift+nuolinäppäimet pienentävät 1 px</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Valinta · Nuolinäppäimet suurentavat, Shift+nuolinäppäimet pienentävät (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Suorakulmiot: valitse ääriviivallinen, pyöristetty tai täytetty suorakulmio</translation>
+            <source>Text · Click to type</source>
+            <translation>Teksti · Kirjoita napsauttamalla</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Ellipsit: valitse ääriviivallinen ellipsi, täytetty ellipsi tai kohdevalo</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mosaiikki · Peitä sisältöä vetämällä</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Nuolet: valitse suora, kaareva tai kaksipäinen nuoli tai viiva</translation>
+            <source>Number · Click to add</source>
+            <translation>Numero · Lisää napsauttamalla</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Piirtäminen: valitse kynä tai korostuskynä</translation>
+            <source>Undo</source>
+            <translation>Kumoa</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Teksti: kirjoita napsauttamalla, uusi rivi näppäimillä Shift+Enter; Alt vahvistaa ja palaa edelliseen työkaluun</translation>
+            <source>Redo</source>
+            <translation>Tee uudelleen</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mosaiikki: valitse suorakulmainen alue vetämällä</translation>
+            <source>Copy screenshot</source>
+            <translation>Kopioi kuvakaappaus</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Numeromerkki: sijoita seuraava numero napsauttamalla</translation>
+            <source>Save PNG</source>
+            <translation>Tallenna PNG</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Kumoa: poista viimeisin merkintä</translation>
+            <source>Light</source>
+            <translation>Vaalea</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Tee uudelleen: palauta kumottu merkintä</translation>
+            <source>Dark</source>
+            <translation>Tumma</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Kopioi: kopioi kuvakaappaus leikepöydälle</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Tallenna: tallenna kuvakaappaus PNG-muodossa</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>Vaalea työkalupalkki</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>Tumma työkalupalkki</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: vahvista · Shift+Enter: uusi rivi · Alt: vahvista ja palaa edelliseen työkaluun</translation>
         </message>
     </context>
     <context>

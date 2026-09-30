@@ -52,64 +52,52 @@
             <translation>Označevalnik</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Barva: izberite prednastavljeno barvo ali povlecite po paleti</translation>
+            <source>Color</source>
+            <translation>Barva</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Izbor: povlecite ročice za spreminjanje velikosti; smerne tipke povečajo za 1 px, Shift+smerne tipke zmanjšajo za 1 px</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Izbor · Smerne tipke povečajo, Shift+smerne tipke zmanjšajo (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Pravokotniki: izberite obrisni, zaobljeni ali zapolnjeni pravokotnik</translation>
+            <source>Text · Click to type</source>
+            <translation>Besedilo · Kliknite za vnos</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Elipse: izberite obrisno elipso, zapolnjeno elipso ali poudarjanje</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mozaik · Povlecite za skrivanje vsebine</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Puščice: izberite ravno, ukrivljeno, dvosmerno puščico ali črto</translation>
+            <source>Number · Click to add</source>
+            <translation>Številka · Kliknite za dodajanje</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Risanje: izberite pisalo ali označevalnik</translation>
+            <source>Undo</source>
+            <translation>Razveljavi</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Besedilo: kliknite za vnos, Shift+Enter za novo vrstico; Alt potrdi in vrne na prejšnje orodje</translation>
+            <source>Redo</source>
+            <translation>Uveljavi</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mozaik: povlecite za izbor pravokotnega območja</translation>
+            <source>Copy screenshot</source>
+            <translation>Kopiraj posnetek zaslona</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Oštevilčena oznaka: kliknite za postavitev naslednje številke</translation>
+            <source>Save PNG</source>
+            <translation>Shrani PNG</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Razveljavi: odstranite zadnjo opombo</translation>
+            <source>Light</source>
+            <translation>Svetlo</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Uveljavi: obnovite razveljavljeno opombo</translation>
+            <source>Dark</source>
+            <translation>Temno</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Kopiraj: kopirajte posnetek zaslona v odložišče</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Shrani: shranite posnetek zaslona kot PNG</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>Svetla orodna vrstica</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>Temna orodna vrstica</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: potrdi · Shift+Enter: nova vrstica · Alt: potrdi in se vrni na prejšnje orodje</translation>
         </message>
     </context>
     <context>

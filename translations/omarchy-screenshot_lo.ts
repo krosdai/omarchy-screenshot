@@ -52,64 +52,52 @@
             <translation>ປາກກາເນັ້ນຂໍ້ຄວາມ</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>ສີ: ເລືອກສີທີ່ກຳນົດໄວ້ ຫຼື ລາກເທິງແຖບສີ</translation>
+            <source>Color</source>
+            <translation>ສີ</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>ການເລືອກ: ລາກຈຸດຈັບເພື່ອປັບຂະໜາດ; ປຸ່ມລູກສອນຂະຫຍາຍ 1 px, Shift+ປຸ່ມລູກສອນຫຍໍ້ 1 px</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>ການເລືອກ · ປຸ່ມລູກສອນຂະຫຍາຍ, Shift+ລູກສອນຫຍໍ້ (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>ສີ່ແຈສາກ: ເລືອກສີ່ແຈສາກແບບຂອບ, ມຸມມົນ ຫຼື ເຕີມສີ</translation>
+            <source>Text · Click to type</source>
+            <translation>ຂໍ້ຄວາມ · ຄລິກເພື່ອພິມ</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>ວົງລີ: ເລືອກວົງລີແບບຂອບ, ວົງລີເຕີມສີ ຫຼື ເນັ້ນຈຸດ</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>ໂມເຊກ · ລາກເພື່ອປິດບັງ</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>ລູກສອນ: ເລືອກລູກສອນຊື່, ໂຄ້ງ, ສອງຫົວ ຫຼື ເສັ້ນ</translation>
+            <source>Number · Click to add</source>
+            <translation>ຕົວເລກ · ຄລິກເພື່ອເພີ່ມ</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>ການແຕ້ມ: ເລືອກປາກກາ ຫຼື ປາກກາເນັ້ນຂໍ້ຄວາມ</translation>
+            <source>Undo</source>
+            <translation>ຍົກເລີກ</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>ຂໍ້ຄວາມ: ຄລິກເພື່ອພິມ, Shift+Enter ເພື່ອຂຶ້ນແຖວໃໝ່; Alt ຢືນຢັນແລະກັບໄປຫາເຄື່ອງມືກ່ອນໜ້າ</translation>
+            <source>Redo</source>
+            <translation>ເຮັດຄືນ</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>ໂມເຊກ: ລາກເພື່ອເລືອກພື້ນທີ່ສີ່ແຈສາກ</translation>
+            <source>Copy screenshot</source>
+            <translation>ສຳເນົາຮູບໜ້າຈໍ</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>ເຄື່ອງໝາຍຕົວເລກ: ຄລິກເພື່ອວາງຕົວເລກຖັດໄປ</translation>
+            <source>Save PNG</source>
+            <translation>ບັນທຶກ PNG</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>ຍົກເລີກ: ລຶບຄຳອະທິບາຍປະກອບລ່າສຸດ</translation>
+            <source>Light</source>
+            <translation>ສີອ່ອນ</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>ເຮັດຄືນ: ກູ້ຄືນຄຳອະທິບາຍປະກອບທີ່ຍົກເລີກ</translation>
+            <source>Dark</source>
+            <translation>ສີເຂັ້ມ</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>ສຳເນົາ: ສຳເນົາຮູບໜ້າຈໍໄປໃສ່ຄລິບບອດ</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>ບັນທຶກ: ບັນທຶກຮູບໜ້າຈໍເປັນ PNG</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>ແຖບເຄື່ອງມືສີອ່ອນ</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>ແຖບເຄື່ອງມືສີເຂັ້ມ</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: ຢືນຢັນ · Shift+Enter: ແຖວໃໝ່ · Alt: ຢືນຢັນແລະກັບໄປເຄື່ອງມືກ່ອນໜ້າ</translation>
         </message>
     </context>
     <context>

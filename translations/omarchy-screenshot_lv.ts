@@ -52,64 +52,52 @@
             <translation>Marķieris</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Krāsa: izvēlieties iepriekš iestatītu krāsu vai velciet pa paleti</translation>
+            <source>Color</source>
+            <translation>Krāsa</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Atlase: velciet rokturus, lai mainītu izmēru; bulttaustiņi palielina par 1 px, Shift+bulttaustiņi samazina par 1 px</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Atlase · Bulttaustiņi palielina, Shift+bulttaustiņi samazina (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Taisnstūri: izvēlieties kontūras, noapaļotu vai aizpildītu taisnstūri</translation>
+            <source>Text · Click to type</source>
+            <translation>Teksts · Noklikšķiniet, lai rakstītu</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Elipses: izvēlieties kontūras elipsi, aizpildītu elipsi vai izcelšanu</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mozaīka · Velciet, lai paslēptu saturu</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Bultas: izvēlieties taisnu, liektu, divvirzienu bultu vai līniju</translation>
+            <source>Number · Click to add</source>
+            <translation>Numurs · Noklikšķiniet, lai pievienotu</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Zīmēšana: izvēlieties pildspalvu vai marķieri</translation>
+            <source>Undo</source>
+            <translation>Atsaukt</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Teksts: noklikšķiniet, lai rakstītu, Shift+Enter jaunai rindai; Alt apstiprina un atgriežas pie iepriekšējā rīka</translation>
+            <source>Redo</source>
+            <translation>Atatsaukt</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mozaīka: velciet, lai atlasītu taisnstūra apgabalu</translation>
+            <source>Copy screenshot</source>
+            <translation>Kopēt ekrānuzņēmumu</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Numurēta atzīme: noklikšķiniet, lai ievietotu nākamo numuru</translation>
+            <source>Save PNG</source>
+            <translation>Saglabāt PNG</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Atsaukt: noņemt pēdējo anotāciju</translation>
+            <source>Light</source>
+            <translation>Gaišs</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Atatsaukt: atjaunot atsaukto anotāciju</translation>
+            <source>Dark</source>
+            <translation>Tumšs</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Kopēt: kopēt ekrānuzņēmumu starpliktuvē</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Saglabāt: saglabāt ekrānuzņēmumu PNG formātā</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>Gaiša rīkjosla</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>Tumša rīkjosla</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: apstiprināt · Shift+Enter: jauna rinda · Alt: apstiprināt un atgriezties pie iepriekšējā rīka</translation>
         </message>
     </context>
     <context>

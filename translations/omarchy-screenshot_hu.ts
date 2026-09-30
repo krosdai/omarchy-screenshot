@@ -52,64 +52,52 @@
             <translation>Szövegkiemelő</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Szín: válasszon egy előre beállított színt, vagy húzza az egeret a palettán</translation>
+            <source>Color</source>
+            <translation>Szín</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Kijelölés: húzza a fogantyúkat az átméretezéshez; a nyílbillentyűk 1 px mérettel növelik, a Shift+nyílbillentyűk 1 px mérettel csökkentik</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Kijelölés · A nyílbillentyűk növelik, a Shift+nyílbillentyűk csökkentik (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Téglalapok: válasszon körvonalas, lekerekített vagy kitöltött téglalapot</translation>
+            <source>Text · Click to type</source>
+            <translation>Szöveg · Kattintson a gépeléshez</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Ellipszisek: válasszon körvonalas ellipszist, kitöltött ellipszist vagy kiemelt területet</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mozaik · Húzással takarja ki a tartalmat</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Nyilak: válasszon egyenes, ívelt, kétvégű nyilat vagy vonalat</translation>
+            <source>Number · Click to add</source>
+            <translation>Szám · Kattintson a hozzáadáshoz</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Rajzolás: válasszon tollat vagy szövegkiemelőt</translation>
+            <source>Undo</source>
+            <translation>Visszavonás</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Szöveg: kattintson a gépeléshez, Shift+Enter az új sorhoz; az Alt megerősíti a bevitelt és visszatér az előző eszközhöz</translation>
+            <source>Redo</source>
+            <translation>Újra</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mozaik: húzással jelöljön ki egy téglalap alakú területet</translation>
+            <source>Copy screenshot</source>
+            <translation>Képernyőkép másolása</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Számozott jelölő: kattintson a következő szám elhelyezéséhez</translation>
+            <source>Save PNG</source>
+            <translation>PNG mentése</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Visszavonás: az utolsó megjegyzés eltávolítása</translation>
+            <source>Light</source>
+            <translation>Világos</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Újra: a visszavont megjegyzés visszaállítása</translation>
+            <source>Dark</source>
+            <translation>Sötét</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Másolás: a képernyőkép másolása a vágólapra</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Mentés: a képernyőkép mentése PNG-ként</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>Világos eszköztár</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>Sötét eszköztár</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: megerősítés · Shift+Enter: új sor · Alt: megerősítés és visszatérés az előző eszközhöz</translation>
         </message>
     </context>
     <context>

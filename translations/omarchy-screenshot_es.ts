@@ -52,64 +52,52 @@
             <translation>Resaltador</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Color: elija un color predefinido o arrastre sobre la paleta</translation>
+            <source>Color</source>
+            <translation>Color</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Selección: arrastre los tiradores para cambiar el tamaño; las teclas de flecha amplían 1 px, Shift+teclas de flecha reducen 1 px</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Selección · Las flechas amplían, Shift+flechas reducen (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Rectángulos: elija un rectángulo con contorno, redondeado o relleno</translation>
+            <source>Text · Click to type</source>
+            <translation>Texto · Haga clic para escribir</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Elipses: elija una elipse con contorno, una elipse rellena o un foco</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mosaico · Arrastre para ocultar contenido</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Flechas: elija una flecha recta, curva, de doble punta o una línea</translation>
+            <source>Number · Click to add</source>
+            <translation>Número · Haga clic para añadir</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Dibujo: elija un lápiz o un resaltador</translation>
+            <source>Undo</source>
+            <translation>Deshacer</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Texto: haga clic para escribir, Shift+Enter para una nueva línea; Alt confirma y vuelve a la herramienta anterior</translation>
+            <source>Redo</source>
+            <translation>Rehacer</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mosaico: arrastre para seleccionar un área rectangular</translation>
+            <source>Copy screenshot</source>
+            <translation>Copiar captura de pantalla</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Marcador numerado: haga clic para colocar el siguiente número</translation>
+            <source>Save PNG</source>
+            <translation>Guardar PNG</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Deshacer: elimine la última anotación</translation>
+            <source>Light</source>
+            <translation>Claro</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Rehacer: restaure la anotación deshecha</translation>
+            <source>Dark</source>
+            <translation>Oscuro</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Copiar: copie la captura de pantalla al portapapeles</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Guardar: guarde la captura de pantalla como PNG</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>Barra de herramientas clara</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>Barra de herramientas oscura</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: confirmar · Shift+Enter: nueva línea · Alt: confirmar y volver a la herramienta anterior</translation>
         </message>
     </context>
     <context>

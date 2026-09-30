@@ -52,64 +52,52 @@
             <translation>Μαρκαδόρος επισήμανσης</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Χρώμα: επιλέξτε ένα προκαθορισμένο χρώμα ή σύρετε στην παλέτα</translation>
+            <source>Color</source>
+            <translation>Χρώμα</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Επιλογή: σύρετε τις λαβές για αλλαγή μεγέθους· τα πλήκτρα βέλους επεκτείνουν κατά 1 px, Shift+πλήκτρα βέλους συρρικνώνουν κατά 1 px</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Επιλογή · Τα βέλη επεκτείνουν, Shift+βέλη συρρικνώνουν (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Ορθογώνια: επιλέξτε ορθογώνιο με περίγραμμα, στρογγυλεμένο ή γεμάτο</translation>
+            <source>Text · Click to type</source>
+            <translation>Κείμενο · Κλικ για πληκτρολόγηση</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Ελλείψεις: επιλέξτε έλλειψη με περίγραμμα, γεμάτη έλλειψη ή εστίαση</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Μωσαϊκό · Σύρετε για απόκρυψη</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Βέλη: επιλέξτε ευθύ, καμπύλο βέλος, βέλος διπλής κατεύθυνσης ή γραμμή</translation>
+            <source>Number · Click to add</source>
+            <translation>Αριθμός · Κλικ για προσθήκη</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Σχεδίαση: επιλέξτε πένα ή μαρκαδόρο επισήμανσης</translation>
+            <source>Undo</source>
+            <translation>Αναίρεση</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Κείμενο: κάντε κλικ για πληκτρολόγηση, Shift+Enter για νέα γραμμή· το Alt επιβεβαιώνει και επιστρέφει στο προηγούμενο εργαλείο</translation>
+            <source>Redo</source>
+            <translation>Επανάληψη</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Μωσαϊκό: σύρετε για να επιλέξετε μια ορθογώνια περιοχή</translation>
+            <source>Copy screenshot</source>
+            <translation>Αντιγραφή στιγμιότυπου</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Αριθμημένος δείκτης: κάντε κλικ για να τοποθετήσετε τον επόμενο αριθμό</translation>
+            <source>Save PNG</source>
+            <translation>Αποθήκευση PNG</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Αναίρεση: αφαιρέστε την τελευταία σημείωση</translation>
+            <source>Light</source>
+            <translation>Φωτεινό</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Επανάληψη: επαναφέρετε τη σημείωση που αναιρέθηκε</translation>
+            <source>Dark</source>
+            <translation>Σκοτεινό</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Αντιγραφή: αντιγράψτε το στιγμιότυπο στο πρόχειρο</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Αποθήκευση: αποθηκεύστε το στιγμιότυπο ως PNG</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>Φωτεινή γραμμή εργαλείων</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>Σκοτεινή γραμμή εργαλείων</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: επιβεβαίωση · Shift+Enter: νέα γραμμή · Alt: επιβεβαίωση και επιστροφή στο προηγούμενο εργαλείο</translation>
         </message>
     </context>
     <context>

@@ -752,7 +752,7 @@ Item {
                     id: colorButtonMouse
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered: root.showToolbarTooltip(qsTr("Color: choose a preset or drag the palette"), colorButtonMouse)
+                    onEntered: root.showToolbarTooltip(qsTr("Color"), colorButtonMouse)
                     onExited: root.hideToolbarTooltip()
                     onClicked: {
                         root.hideToolbarTooltip()
@@ -766,18 +766,18 @@ Item {
             Repeater {
                 id: toolbarRepeater
                 model: [
-                    {key: "V", action: "select", hint: qsTr("Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px")},
-                    {key: "R", action: "rect_group", hint: qsTr("Rectangles: choose an outline, rounded or filled rectangle")},
-                    {key: "E", action: "ellipse_group", hint: qsTr("Ellipses: choose an outline, filled ellipse or spotlight")},
-                    {key: "A", action: "arrow_group", hint: qsTr("Arrows: choose a straight, curved, double-headed arrow or line")},
-                    {key: "D", action: "pen_group", hint: qsTr("Drawing: choose a pen or highlighter")},
-                    {key: "T", action: "text", hint: qsTr("Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool")},
-                    {key: "G", action: "mosaic", hint: qsTr("Mosaic: drag to select a rectangular area")},
-                    {key: "B", action: "marker", hint: qsTr("Numbered marker: click to place the next number")},
-                    {key: "Z", action: "undo", hint: qsTr("Undo: remove the last annotation")},
-                    {key: "X", action: "redo", hint: qsTr("Redo: restore the undone annotation")},
-                    {key: "C", action: "copy", hint: qsTr("Copy: copy the screenshot to the clipboard")},
-                    {key: "S", action: "save", hint: qsTr("Save: save the screenshot as PNG")}
+                    {key: "V", action: "select", hint: qsTr("Selection · Arrow keys expand, Shift+arrows shrink (1 px)")},
+                    {key: "R", action: "rect_group", hint: qsTr("Rectangle")},
+                    {key: "E", action: "ellipse_group", hint: qsTr("Ellipse")},
+                    {key: "A", action: "arrow_group", hint: qsTr("Arrow")},
+                    {key: "D", action: "pen_group", hint: qsTr("Pen")},
+                    {key: "T", action: "text", hint: qsTr("Text · Click to type")},
+                    {key: "G", action: "mosaic", hint: qsTr("Mosaic · Drag to redact")},
+                    {key: "B", action: "marker", hint: qsTr("Number · Click to add")},
+                    {key: "Z", action: "undo", hint: qsTr("Undo")},
+                    {key: "X", action: "redo", hint: qsTr("Redo")},
+                    {key: "C", action: "copy", hint: qsTr("Copy screenshot")},
+                    {key: "S", action: "save", hint: qsTr("Save PNG")}
                 ]
                 delegate: Rectangle {
                     required property var modelData
@@ -993,8 +993,8 @@ Item {
                     Repeater {
                         id: themeRepeater
                         model: [
-                            {action: "theme_light", dark: false, hint: qsTr("Light toolbar")},
-                            {action: "theme_dark", dark: true, hint: qsTr("Dark toolbar")}
+                            {action: "theme_light", dark: false, hint: qsTr("Light")},
+                            {action: "theme_dark", dark: true, hint: qsTr("Dark")}
                         ]
                         delegate: Rectangle {
                             required property var modelData
@@ -1173,15 +1173,17 @@ Item {
     Rectangle {
         id: toolbarTooltip
         objectName: "toolbarTooltip"
-        visible: root.toolbarTooltipVisible && toolbar.visible
+        visible: (root.toolbarTooltipVisible || editor.visible) && toolbar.visible
         z: 30
         width: Math.min(tooltipLabel.implicitWidth + 20, root.width - 16)
         height: tooltipLabel.implicitHeight + 12
-        x: Math.max(8, Math.min(root.toolbarTooltipX - width / 2,
+        readonly property real anchorX: editor.visible ? editor.x + editor.width / 2 : root.toolbarTooltipX
+        readonly property real anchorY: editor.visible ? editor.y : root.toolbarTooltipY
+        x: Math.max(8, Math.min(anchorX - width / 2,
                                 root.width - width - 8))
-        y: root.toolbarTooltipY - height - 8 >= 8
-           ? root.toolbarTooltipY - height - 8
-           : root.toolbarTooltipY + 40
+        y: anchorY - height - 8 >= 8
+           ? anchorY - height - 8
+           : anchorY + (editor.visible ? editor.height + 8 : 40)
         radius: 5
         color: "#f0202734"
         border.color: "#748090"
@@ -1190,7 +1192,9 @@ Item {
             objectName: "tooltipLabel"
             anchors.centerIn: parent
             width: parent.width - 20
-            text: root.toolbarTooltipText
+            text: editor.visible
+                  ? qsTr("Enter: confirm · Shift+Enter: new line · Alt: confirm & return to previous tool")
+                  : root.toolbarTooltipText
             textFormat: Text.PlainText
             wrapMode: Text.Wrap
             horizontalAlignment: Qt.application.layoutDirection === Qt.RightToLeft

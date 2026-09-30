@@ -52,64 +52,52 @@
             <translation>მარკერი</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>ფერი: აირჩიეთ მზა ფერი ან გადაათრიეთ პალიტრაზე</translation>
+            <source>Color</source>
+            <translation>ფერი</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>მონიშვნა: ზომის შესაცვლელად გადაათრიეთ სახელურები; ისრის ღილაკები ზრდის 1 px-ით, Shift+ისრის ღილაკები ამცირებს 1 px-ით</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>მონიშვნა · ისრები ზრდის, Shift+ისრები ამცირებს (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>მართკუთხედები: აირჩიეთ კონტურული, მომრგვალებული ან შევსებული მართკუთხედი</translation>
+            <source>Text · Click to type</source>
+            <translation>ტექსტი · დასაწერად დააწკაპუნეთ</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>ელიფსები: აირჩიეთ კონტურული ელიფსი, შევსებული ელიფსი ან გამოყოფა</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>მოზაიკა · დასაფარად გადაათრიეთ</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>ისრები: აირჩიეთ სწორი, მოხრილი, ორთავიანი ისარი ან ხაზი</translation>
+            <source>Number · Click to add</source>
+            <translation>ნომერი · დასამატებლად დააწკაპუნეთ</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>ხატვა: აირჩიეთ კალამი ან მარკერი</translation>
+            <source>Undo</source>
+            <translation>გაუქმება</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>ტექსტი: დასაწერად დააწკაპუნეთ, ახალი ხაზისთვის გამოიყენეთ Shift+Enter; Alt ადასტურებს და წინა ხელსაწყოზე გაბრუნებთ</translation>
+            <source>Redo</source>
+            <translation>გამეორება</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>მოზაიკა: მართკუთხა არეალის მოსანიშნად გადაათრიეთ</translation>
+            <source>Copy screenshot</source>
+            <translation>ეკრანის სურათის კოპირება</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>დანომრილი ნიშნული: შემდეგი ნომრის დასასმელად დააწკაპუნეთ</translation>
+            <source>Save PNG</source>
+            <translation>PNG-ად შენახვა</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>გაუქმება: წაშალეთ ბოლო ანოტაცია</translation>
+            <source>Light</source>
+            <translation>ღია</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>გამეორება: აღადგინეთ გაუქმებული ანოტაცია</translation>
+            <source>Dark</source>
+            <translation>მუქი</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>კოპირება: დააკოპირეთ ეკრანის სურათი ბუფერში</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>შენახვა: შეინახეთ ეკრანის სურათი PNG ფორმატში</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>ღია ხელსაწყოთა ზოლი</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>მუქი ხელსაწყოთა ზოლი</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: დადასტურება · Shift+Enter: ახალი ხაზი · Alt: დადასტურება და წინა ხელსაწყოზე დაბრუნება</translation>
         </message>
     </context>
     <context>

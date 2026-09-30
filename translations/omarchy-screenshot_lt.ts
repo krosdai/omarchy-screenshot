@@ -52,64 +52,52 @@
             <translation>Žymeklis</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Spalva: pasirinkite iš anksto nustatytą spalvą arba vilkite paletėje</translation>
+            <source>Color</source>
+            <translation>Spalva</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Pasirinkimas: vilkite rankenėles dydžiui keisti; rodyklių klavišai padidina 1 px, Shift+rodyklių klavišai sumažina 1 px</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Pasirinkimas · Rodyklių klavišai didina, Shift+rodyklės mažina (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Stačiakampiai: pasirinkite kontūrinį, suapvalintą arba užpildytą stačiakampį</translation>
+            <source>Text · Click to type</source>
+            <translation>Tekstas · Spustelėkite ir rašykite</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Elipsės: pasirinkite kontūrinę elipsę, užpildytą elipsę arba išryškinimą</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mozaika · Vilkite turiniui paslėpti</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Rodyklės: pasirinkite tiesią, lenktą, dvikryptę rodyklę arba liniją</translation>
+            <source>Number · Click to add</source>
+            <translation>Numeris · Spustelėkite ir pridėkite</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Piešimas: pasirinkite rašiklį arba žymeklį</translation>
+            <source>Undo</source>
+            <translation>Atšaukti</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Tekstas: spustelėkite norėdami rašyti, Shift+Enter naujai eilutei; Alt patvirtina ir grąžina į ankstesnį įrankį</translation>
+            <source>Redo</source>
+            <translation>Grąžinti</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mozaika: vilkite norėdami pasirinkti stačiakampę sritį</translation>
+            <source>Copy screenshot</source>
+            <translation>Kopijuoti ekrano kopiją</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Numeruota žyma: spustelėkite norėdami įterpti kitą numerį</translation>
+            <source>Save PNG</source>
+            <translation>Įrašyti PNG</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Atšaukti: pašalinti paskutinę anotaciją</translation>
+            <source>Light</source>
+            <translation>Šviesi</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Grąžinti: atkurti atšauktą anotaciją</translation>
+            <source>Dark</source>
+            <translation>Tamsi</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Kopijuoti: kopijuoti ekrano kopiją į iškarpinę</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Įrašyti: įrašyti ekrano kopiją PNG formatu</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>Šviesi įrankių juosta</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>Tamsi įrankių juosta</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: patvirtinti · Shift+Enter: nauja eilutė · Alt: patvirtinti ir grįžti prie ankstesnio įrankio</translation>
         </message>
     </context>
     <context>

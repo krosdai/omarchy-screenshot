@@ -52,64 +52,52 @@
             <translation>Överstrykningspenna</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Färg: välj en förinställd färg eller dra på paletten</translation>
+            <source>Color</source>
+            <translation>Färg</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Markering: dra i handtagen för att ändra storlek; piltangenterna utökar med 1 px, Shift+piltangenterna minskar med 1 px</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Markering · Piltangenter utökar, Shift+piltangenter minskar (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Rektanglar: välj en rektangel med kontur, rundade hörn eller fyllning</translation>
+            <source>Text · Click to type</source>
+            <translation>Text · Klicka för att skriva</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Ellipser: välj en ellips med kontur, en fylld ellips eller en strålkastare</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mosaik · Dra för att dölja innehåll</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Pilar: välj en rak pil, en böjd pil, en pil med två spetsar eller en linje</translation>
+            <source>Number · Click to add</source>
+            <translation>Nummer · Klicka för att lägga till</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Rita: välj en penna eller överstrykningspenna</translation>
+            <source>Undo</source>
+            <translation>Ångra</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Text: klicka för att skriva, Shift+Enter för en ny rad; Alt bekräftar och återgår till föregående verktyg</translation>
+            <source>Redo</source>
+            <translation>Gör om</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mosaik: dra för att välja ett rektangulärt område</translation>
+            <source>Copy screenshot</source>
+            <translation>Kopiera skärmbild</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Numrerad markör: klicka för att placera nästa nummer</translation>
+            <source>Save PNG</source>
+            <translation>Spara PNG</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Ångra: ta bort den senaste anteckningen</translation>
+            <source>Light</source>
+            <translation>Ljus</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Gör om: återställ den ångrade anteckningen</translation>
+            <source>Dark</source>
+            <translation>Mörk</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Kopiera: kopiera skärmbilden till urklipp</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Spara: spara skärmbilden som PNG</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>Ljus verktygsrad</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>Mörk verktygsrad</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: bekräfta · Shift+Enter: ny rad · Alt: bekräfta och återgå till föregående verktyg</translation>
         </message>
     </context>
     <context>

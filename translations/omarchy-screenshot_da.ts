@@ -52,64 +52,52 @@
             <translation>Overstregningspen</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Farve: vælg en forudindstillet farve, eller træk på paletten</translation>
+            <source>Color</source>
+            <translation>Farve</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Markering: træk i håndtagene for at ændre størrelsen; piletaster udvider med 1 px, Shift+piletaster formindsker med 1 px</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Markering · Piletaster udvider, Shift+piletaster formindsker (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Rektangler: vælg et rektangel med kontur, afrundede hjørner eller udfyldning</translation>
+            <source>Text · Click to type</source>
+            <translation>Tekst · Klik for at skrive</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Ellipser: vælg en ellipse med kontur, en udfyldt ellipse eller fremhævning</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mosaik · Træk for at skjule indhold</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Pile: vælg en lige pil, en buet pil, en pil med to spidser eller en linje</translation>
+            <source>Number · Click to add</source>
+            <translation>Nummer · Klik for at tilføje</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Tegning: vælg en pen eller overstregningspen</translation>
+            <source>Undo</source>
+            <translation>Fortryd</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Tekst: klik for at skrive, Shift+Enter for en ny linje; Alt bekræfter og vender tilbage til det forrige værktøj</translation>
+            <source>Redo</source>
+            <translation>Annuller fortryd</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mosaik: træk for at vælge et rektangulært område</translation>
+            <source>Copy screenshot</source>
+            <translation>Kopiér skærmbillede</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Nummereret markør: klik for at placere det næste nummer</translation>
+            <source>Save PNG</source>
+            <translation>Gem PNG</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Fortryd: fjern den seneste annotering</translation>
+            <source>Light</source>
+            <translation>Lys</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Annuller fortryd: gendan den fortrudte annotering</translation>
+            <source>Dark</source>
+            <translation>Mørk</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Kopiér: kopiér skærmbilledet til udklipsholderen</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Gem: gem skærmbilledet som PNG</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>Lys værktøjslinje</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>Mørk værktøjslinje</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: bekræft · Shift+Enter: ny linje · Alt: bekræft og vend tilbage til forrige værktøj</translation>
         </message>
     </context>
     <context>

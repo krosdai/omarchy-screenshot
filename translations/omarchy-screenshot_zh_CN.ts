@@ -52,64 +52,52 @@
             <translation>荧光笔</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>颜色：选择预设颜色或在调色板上拖动</translation>
+            <source>Color</source>
+            <translation>颜色</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>选区：拖动控制点调整大小；方向键扩大 1 px，Shift+方向键缩小 1 px</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>选区 · 方向键扩大，Shift+方向键缩小（1 px）</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>矩形：选择空心、圆角或实心矩形</translation>
+            <source>Text · Click to type</source>
+            <translation>文字 · 点击输入</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>椭圆：选择空心椭圆、实心椭圆或聚光灯</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>马赛克 · 拖动涂抹</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>箭头：选择直线箭头、曲线箭头、双向箭头或直线</translation>
+            <source>Number · Click to add</source>
+            <translation>编号 · 点击添加</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>绘图：选择画笔或荧光笔</translation>
+            <source>Undo</source>
+            <translation>撤销</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>文字：点击输入，Shift+Enter 换行；Alt 确认并返回上一个工具</translation>
+            <source>Redo</source>
+            <translation>重做</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>马赛克：拖动选择矩形区域</translation>
+            <source>Copy screenshot</source>
+            <translation>复制截图</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>编号标记：点击放置下一个编号</translation>
+            <source>Save PNG</source>
+            <translation>保存 PNG</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>撤销：移除最后一条标注</translation>
+            <source>Light</source>
+            <translation>浅色</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>重做：恢复已撤销的标注</translation>
+            <source>Dark</source>
+            <translation>深色</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>复制：将截图复制到剪贴板</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>保存：将截图保存为 PNG</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>浅色工具栏</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>深色工具栏</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter 确认 · Shift+Enter 换行 · Alt 确认并返回上个工具</translation>
         </message>
     </context>
     <context>

@@ -52,64 +52,52 @@
             <translation>Marker</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Värv: vali valmisvärv või lohista värvipaletil</translation>
+            <source>Color</source>
+            <translation>Värv</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Valik: suuruse muutmiseks lohista pidemeid; nooleklahvid suurendavad 1 px võrra, Shift+nooleklahvid vähendavad 1 px võrra</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Valik · Nooleklahvid suurendavad, Shift+nooleklahvid vähendavad (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Ristkülikud: vali kontuuriga, ümardatud või täidetud ristkülik</translation>
+            <source>Text · Click to type</source>
+            <translation>Tekst · Klõpsa kirjutamiseks</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Ellipsid: vali kontuuriga ellips, täidetud ellips või esiletõstmine</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mosaiik · Lohista sisu peitmiseks</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Nooled: vali sirge, kõver, kahe otsaga nool või joon</translation>
+            <source>Number · Click to add</source>
+            <translation>Number · Klõpsa lisamiseks</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Joonistamine: vali pliiats või marker</translation>
+            <source>Undo</source>
+            <translation>Võta tagasi</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Tekst: klõpsa kirjutamiseks, uue rea jaoks vajuta Shift+Enter; Alt kinnitab ja viib tagasi eelmise tööriista juurde</translation>
+            <source>Redo</source>
+            <translation>Tee uuesti</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mosaiik: ristkülikukujulise ala valimiseks lohista</translation>
+            <source>Copy screenshot</source>
+            <translation>Kopeeri kuvatõmmis</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Numbrimärgis: järgmise numbri paigutamiseks klõpsa</translation>
+            <source>Save PNG</source>
+            <translation>Salvesta PNG</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Võta tagasi: eemalda viimane märkus</translation>
+            <source>Light</source>
+            <translation>Hele</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Tee uuesti: taasta tagasivõetud märkus</translation>
+            <source>Dark</source>
+            <translation>Tume</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Kopeeri: kopeeri kuvatõmmis lõikelauale</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Salvesta: salvesta kuvatõmmis PNG-vormingus</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>Hele tööriistariba</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>Tume tööriistariba</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: kinnita · Shift+Enter: uus rida · Alt: kinnita ja naase eelmise tööriista juurde</translation>
         </message>
     </context>
     <context>

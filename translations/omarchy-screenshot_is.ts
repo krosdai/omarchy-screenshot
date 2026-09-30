@@ -52,64 +52,52 @@
             <translation>Áherslupenni</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Litur: veldu forstilltan lit eða dragðu á litaspjaldinu</translation>
+            <source>Color</source>
+            <translation>Litur</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Val: dragðu handföngin til að breyta stærð; örvatakkar stækka um 1 px, Shift+örvatakkar minnka um 1 px</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Val · Örvatakkar stækka, Shift+örvatakkar minnka (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Rétthyrningar: veldu útlínurétthyrning, rétthyrning með ávölum hornum eða fylltan rétthyrning</translation>
+            <source>Text · Click to type</source>
+            <translation>Texti · Smelltu til að skrifa</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Sporbaugar: veldu útlínusporbaug, fylltan sporbaug eða kastljós</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mósaík · Dragðu til að fela efni</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Örvar: veldu beina ör, bogna ör, ör með tveimur oddum eða línu</translation>
+            <source>Number · Click to add</source>
+            <translation>Númer · Smelltu til að bæta við</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Teikning: veldu penna eða áherslupenna</translation>
+            <source>Undo</source>
+            <translation>Afturkalla</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Texti: smelltu til að skrifa, Shift+Enter fyrir nýja línu; Alt staðfestir og fer aftur í fyrra verkfæri</translation>
+            <source>Redo</source>
+            <translation>Endurtaka</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mósaík: dragðu til að velja rétthyrnt svæði</translation>
+            <source>Copy screenshot</source>
+            <translation>Afrita skjámynd</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Númerað merki: smelltu til að setja næsta númer</translation>
+            <source>Save PNG</source>
+            <translation>Vista PNG</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Afturkalla: fjarlægðu síðustu athugasemd</translation>
+            <source>Light</source>
+            <translation>Ljóst</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Endurtaka: endurheimtu afturkallaða athugasemd</translation>
+            <source>Dark</source>
+            <translation>Dökkt</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Afrita: afritaðu skjámyndina á klippispjaldið</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Vista: vistaðu skjámyndina sem PNG</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>Ljós verkfærastika</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>Dökk verkfærastika</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: staðfesta · Shift+Enter: ný lína · Alt: staðfesta og fara aftur í fyrra verkfæri</translation>
         </message>
     </context>
     <context>

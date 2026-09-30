@@ -52,64 +52,52 @@
             <translation>מדגש</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>צבע: יש לבחור צבע מוגדר מראש או לגרור על לוח הצבעים</translation>
+            <source>Color</source>
+            <translation>צבע</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>בחירה: יש לגרור את הידיות לשינוי הגודל; מקשי החצים מרחיבים ב־&#x2066;1 px&#x2069;, מקשי החצים בשילוב &#x2066;Shift&#x2069; מצמצמים ב־&#x2066;1 px&#x2069;</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>בחירה · חצים מרחיבים, &#x2066;Shift&#x2069;+חצים מצמצמים (&#x2066;1 px&#x2069;)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>מלבנים: יש לבחור מלבן עם קו מתאר, מעוגל או מלא</translation>
+            <source>Text · Click to type</source>
+            <translation>טקסט · לחיצה להקלדה</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>אליפסות: יש לבחור אליפסה עם קו מתאר, אליפסה מלאה או זרקור</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>פסיפס · גרירה להסתרה</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>חצים: יש לבחור חץ ישר, מעוקל, דו־ראשי או קו</translation>
+            <source>Number · Click to add</source>
+            <translation>מספר · לחיצה להוספה</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>ציור: יש לבחור עט או מדגש</translation>
+            <source>Undo</source>
+            <translation>ביטול</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>טקסט: יש ללחוץ כדי להקליד, &#x2066;Shift+Enter&#x2069; לשורה חדשה; &#x2066;Alt&#x2069; מאשר ומחזיר לכלי הקודם</translation>
+            <source>Redo</source>
+            <translation>ביצוע מחדש</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>פסיפס: יש לגרור כדי לבחור אזור מלבני</translation>
+            <source>Copy screenshot</source>
+            <translation>העתקת צילום המסך</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>סמן ממוספר: יש ללחוץ כדי למקם את המספר הבא</translation>
+            <source>Save PNG</source>
+            <translation>שמירת &#x2066;PNG&#x2069;</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>ביטול: הסרת ההערה האחרונה</translation>
+            <source>Light</source>
+            <translation>בהיר</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>ביצוע מחדש: שחזור ההערה שבוטלה</translation>
+            <source>Dark</source>
+            <translation>כהה</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>העתקה: העתקת צילום המסך ללוח</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>שמירה: שמירת צילום המסך בתור PNG</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>סרגל כלים בהיר</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>סרגל כלים כהה</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>&#x2066;Enter&#x2069;: אישור · &#x2066;Shift+Enter&#x2069;: שורה חדשה · &#x2066;Alt&#x2069;: אישור וחזרה לכלי הקודם</translation>
         </message>
     </context>
     <context>

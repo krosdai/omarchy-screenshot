@@ -52,64 +52,52 @@
             <translation>Vurğulayıcı</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Rəng: hazır rəng seçin və ya palitranı sürükləyin</translation>
+            <source>Color</source>
+            <translation>Rəng</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Seçim: ölçünü dəyişmək üçün tutacaqları sürükləyin; ox düymələri ilə 1 px böyüdün, Shift+ox düymələri ilə 1 px kiçildin</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Seçim · Ox düymələri böyüdür, Shift+oxlar kiçildir (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Düzbucaqlılar: konturlu, yuvarlaq künclü və ya dolu düzbucaqlı seçin</translation>
+            <source>Text · Click to type</source>
+            <translation>Mətn · Yazmaq üçün klikləyin</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Ellipslər: konturlu ellips, dolu ellips və ya vurğulama seçin</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mozaika · Gizlətmək üçün sürükləyin</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Oxlar: düz, əyri, ikiuclu ox və ya xətt seçin</translation>
+            <source>Number · Click to add</source>
+            <translation>Nömrə · Əlavə etmək üçün klikləyin</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Çəkmə: qələm və ya vurğulayıcı seçin</translation>
+            <source>Undo</source>
+            <translation>Geri al</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Mətn: yazmaq üçün klikləyin, yeni sətir üçün Shift+Enter istifadə edin; Alt təsdiqləyir və əvvəlki alətə qaytarır</translation>
+            <source>Redo</source>
+            <translation>Təkrar et</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mozaika: düzbucaqlı sahə seçmək üçün sürükləyin</translation>
+            <source>Copy screenshot</source>
+            <translation>Ekran görüntüsünü kopyala</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Nömrəli nişan: növbəti nömrəni yerləşdirmək üçün klikləyin</translation>
+            <source>Save PNG</source>
+            <translation>PNG saxla</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Geri al: son qeydi silin</translation>
+            <source>Light</source>
+            <translation>Açıq</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Təkrar et: geri alınmış qeydi bərpa edin</translation>
+            <source>Dark</source>
+            <translation>Tünd</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Kopyala: ekran görüntüsünü mübadilə buferinə kopyalayın</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Saxla: ekran görüntüsünü PNG kimi saxlayın</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>Açıq alətlər paneli</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>Tünd alətlər paneli</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: təsdiqlə · Shift+Enter: yeni sətir · Alt: təsdiqlə və əvvəlki alətə qayıt</translation>
         </message>
     </context>
     <context>

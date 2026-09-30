@@ -52,64 +52,52 @@
             <translation>Маркер</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Боја: изберете однапред зададена боја или влечете по палетата</translation>
+            <source>Color</source>
+            <translation>Боја</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Избор: влечете ги рачките за да ја смените големината; копчињата со стрелки прошируваат за 1 px, Shift+копчињата со стрелки стеснуваат за 1 px</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Избор · Стрелките прошируваат, Shift+стрелки стеснуваат (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Правоаголници: изберете контурен, заоблен или пополнет правоаголник</translation>
+            <source>Text · Click to type</source>
+            <translation>Текст · Кликнете за внесување</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Елипси: изберете контурна елипса, пополнета елипса или истакнување</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Мозаик · Влечете за сокривање</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Стрелки: изберете права, закривена, двонасочна стрелка или линија</translation>
+            <source>Number · Click to add</source>
+            <translation>Број · Кликнете за додавање</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Цртање: изберете пенкало или маркер</translation>
+            <source>Undo</source>
+            <translation>Врати</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Текст: кликнете за да пишувате, Shift+Enter за нов ред; Alt потврдува и ве враќа на претходната алатка</translation>
+            <source>Redo</source>
+            <translation>Повтори</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Мозаик: влечете за да изберете правоаголна област</translation>
+            <source>Copy screenshot</source>
+            <translation>Копирај слика од екранот</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Нумерирана ознака: кликнете за да го поставите следниот број</translation>
+            <source>Save PNG</source>
+            <translation>Зачувај PNG</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Врати: отстранете ја последната анотација</translation>
+            <source>Light</source>
+            <translation>Светла</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Повтори: обновете ја вратената анотација</translation>
+            <source>Dark</source>
+            <translation>Темна</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Копирај: копирајте ја сликата од екранот во меѓуспремникот</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Зачувај: зачувајте ја сликата од екранот како PNG</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>Светла лента со алатки</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>Темна лента со алатки</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: потврди · Shift+Enter: нов ред · Alt: потврди и врати се на претходната алатка</translation>
         </message>
     </context>
     <context>

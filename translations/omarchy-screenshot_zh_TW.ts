@@ -52,64 +52,52 @@
             <translation>螢光筆</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>顏色：選擇預設顏色或在調色盤上拖曳</translation>
+            <source>Color</source>
+            <translation>顏色</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>選取範圍：拖曳控制點調整大小；方向鍵擴大 1 px，Shift+方向鍵縮小 1 px</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>選取範圍 · 方向鍵擴大，Shift+方向鍵縮小（1 px）</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>矩形：選擇空心、圓角或實心矩形</translation>
+            <source>Text · Click to type</source>
+            <translation>文字 · 點擊輸入</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>橢圓：選擇空心橢圓、實心橢圓或聚光燈</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>馬賽克 · 拖曳塗抹</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>箭頭：選擇直線箭頭、曲線箭頭、雙向箭頭或直線</translation>
+            <source>Number · Click to add</source>
+            <translation>編號 · 點擊新增</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>繪圖：選擇畫筆或螢光筆</translation>
+            <source>Undo</source>
+            <translation>復原</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>文字：點擊輸入，Shift+Enter 換行；Alt 確認並返回上一個工具</translation>
+            <source>Redo</source>
+            <translation>重做</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>馬賽克：拖曳選取矩形區域</translation>
+            <source>Copy screenshot</source>
+            <translation>複製截圖</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>編號標記：點擊放置下一個編號</translation>
+            <source>Save PNG</source>
+            <translation>儲存 PNG</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>復原：移除最後一筆標註</translation>
+            <source>Light</source>
+            <translation>淺色</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>重做：還原已復原的標註</translation>
+            <source>Dark</source>
+            <translation>深色</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>複製：將螢幕擷取畫面複製到剪貼簿</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>儲存：將螢幕擷取畫面儲存為 PNG</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>淺色工具列</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>深色工具列</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter 確認 · Shift+Enter 換行 · Alt 確認並返回上個工具</translation>
         </message>
     </context>
     <context>

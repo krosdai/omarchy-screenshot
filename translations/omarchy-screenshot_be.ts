@@ -52,64 +52,52 @@
             <translation>Маркер</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Колер: выберыце гатовы колер або перацягніце палітру</translation>
+            <source>Color</source>
+            <translation>Колер</translation>
         </message>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Вылучэнне: перацягвайце ручкі, каб змяніць памер; клавішы са стрэлкамі павялічваюць на 1 px, Shift+клавішы са стрэлкамі памяншаюць на 1 px</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Вылучэнне · Стрэлкі павялічваюць, Shift+стрэлкі памяншаюць (1 px)</translation>
         </message>
         <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Прамавугольнікі: выберыце контурны, закруглены або запоўнены прамавугольнік</translation>
+            <source>Text · Click to type</source>
+            <translation>Тэкст · Націсніце для ўводу</translation>
         </message>
         <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Эліпсы: выберыце контурны эліпс, запоўнены эліпс або падсвятленне</translation>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Мазаіка · Перацягніце, каб схаваць</translation>
         </message>
         <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Стрэлкі: выберыце прамую, выгнутую, двухбаковую стрэлку або лінію</translation>
+            <source>Number · Click to add</source>
+            <translation>Нумар · Націсніце, каб дадаць</translation>
         </message>
         <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Маляванне: выберыце пяро або маркер</translation>
+            <source>Undo</source>
+            <translation>Адмяніць</translation>
         </message>
         <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Тэкст: націсніце, каб увесці тэкст, Shift+Enter — новы радок; Alt пацвярджае і вяртае да папярэдняга інструмента</translation>
+            <source>Redo</source>
+            <translation>Паўтарыць</translation>
         </message>
         <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Мазаіка: перацягніце, каб вылучыць прамавугольную вобласць</translation>
+            <source>Copy screenshot</source>
+            <translation>Скапіраваць здымак экрана</translation>
         </message>
         <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Нумараваная пазнака: націсніце, каб змясціць наступны нумар</translation>
+            <source>Save PNG</source>
+            <translation>Захаваць PNG</translation>
         </message>
         <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Адмяніць: выдаліць апошнюю анатацыю</translation>
+            <source>Light</source>
+            <translation>Светлая</translation>
         </message>
         <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Паўтарыць: аднавіць адмененую анатацыю</translation>
+            <source>Dark</source>
+            <translation>Цёмная</translation>
         </message>
         <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Капіяваць: скапіраваць здымак экрана ў буфер абмену</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Захаваць: захаваць здымак экрана ў фармаце PNG</translation>
-        </message>
-        <message>
-            <source>Light toolbar</source>
-            <translation>Светлая панэль інструментаў</translation>
-        </message>
-        <message>
-            <source>Dark toolbar</source>
-            <translation>Цёмная панэль інструментаў</translation>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: пацвердзіць · Shift+Enter: новы радок · Alt: пацвердзіць і вярнуцца да папярэдняга інструмента</translation>
         </message>
     </context>
     <context>
