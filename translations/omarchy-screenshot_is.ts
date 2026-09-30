@@ -4,72 +4,68 @@
     <context>
         <name>AnnotationToolbar</name>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Val: dragðu handföngin til að breyta stærð; örvatakkar stækka um 1 px, Shift+örvatakkar minnka um 1 px</translation>
-        </message>
-        <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Rétthyrningar: veldu útlínurétthyrning, rétthyrning með ávölum hornum eða fylltan rétthyrning</translation>
-        </message>
-        <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Sporbaugar: veldu útlínusporbaug, fylltan sporbaug eða kastljós</translation>
-        </message>
-        <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Örvar: veldu beina ör, bogna ör, ör með tveimur oddum eða línu</translation>
-        </message>
-        <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Teikning: veldu penna eða áherslupenna</translation>
-        </message>
-        <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Texti: smelltu til að skrifa, Shift+Enter fyrir nýja línu; Alt staðfestir og fer aftur í fyrra verkfæri</translation>
-        </message>
-        <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mósaík: dragðu til að velja rétthyrnt svæði</translation>
-        </message>
-        <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Númerað merki: smelltu til að setja næsta númer</translation>
-        </message>
-        <message>
-            <source>Zoom out of the long image (-)</source>
-            <translation>Þysja út á löngu myndinni (-)</translation>
-        </message>
-        <message>
-            <source>Zoom in on the long image (=)</source>
-            <translation>Þysja inn á löngu myndinni (=)</translation>
-        </message>
-        <message>
-            <source>Resume (H): keep capturing downward and keep existing annotations</source>
-            <translation>Halda áfram (H): haltu áfram að taka mynd niður á við og haltu fyrirliggjandi athugasemdum</translation>
-        </message>
-        <message>
-            <source>Scrolling capture (H): scroll automatically and stitch a long image</source>
-            <translation>Skrunmyndataka (H): skrunaðu sjálfkrafa og skeyttu saman í langa mynd</translation>
-        </message>
-        <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Afturkalla: fjarlægðu síðustu athugasemd</translation>
-        </message>
-        <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Endurtaka: endurheimtu afturkallaða athugasemd</translation>
-        </message>
-        <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Afrita: afritaðu skjámyndina á klippispjaldið</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Vista: vistaðu skjámyndina sem PNG</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Val · Örvatakkar stækka, Shift+örvatakkar minnka (1 px)</translation>
         </message>
         <message>
             <source>Rectangle</source>
             <translation>Rétthyrningur</translation>
+        </message>
+        <message>
+            <source>Ellipse</source>
+            <translation>Sporbaugur</translation>
+        </message>
+        <message>
+            <source>Arrow</source>
+            <translation>Ör</translation>
+        </message>
+        <message>
+            <source>Pen</source>
+            <translation>Penni</translation>
+        </message>
+        <message>
+            <source>Text · Click to type</source>
+            <translation>Texti · Smelltu til að skrifa</translation>
+        </message>
+        <message>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mósaík · Dragðu til að fela efni</translation>
+        </message>
+        <message>
+            <source>Number · Click to add</source>
+            <translation>Númer · Smelltu til að bæta við</translation>
+        </message>
+        <message>
+            <source>Zoom out</source>
+            <translation>Minnka</translation>
+        </message>
+        <message>
+            <source>Zoom in</source>
+            <translation>Stækka</translation>
+        </message>
+        <message>
+            <source>Continue capture · Keeps annotations</source>
+            <translation>Halda áfram að taka mynd · Athugasemdir haldast</translation>
+        </message>
+        <message>
+            <source>Scrolling capture</source>
+            <translation>Skrunskjámynd</translation>
+        </message>
+        <message>
+            <source>Undo</source>
+            <translation>Afturkalla</translation>
+        </message>
+        <message>
+            <source>Redo</source>
+            <translation>Endurtaka</translation>
+        </message>
+        <message>
+            <source>Copy screenshot</source>
+            <translation>Afrita skjámynd</translation>
+        </message>
+        <message>
+            <source>Save PNG</source>
+            <translation>Vista PNG</translation>
         </message>
         <message>
             <source>Rounded rectangle</source>
@@ -80,20 +76,12 @@
             <translation>Fylltur rétthyrningur</translation>
         </message>
         <message>
-            <source>Ellipse</source>
-            <translation>Sporbaugur</translation>
-        </message>
-        <message>
             <source>Filled ellipse</source>
             <translation>Fylltur sporbaugur</translation>
         </message>
         <message>
             <source>Spotlight</source>
             <translation>Kastljós</translation>
-        </message>
-        <message>
-            <source>Arrow</source>
-            <translation>Ör</translation>
         </message>
         <message>
             <source>Curved arrow</source>
@@ -108,24 +96,24 @@
             <translation>Lína</translation>
         </message>
         <message>
-            <source>Pen</source>
-            <translation>Penni</translation>
-        </message>
-        <message>
             <source>Highlighter</source>
             <translation>Áherslupenni</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Litur: veldu forstilltan lit eða dragðu á litaspjaldinu</translation>
+            <source>Color</source>
+            <translation>Litur</translation>
         </message>
         <message>
-            <source>Light toolbar</source>
-            <translation>Ljós verkfærastika</translation>
+            <source>Light</source>
+            <translation>Ljóst</translation>
         </message>
         <message>
-            <source>Dark toolbar</source>
-            <translation>Dökk verkfærastika</translation>
+            <source>Dark</source>
+            <translation>Dökkt</translation>
+        </message>
+        <message>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: staðfesta · Shift+Enter: ný lína · Alt: staðfesta og fara aftur í fyrra verkfæri</translation>
         </message>
     </context>
     <context>

@@ -78,7 +78,7 @@ class Translations(unittest.TestCase):
                 "-ts", str(reference),
             ], check=True, capture_output=True, text=True)
             sources = set(messages(reference))
-        self.assertEqual(len(sources), 68)
+        self.assertEqual(len(sources), 65)
         for locale, catalog in self.catalogs.items():
             with self.subTest(locale=locale):
                 self.assertEqual(set(catalog), sources)
@@ -92,16 +92,19 @@ class Translations(unittest.TestCase):
                     self.assertEqual(re.findall(r"%\d+", source),
                                      re.findall(r"%\d+", translation.text))
                     for token in ("Qt", "wl-copy", "tesseract", "PNG", "OCR",
-                                  "Alt", "Shift+Enter", "Shift", "1 px"):
+                                  "Alt", "Enter", "Shift+Enter", "Shift", "1 px"):
                         if token in source:
                             self.assertIn(token, translation.text)
 
     def test_hebrew_direction_isolates(self):
         catalog = self.catalogs["he"]
-        selection = catalog[("AnnotationToolbar", "Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px")].text
+        selection = catalog[("AnnotationToolbar", "Selection · Arrow keys expand, Shift+arrows shrink (1 px)")].text
         # Without isolation the visible unit reverses to "px 1" in RTL text.
-        self.assertEqual(selection.count("\u20661 px\u2069"), 2)
+        self.assertEqual(selection.count("\u20661 px\u2069"), 1)
         self.assertIn("\u2066Shift\u2069", selection)
+        editor = catalog[("AnnotationToolbar", "Enter: confirm · Shift+Enter: new line · Alt: confirm & return to previous tool")].text
+        for key in ("Enter", "Shift+Enter", "Alt"):
+            self.assertIn(f"\u2066{key}\u2069", editor)
         for translation in catalog.values():
             text = translation.text
             self.assertEqual(text.count("\u2066") + text.count("\u2068"),

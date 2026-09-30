@@ -4,72 +4,68 @@
     <context>
         <name>AnnotationToolbar</name>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Seçim: boyutlandırmak için tutamaçları sürükleyin; ok tuşları 1 px büyütür, Shift+ok tuşları 1 px küçültür</translation>
-        </message>
-        <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Dikdörtgenler: kenarlıklı, yuvarlatılmış veya dolu bir dikdörtgen seçin</translation>
-        </message>
-        <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Elipsler: kenarlıklı elips, dolu elips veya spot ışığı seçin</translation>
-        </message>
-        <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Oklar: düz, eğri, çift uçlu ok veya çizgi seçin</translation>
-        </message>
-        <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Çizim: kalem veya vurgulayıcı seçin</translation>
-        </message>
-        <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Metin: yazmak için tıklayın, yeni satır için Shift+Enter kullanın; Alt onaylar ve önceki araca döner</translation>
-        </message>
-        <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mozaik: dikdörtgen bir alan seçmek için sürükleyin</translation>
-        </message>
-        <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Numaralı işaret: sonraki numarayı yerleştirmek için tıklayın</translation>
-        </message>
-        <message>
-            <source>Zoom out of the long image (-)</source>
-            <translation>Uzun görüntüyü uzaklaştır (-)</translation>
-        </message>
-        <message>
-            <source>Zoom in on the long image (=)</source>
-            <translation>Uzun görüntüyü yakınlaştır (=)</translation>
-        </message>
-        <message>
-            <source>Resume (H): keep capturing downward and keep existing annotations</source>
-            <translation>Sürdür (H): aşağı doğru yakalamaya devam edin ve mevcut açıklamaları koruyun</translation>
-        </message>
-        <message>
-            <source>Scrolling capture (H): scroll automatically and stitch a long image</source>
-            <translation>Kaydırmalı yakalama (H): otomatik olarak kaydırın ve uzun bir görüntüde birleştirin</translation>
-        </message>
-        <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Geri al: son açıklamayı kaldırın</translation>
-        </message>
-        <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Yinele: geri alınan açıklamayı geri yükleyin</translation>
-        </message>
-        <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Kopyala: ekran görüntüsünü panoya kopyalayın</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Kaydet: ekran görüntüsünü PNG olarak kaydedin</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Seçim · Ok tuşları büyütür, Shift+oklar küçültür (1 px)</translation>
         </message>
         <message>
             <source>Rectangle</source>
             <translation>Dikdörtgen</translation>
+        </message>
+        <message>
+            <source>Ellipse</source>
+            <translation>Elips</translation>
+        </message>
+        <message>
+            <source>Arrow</source>
+            <translation>Ok</translation>
+        </message>
+        <message>
+            <source>Pen</source>
+            <translation>Kalem</translation>
+        </message>
+        <message>
+            <source>Text · Click to type</source>
+            <translation>Metin · Yazmak için tıklayın</translation>
+        </message>
+        <message>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mozaik · Gizlemek için sürükleyin</translation>
+        </message>
+        <message>
+            <source>Number · Click to add</source>
+            <translation>Numara · Eklemek için tıklayın</translation>
+        </message>
+        <message>
+            <source>Zoom out</source>
+            <translation>Uzaklaştır</translation>
+        </message>
+        <message>
+            <source>Zoom in</source>
+            <translation>Yakınlaştır</translation>
+        </message>
+        <message>
+            <source>Continue capture · Keeps annotations</source>
+            <translation>Yakalamaya devam et · İşaretlemeler korunur</translation>
+        </message>
+        <message>
+            <source>Scrolling capture</source>
+            <translation>Kaydırmalı yakalama</translation>
+        </message>
+        <message>
+            <source>Undo</source>
+            <translation>Geri al</translation>
+        </message>
+        <message>
+            <source>Redo</source>
+            <translation>Yinele</translation>
+        </message>
+        <message>
+            <source>Copy screenshot</source>
+            <translation>Ekran görüntüsünü kopyala</translation>
+        </message>
+        <message>
+            <source>Save PNG</source>
+            <translation>PNG kaydet</translation>
         </message>
         <message>
             <source>Rounded rectangle</source>
@@ -80,20 +76,12 @@
             <translation>Dolu dikdörtgen</translation>
         </message>
         <message>
-            <source>Ellipse</source>
-            <translation>Elips</translation>
-        </message>
-        <message>
             <source>Filled ellipse</source>
             <translation>Dolu elips</translation>
         </message>
         <message>
             <source>Spotlight</source>
             <translation>Spot ışığı</translation>
-        </message>
-        <message>
-            <source>Arrow</source>
-            <translation>Ok</translation>
         </message>
         <message>
             <source>Curved arrow</source>
@@ -108,24 +96,24 @@
             <translation>Çizgi</translation>
         </message>
         <message>
-            <source>Pen</source>
-            <translation>Kalem</translation>
-        </message>
-        <message>
             <source>Highlighter</source>
             <translation>Vurgulayıcı</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Renk: hazır bir renk seçin veya palet üzerinde sürükleyin</translation>
+            <source>Color</source>
+            <translation>Renk</translation>
         </message>
         <message>
-            <source>Light toolbar</source>
-            <translation>Açık araç çubuğu</translation>
+            <source>Light</source>
+            <translation>Açık</translation>
         </message>
         <message>
-            <source>Dark toolbar</source>
-            <translation>Koyu araç çubuğu</translation>
+            <source>Dark</source>
+            <translation>Koyu</translation>
+        </message>
+        <message>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: onayla · Shift+Enter: yeni satır · Alt: onayla ve önceki araca dön</translation>
         </message>
     </context>
     <context>

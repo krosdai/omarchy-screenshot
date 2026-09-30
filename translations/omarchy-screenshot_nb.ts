@@ -4,72 +4,68 @@
     <context>
         <name>AnnotationToolbar</name>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Markering: dra i håndtakene for å endre størrelse; piltastene utvider med 1 px, Shift+piltastene krymper med 1 px</translation>
-        </message>
-        <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Rektangler: velg et rektangel med omriss, avrundede hjørner eller fyll</translation>
-        </message>
-        <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Ellipser: velg en ellipse med omriss, en fylt ellipse eller fremheving</translation>
-        </message>
-        <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Piler: velg en rett pil, en buet pil, en pil med to spisser eller en linje</translation>
-        </message>
-        <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Tegning: velg en penn eller markeringspenn</translation>
-        </message>
-        <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Tekst: klikk for å skrive, Shift+Enter for en ny linje; Alt bekrefter og går tilbake til forrige verktøy</translation>
-        </message>
-        <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mosaikk: dra for å velge et rektangulært område</translation>
-        </message>
-        <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Nummerert markør: klikk for å plassere neste nummer</translation>
-        </message>
-        <message>
-            <source>Zoom out of the long image (-)</source>
-            <translation>Zoom ut i det lange bildet (-)</translation>
-        </message>
-        <message>
-            <source>Zoom in on the long image (=)</source>
-            <translation>Zoom inn i det lange bildet (=)</translation>
-        </message>
-        <message>
-            <source>Resume (H): keep capturing downward and keep existing annotations</source>
-            <translation>Fortsett (H): fortsett opptaket nedover og behold eksisterende merknader</translation>
-        </message>
-        <message>
-            <source>Scrolling capture (H): scroll automatically and stitch a long image</source>
-            <translation>Rulleopptak (H): rull automatisk og sett sammen et langt bilde</translation>
-        </message>
-        <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Angre: fjern den siste merknaden</translation>
-        </message>
-        <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Gjør om: gjenopprett merknaden som ble angret</translation>
-        </message>
-        <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Kopier: kopier skjermbildet til utklippstavlen</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Lagre: lagre skjermbildet som PNG</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Markering · Piltaster utvider, Shift+piltaster krymper (1 px)</translation>
         </message>
         <message>
             <source>Rectangle</source>
             <translation>Rektangel</translation>
+        </message>
+        <message>
+            <source>Ellipse</source>
+            <translation>Ellipse</translation>
+        </message>
+        <message>
+            <source>Arrow</source>
+            <translation>Pil</translation>
+        </message>
+        <message>
+            <source>Pen</source>
+            <translation>Penn</translation>
+        </message>
+        <message>
+            <source>Text · Click to type</source>
+            <translation>Tekst · Klikk for å skrive</translation>
+        </message>
+        <message>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mosaikk · Dra for å skjule innhold</translation>
+        </message>
+        <message>
+            <source>Number · Click to add</source>
+            <translation>Nummer · Klikk for å legge til</translation>
+        </message>
+        <message>
+            <source>Zoom out</source>
+            <translation>Zoom ut</translation>
+        </message>
+        <message>
+            <source>Zoom in</source>
+            <translation>Zoom inn</translation>
+        </message>
+        <message>
+            <source>Continue capture · Keeps annotations</source>
+            <translation>Fortsett opptaket · Kommentarer beholdes</translation>
+        </message>
+        <message>
+            <source>Scrolling capture</source>
+            <translation>Rullende skjermbilde</translation>
+        </message>
+        <message>
+            <source>Undo</source>
+            <translation>Angre</translation>
+        </message>
+        <message>
+            <source>Redo</source>
+            <translation>Gjør om</translation>
+        </message>
+        <message>
+            <source>Copy screenshot</source>
+            <translation>Kopier skjermbilde</translation>
+        </message>
+        <message>
+            <source>Save PNG</source>
+            <translation>Lagre PNG</translation>
         </message>
         <message>
             <source>Rounded rectangle</source>
@@ -80,20 +76,12 @@
             <translation>Fylt rektangel</translation>
         </message>
         <message>
-            <source>Ellipse</source>
-            <translation>Ellipse</translation>
-        </message>
-        <message>
             <source>Filled ellipse</source>
             <translation>Fylt ellipse</translation>
         </message>
         <message>
             <source>Spotlight</source>
             <translation>Fremheving</translation>
-        </message>
-        <message>
-            <source>Arrow</source>
-            <translation>Pil</translation>
         </message>
         <message>
             <source>Curved arrow</source>
@@ -108,24 +96,24 @@
             <translation>Linje</translation>
         </message>
         <message>
-            <source>Pen</source>
-            <translation>Penn</translation>
-        </message>
-        <message>
             <source>Highlighter</source>
             <translation>Markeringspenn</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Farge: velg en forhåndsinnstilt farge eller dra på paletten</translation>
+            <source>Color</source>
+            <translation>Farge</translation>
         </message>
         <message>
-            <source>Light toolbar</source>
-            <translation>Lys verktøylinje</translation>
+            <source>Light</source>
+            <translation>Lys</translation>
         </message>
         <message>
-            <source>Dark toolbar</source>
-            <translation>Mørk verktøylinje</translation>
+            <source>Dark</source>
+            <translation>Mørk</translation>
+        </message>
+        <message>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: bekreft · Shift+Enter: ny linje · Alt: bekreft og gå tilbake til forrige verktøy</translation>
         </message>
     </context>
     <context>

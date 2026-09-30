@@ -4,72 +4,68 @@
     <context>
         <name>AnnotationToolbar</name>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Избор: превуците ручице за промену величине; тастери са стрелицама проширују за 1 px, Shift+тастери са стрелицама сужавају за 1 px</translation>
-        </message>
-        <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Правоугаоници: изаберите контурни, заобљени или попуњени правоугаоник</translation>
-        </message>
-        <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Елипсе: изаберите контурну елипсу, попуњену елипсу или истицање</translation>
-        </message>
-        <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Стрелице: изаберите праву, закривљену, двосмерну стрелицу или линију</translation>
-        </message>
-        <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Цртање: изаберите оловку или маркер</translation>
-        </message>
-        <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Текст: кликните за унос, Shift+Enter за нови ред; Alt потврђује и враћа на претходну алатку</translation>
-        </message>
-        <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Мозаик: превуците да изаберете правоугаону област</translation>
-        </message>
-        <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Нумерисана ознака: кликните да поставите следећи број</translation>
-        </message>
-        <message>
-            <source>Zoom out of the long image (-)</source>
-            <translation>Умањи дугачку слику (-)</translation>
-        </message>
-        <message>
-            <source>Zoom in on the long image (=)</source>
-            <translation>Увећај дугачку слику (=)</translation>
-        </message>
-        <message>
-            <source>Resume (H): keep capturing downward and keep existing annotations</source>
-            <translation>Настави (H): наставите снимање надоле и задржите постојеће напомене</translation>
-        </message>
-        <message>
-            <source>Scrolling capture (H): scroll automatically and stitch a long image</source>
-            <translation>Снимање уз клизање (H): аутоматско клизање и спајање у дугачку слику</translation>
-        </message>
-        <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Опозови: уклоните последњу напомену</translation>
-        </message>
-        <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Понови: вратите опозвану напомену</translation>
-        </message>
-        <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Копирај: копирајте снимак екрана у оставу</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Сачувај: сачувајте снимак екрана као PNG</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Избор · Стрелице проширују, Shift+стрелице сужавају (1 px)</translation>
         </message>
         <message>
             <source>Rectangle</source>
             <translation>Правоугаоник</translation>
+        </message>
+        <message>
+            <source>Ellipse</source>
+            <translation>Елипса</translation>
+        </message>
+        <message>
+            <source>Arrow</source>
+            <translation>Стрелица</translation>
+        </message>
+        <message>
+            <source>Pen</source>
+            <translation>Оловка</translation>
+        </message>
+        <message>
+            <source>Text · Click to type</source>
+            <translation>Текст · Кликните за унос</translation>
+        </message>
+        <message>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Мозаик · Превуците за скривање</translation>
+        </message>
+        <message>
+            <source>Number · Click to add</source>
+            <translation>Број · Кликните за додавање</translation>
+        </message>
+        <message>
+            <source>Zoom out</source>
+            <translation>Умањи</translation>
+        </message>
+        <message>
+            <source>Zoom in</source>
+            <translation>Увећај</translation>
+        </message>
+        <message>
+            <source>Continue capture · Keeps annotations</source>
+            <translation>Настави снимање · Задржава напомене</translation>
+        </message>
+        <message>
+            <source>Scrolling capture</source>
+            <translation>Снимање са померањем</translation>
+        </message>
+        <message>
+            <source>Undo</source>
+            <translation>Опозови</translation>
+        </message>
+        <message>
+            <source>Redo</source>
+            <translation>Понови</translation>
+        </message>
+        <message>
+            <source>Copy screenshot</source>
+            <translation>Копирај снимак екрана</translation>
+        </message>
+        <message>
+            <source>Save PNG</source>
+            <translation>Сачувај PNG</translation>
         </message>
         <message>
             <source>Rounded rectangle</source>
@@ -80,20 +76,12 @@
             <translation>Попуњени правоугаоник</translation>
         </message>
         <message>
-            <source>Ellipse</source>
-            <translation>Елипса</translation>
-        </message>
-        <message>
             <source>Filled ellipse</source>
             <translation>Попуњена елипса</translation>
         </message>
         <message>
             <source>Spotlight</source>
             <translation>Истицање</translation>
-        </message>
-        <message>
-            <source>Arrow</source>
-            <translation>Стрелица</translation>
         </message>
         <message>
             <source>Curved arrow</source>
@@ -108,24 +96,24 @@
             <translation>Линија</translation>
         </message>
         <message>
-            <source>Pen</source>
-            <translation>Оловка</translation>
-        </message>
-        <message>
             <source>Highlighter</source>
             <translation>Маркер</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Боја: изаберите унапред задату боју или превуците по палети</translation>
+            <source>Color</source>
+            <translation>Боја</translation>
         </message>
         <message>
-            <source>Light toolbar</source>
-            <translation>Светла трака са алаткама</translation>
+            <source>Light</source>
+            <translation>Светла</translation>
         </message>
         <message>
-            <source>Dark toolbar</source>
-            <translation>Тамна трака са алаткама</translation>
+            <source>Dark</source>
+            <translation>Тамна</translation>
+        </message>
+        <message>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: потврди · Shift+Enter: нови ред · Alt: потврди и врати се на претходну алатку</translation>
         </message>
     </context>
     <context>

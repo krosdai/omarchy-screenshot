@@ -4,72 +4,68 @@
     <context>
         <name>AnnotationToolbar</name>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Valinta: muuta kokoa vetämällä kahvoista; nuolinäppäimet suurentavat 1 px, Shift+nuolinäppäimet pienentävät 1 px</translation>
-        </message>
-        <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Suorakulmiot: valitse ääriviivallinen, pyöristetty tai täytetty suorakulmio</translation>
-        </message>
-        <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Ellipsit: valitse ääriviivallinen ellipsi, täytetty ellipsi tai kohdevalo</translation>
-        </message>
-        <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Nuolet: valitse suora, kaareva tai kaksipäinen nuoli tai viiva</translation>
-        </message>
-        <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Piirtäminen: valitse kynä tai korostuskynä</translation>
-        </message>
-        <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Teksti: kirjoita napsauttamalla, uusi rivi näppäimillä Shift+Enter; Alt vahvistaa ja palaa edelliseen työkaluun</translation>
-        </message>
-        <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mosaiikki: valitse suorakulmainen alue vetämällä</translation>
-        </message>
-        <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Numeromerkki: sijoita seuraava numero napsauttamalla</translation>
-        </message>
-        <message>
-            <source>Zoom out of the long image (-)</source>
-            <translation>Loitonna pitkää kuvaa (-)</translation>
-        </message>
-        <message>
-            <source>Zoom in on the long image (=)</source>
-            <translation>Lähennä pitkää kuvaa (=)</translation>
-        </message>
-        <message>
-            <source>Resume (H): keep capturing downward and keep existing annotations</source>
-            <translation>Jatka (H): jatka kaappausta alaspäin ja säilytä nykyiset merkinnät</translation>
-        </message>
-        <message>
-            <source>Scrolling capture (H): scroll automatically and stitch a long image</source>
-            <translation>Vierityskaappaus (H): vieritä automaattisesti ja yhdistä pitkäksi kuvaksi</translation>
-        </message>
-        <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Kumoa: poista viimeisin merkintä</translation>
-        </message>
-        <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Tee uudelleen: palauta kumottu merkintä</translation>
-        </message>
-        <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Kopioi: kopioi kuvakaappaus leikepöydälle</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Tallenna: tallenna kuvakaappaus PNG-muodossa</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Valinta · Nuolinäppäimet suurentavat, Shift+nuolinäppäimet pienentävät (1 px)</translation>
         </message>
         <message>
             <source>Rectangle</source>
             <translation>Suorakulmio</translation>
+        </message>
+        <message>
+            <source>Ellipse</source>
+            <translation>Ellipsi</translation>
+        </message>
+        <message>
+            <source>Arrow</source>
+            <translation>Nuoli</translation>
+        </message>
+        <message>
+            <source>Pen</source>
+            <translation>Kynä</translation>
+        </message>
+        <message>
+            <source>Text · Click to type</source>
+            <translation>Teksti · Kirjoita napsauttamalla</translation>
+        </message>
+        <message>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mosaiikki · Peitä sisältöä vetämällä</translation>
+        </message>
+        <message>
+            <source>Number · Click to add</source>
+            <translation>Numero · Lisää napsauttamalla</translation>
+        </message>
+        <message>
+            <source>Zoom out</source>
+            <translation>Loitonna</translation>
+        </message>
+        <message>
+            <source>Zoom in</source>
+            <translation>Lähennä</translation>
+        </message>
+        <message>
+            <source>Continue capture · Keeps annotations</source>
+            <translation>Jatka kaappausta · Merkinnät säilyvät</translation>
+        </message>
+        <message>
+            <source>Scrolling capture</source>
+            <translation>Vierityskaappaus</translation>
+        </message>
+        <message>
+            <source>Undo</source>
+            <translation>Kumoa</translation>
+        </message>
+        <message>
+            <source>Redo</source>
+            <translation>Tee uudelleen</translation>
+        </message>
+        <message>
+            <source>Copy screenshot</source>
+            <translation>Kopioi kuvakaappaus</translation>
+        </message>
+        <message>
+            <source>Save PNG</source>
+            <translation>Tallenna PNG</translation>
         </message>
         <message>
             <source>Rounded rectangle</source>
@@ -80,20 +76,12 @@
             <translation>Täytetty suorakulmio</translation>
         </message>
         <message>
-            <source>Ellipse</source>
-            <translation>Ellipsi</translation>
-        </message>
-        <message>
             <source>Filled ellipse</source>
             <translation>Täytetty ellipsi</translation>
         </message>
         <message>
             <source>Spotlight</source>
             <translation>Kohdevalo</translation>
-        </message>
-        <message>
-            <source>Arrow</source>
-            <translation>Nuoli</translation>
         </message>
         <message>
             <source>Curved arrow</source>
@@ -108,24 +96,24 @@
             <translation>Viiva</translation>
         </message>
         <message>
-            <source>Pen</source>
-            <translation>Kynä</translation>
-        </message>
-        <message>
             <source>Highlighter</source>
             <translation>Korostuskynä</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Väri: valitse valmis väri tai vedä paletilla</translation>
+            <source>Color</source>
+            <translation>Väri</translation>
         </message>
         <message>
-            <source>Light toolbar</source>
-            <translation>Vaalea työkalupalkki</translation>
+            <source>Light</source>
+            <translation>Vaalea</translation>
         </message>
         <message>
-            <source>Dark toolbar</source>
-            <translation>Tumma työkalupalkki</translation>
+            <source>Dark</source>
+            <translation>Tumma</translation>
+        </message>
+        <message>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: vahvista · Shift+Enter: uusi rivi · Alt: vahvista ja palaa edelliseen työkaluun</translation>
         </message>
     </context>
     <context>
