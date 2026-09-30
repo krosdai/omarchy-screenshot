@@ -22,13 +22,20 @@
 
 在 Arch / Omarchy 上需要 `cmake`、`gcc`、`qt6-base`、`qt6-declarative`、`qt6-wayland`、`layer-shell-qt`、`grim`、`wl-clipboard` 和 `hyprland`。
 
-发布到 AUR 后，可在 Omarchy 上安装：
+可在 Omarchy 上从 AUR 安装：
 
 ```sh
 omarchy pkg aur add omarchy-screenshot
 ```
 
 AUR 软件包会从对应的 GitHub 版本标签下载源码、编译并安装 `omarchy-screenshot`。可选安装 `tesseract` 和 `tesseract-data-chi_sim` 来使用 OCR。
+
+安装后，可在 `~/.config/hypr/bindings.lua` 中把 `Ctrl+Alt+A` 绑定为截图快捷键；如果已有同键绑定，先取消旧绑定：
+
+```lua
+hl.unbind("CTRL + ALT + A")
+o.bind("CTRL + ALT + A", "Omarchy Screenshot", "omarchy-screenshot")
+```
 
 如果从当前源码手动构建：
 
