@@ -227,9 +227,12 @@ bool CaptureController::initialize(QString *error) {
         QRectF(data.value(QStringLiteral("x")).toDouble(),
                data.value(QStringLiteral("y")).toDouble(), width, height);
 
+    // grim's PNG compression dominates startup; PPM transfers the same pixels
+    // without compression before QImage decodes them.
     const QByteArray bytes =
         run(QStringLiteral("grim"),
-            {QStringLiteral("-o"), monitor.name, QStringLiteral("-")}, error);
+            {QStringLiteral("-t"), QStringLiteral("ppm"), QStringLiteral("-o"),
+             monitor.name, QStringLiteral("-")}, error);
     monitor.image = QImage::fromData(bytes);
     if (monitor.image.isNull()) {
       if (error && error->isEmpty())
