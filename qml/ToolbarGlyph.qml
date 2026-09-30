@@ -3,182 +3,273 @@ import QtQuick
 Canvas {
     id: glyph
     required property string action
-    property string accentColor: "#ff4b55"
-    width: 20
-    height: 20
+    property color accentColor: "#ff4b55"
+    width: 22
+    height: 22
     antialiasing: true
     onActionChanged: requestPaint()
     onAccentColorChanged: requestPaint()
 
     onPaint: {
         const ctx = getContext("2d")
+        const ink = "#293340"
+        const paper = "#ffffff"
+        const brightness = accentColor.r * 0.2126 +
+                           accentColor.g * 0.7152 + accentColor.b * 0.0722
+        const iconFill = brightness > 0.87 ? "#d9e2ec" : accentColor
         ctx.clearRect(0, 0, width, height)
-        ctx.strokeStyle = "#26313d"
+        ctx.save()
+        ctx.scale(width / 24, height / 24)
+        ctx.strokeStyle = ink
+        ctx.fillStyle = paper
         ctx.lineWidth = 1.8
         ctx.lineCap = "round"
         ctx.lineJoin = "round"
-        ctx.beginPath()
+
+        function strokePath(draw) {
+            ctx.beginPath()
+            draw()
+            ctx.stroke()
+        }
+
+        function fillPath(draw, fill) {
+            ctx.beginPath()
+            draw()
+            ctx.fillStyle = fill
+            ctx.fill()
+            ctx.strokeStyle = ink
+            ctx.stroke()
+        }
+
+        function roundedRect(x, y, w, h, r) {
+            ctx.moveTo(x + r, y)
+            ctx.lineTo(x + w - r, y)
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r)
+            ctx.lineTo(x + w, y + h - r)
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
+            ctx.lineTo(x + r, y + h)
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r)
+            ctx.lineTo(x, y + r)
+            ctx.quadraticCurveTo(x, y, x + r, y)
+            ctx.closePath()
+        }
+
+        function dot(x, y, radius, color) {
+            ctx.beginPath()
+            ctx.arc(x, y, radius, 0, Math.PI * 2)
+            ctx.fillStyle = color
+            ctx.fill()
+        }
+
+        function curvedShaft() {
+            ctx.moveTo(4.2, 19)
+            ctx.bezierCurveTo(3.9, 8.2, 10.1, 4.4, 19.2, 6.2)
+        }
+
+        function undoArrow() {
+            ctx.moveTo(9.2, 5.5)
+            ctx.lineTo(4.5, 10.2)
+            ctx.lineTo(9.2, 14.8)
+            ctx.moveTo(4.8, 10.2)
+            ctx.lineTo(12.8, 10.2)
+            ctx.bezierCurveTo(16.8, 10.2, 19.3, 12.7, 19.3, 18.2)
+        }
 
         switch (action) {
         case "color":
-            ctx.arc(10, 10, 7, 0, Math.PI * 2)
-            ctx.fillStyle = accentColor
-            ctx.fill()
+            fillPath(() => {
+                ctx.moveTo(11.8, 2.7)
+                ctx.bezierCurveTo(6.6, 2.7, 2.8, 6.6, 2.8, 12)
+                ctx.bezierCurveTo(2.8, 17.4, 6.8, 21.2, 12.2, 21.2)
+                ctx.bezierCurveTo(14.4, 21.2, 15.8, 19.8, 15.8, 18)
+                ctx.bezierCurveTo(15.8, 16.6, 14.4, 16, 14.4, 14.7)
+                ctx.bezierCurveTo(14.4, 13.4, 15.3, 12.8, 16.4, 12.8)
+                ctx.lineTo(18.1, 12.8)
+                ctx.bezierCurveTo(20, 12.8, 21.2, 11.5, 20.9, 9.7)
+                ctx.bezierCurveTo(20.3, 5.6, 16.5, 2.7, 11.8, 2.7)
+                ctx.closePath()
+            }, paper)
+            dot(7.2, 10, 2, accentColor)
+            ctx.lineWidth = 0.7
+            ctx.stroke()
+            ctx.lineWidth = 1.8
+            dot(10.5, 6.4, 1.35, "#60b6e9")
+            dot(15.7, 7, 1.35, "#f3bd61")
+            dot(8.6, 16.1, 1.35, "#8fbf88")
             break
+
         case "select":
-            ctx.moveTo(2.5, 2.5)
-            ctx.lineTo(2.5, 16)
-            ctx.lineTo(6, 12.5)
-            ctx.lineTo(9.2, 17.5)
-            ctx.lineTo(11.5, 16)
-            ctx.lineTo(8.5, 10.8)
-            ctx.lineTo(15.5, 10.8)
-            ctx.closePath()
-            ctx.fillStyle = "#ffffff"
-            ctx.fill()
+            fillPath(() => {
+                ctx.moveTo(3.3, 2.7)
+                ctx.lineTo(3.3, 20.1)
+                ctx.lineTo(8.1, 15.9)
+                ctx.lineTo(11.1, 21.3)
+                ctx.lineTo(13.8, 19.8)
+                ctx.lineTo(10.8, 14.4)
+                ctx.lineTo(17.4, 14.2)
+                ctx.closePath()
+            }, paper)
             break
+
         case "rect":
-            ctx.rect(3, 3, 14, 14)
+            strokePath(() => ctx.rect(4, 4, 16, 16))
             break
         case "roundrect":
-            ctx.moveTo(7, 3)
-            ctx.lineTo(13, 3)
-            ctx.quadraticCurveTo(17, 3, 17, 7)
-            ctx.lineTo(17, 13)
-            ctx.quadraticCurveTo(17, 17, 13, 17)
-            ctx.lineTo(7, 17)
-            ctx.quadraticCurveTo(3, 17, 3, 13)
-            ctx.lineTo(3, 7)
-            ctx.quadraticCurveTo(3, 3, 7, 3)
+            strokePath(() => roundedRect(4, 4, 16, 16, 4))
             break
         case "fillrect":
-            ctx.fillStyle = accentColor
-            ctx.fillRect(3, 3, 14, 14)
-            break
-        case "fillellipse":
-            ctx.fillStyle = accentColor
-            ctx.arc(10, 10, 7, 0, Math.PI * 2)
-            ctx.fill()
+            fillPath(() => ctx.rect(4, 4, 16, 16), iconFill)
             break
         case "ellipse":
-            ctx.arc(10, 10, 7, 0, Math.PI * 2)
+            strokePath(() => ctx.arc(12, 12, 8.1, 0, Math.PI * 2))
             break
+        case "fillellipse":
+            fillPath(() => ctx.arc(12, 12, 8.1, 0, Math.PI * 2), iconFill)
+            break
+        case "spotlight":
+            ctx.fillStyle = "#c4ced9"
+            ctx.fillRect(3.5, 3.5, 17, 17)
+            strokePath(() => ctx.rect(3.5, 3.5, 17, 17))
+            fillPath(() => ctx.arc(12, 12, 6.2, 0, Math.PI * 2), paper)
+            break
+
         case "arrow":
-            ctx.moveTo(3.2, 16.8)
-            ctx.lineTo(16.8, 3.2)
-            ctx.moveTo(10, 3.2)
-            ctx.lineTo(16.8, 3.2)
-            ctx.lineTo(16.8, 10)
+            strokePath(() => {
+                ctx.moveTo(4.2, 19.8)
+                ctx.lineTo(19.6, 4.4)
+                ctx.moveTo(11.4, 4.4)
+                ctx.lineTo(19.6, 4.4)
+                ctx.lineTo(19.6, 12.6)
+            })
             break
         case "curvedarrow":
         case "doublearrow":
-            ctx.moveTo(3, 16)
-            ctx.quadraticCurveTo(4, 3, 17, 4)
-            ctx.moveTo(11, 3)
-            ctx.lineTo(17, 4)
-            ctx.lineTo(15, 10)
-            if (action === "doublearrow") {
-                ctx.moveTo(3, 16)
-                ctx.lineTo(3, 10)
-                ctx.moveTo(3, 16)
-                ctx.lineTo(9, 16)
-            }
+            strokePath(() => {
+                curvedShaft()
+                ctx.moveTo(13, 3.2)
+                ctx.lineTo(19.2, 6.2)
+                ctx.lineTo(15.4, 11.8)
+                if (action === "doublearrow") {
+                    ctx.moveTo(4.2, 19)
+                    ctx.lineTo(3.8, 12.3)
+                    ctx.moveTo(4.2, 19)
+                    ctx.lineTo(10.7, 18)
+                }
+            })
             break
         case "line":
-            ctx.moveTo(3, 17)
-            ctx.lineTo(17, 3)
+            strokePath(() => {
+                ctx.moveTo(4.5, 19.5)
+                ctx.lineTo(19.5, 4.5)
+            })
+            dot(4.5, 19.5, 1.25, ink)
+            dot(19.5, 4.5, 1.25, ink)
+            break
+
+        case "pen":
+            fillPath(() => {
+                ctx.moveTo(4.2, 20.1)
+                ctx.lineTo(5.2, 15.4)
+                ctx.lineTo(15.8, 4.8)
+                ctx.quadraticCurveTo(16.9, 3.7, 18, 4.8)
+                ctx.lineTo(19.2, 6)
+                ctx.quadraticCurveTo(20.3, 7.1, 19.2, 8.2)
+                ctx.lineTo(8.6, 18.8)
+                ctx.closePath()
+            }, paper)
+            strokePath(() => {
+                ctx.moveTo(5.2, 15.4)
+                ctx.lineTo(8.6, 18.8)
+                ctx.moveTo(14.8, 5.8)
+                ctx.lineTo(18.2, 9.2)
+            })
             break
         case "highlighter":
-            ctx.lineWidth = 5
-            ctx.strokeStyle = accentColor
-            ctx.moveTo(3, 15)
-            ctx.lineTo(17, 5)
-            break
-        case "spotlight":
-            ctx.arc(10, 10, 5, 0, Math.PI * 2)
-            ctx.rect(2, 2, 16, 16)
-            break
-        case "marker":
-            ctx.arc(10, 10, 7, 0, Math.PI * 2)
-            ctx.fillStyle = accentColor
-            ctx.fill()
-            ctx.fillStyle = "#ffffff"
-            ctx.font = "bold 12px sans-serif"
-            ctx.textAlign = "center"
-            ctx.textBaseline = "middle"
-            ctx.fillText("1", 10, 10)
-            break
-        case "pen":
-            ctx.moveTo(3.2, 17)
-            ctx.lineTo(4.2, 13.5)
-            ctx.lineTo(13.1, 4.6)
-            ctx.quadraticCurveTo(14.2, 3.5, 15.3, 4.6)
-            ctx.lineTo(15.9, 5.2)
-            ctx.quadraticCurveTo(17, 6.3, 15.9, 7.4)
-            ctx.lineTo(7, 16.3)
-            ctx.closePath()
-            ctx.moveTo(4.2, 13.5)
-            ctx.lineTo(7, 16.3)
-            ctx.moveTo(13.1, 4.6)
-            ctx.lineTo(15.9, 7.4)
+            ctx.save()
+            ctx.globalAlpha = 0.38
+            ctx.strokeStyle = iconFill
+            ctx.lineWidth = 5.5
+            strokePath(() => {
+                ctx.moveTo(3.6, 20)
+                ctx.lineTo(10.1, 13.5)
+            })
+            ctx.restore()
+            fillPath(() => {
+                ctx.moveTo(8.1, 15.2)
+                ctx.lineTo(15.8, 4.9)
+                ctx.quadraticCurveTo(16.6, 3.9, 17.6, 4.9)
+                ctx.lineTo(19.2, 6.5)
+                ctx.quadraticCurveTo(20.2, 7.5, 19.2, 8.3)
+                ctx.lineTo(9, 16.1)
+                ctx.closePath()
+            }, iconFill)
+            strokePath(() => {
+                ctx.moveTo(8.1, 15.2)
+                ctx.lineTo(5.7, 18.5)
+                ctx.lineTo(8.4, 21.2)
+                ctx.lineTo(11.7, 18.8)
+            })
             break
         case "text":
-            ctx.moveTo(3.5, 17)
-            ctx.lineTo(10, 3)
-            ctx.lineTo(16.5, 17)
-            ctx.moveTo(5.8, 12)
-            ctx.lineTo(14.2, 12)
+            strokePath(() => {
+                ctx.moveTo(4.4, 20)
+                ctx.lineTo(12, 4)
+                ctx.lineTo(19.6, 20)
+                ctx.moveTo(7.5, 14.7)
+                ctx.lineTo(16.5, 14.7)
+            })
             break
         case "mosaic":
-            ctx.fillStyle = "#4aa3ff"
-            ctx.fillRect(3, 3, 7, 7)
-            ctx.fillRect(10, 10, 7, 7)
-            ctx.rect(3, 3, 14, 14)
-            ctx.moveTo(10, 3)
-            ctx.lineTo(10, 17)
-            ctx.moveTo(3, 10)
-            ctx.lineTo(17, 10)
+            ctx.fillStyle = "#74889c"
+            ctx.fillRect(4, 4, 8, 8)
+            ctx.fillStyle = iconFill
+            ctx.fillRect(12, 12, 8, 8)
+            strokePath(() => {
+                ctx.rect(4, 4, 16, 16)
+                ctx.moveTo(12, 4)
+                ctx.lineTo(12, 20)
+                ctx.moveTo(4, 12)
+                ctx.lineTo(20, 12)
+            })
             break
-        case "undo":
-            ctx.moveTo(4.5, 7)
-            ctx.lineTo(10, 7)
-            ctx.bezierCurveTo(15.2, 7, 17.4, 11.2, 15.2, 16)
-            ctx.moveTo(8, 3.5)
-            ctx.lineTo(4.5, 7)
-            ctx.lineTo(8, 10.5)
-            break
-        case "redo":
-            ctx.moveTo(15.5, 7)
-            ctx.lineTo(10, 7)
-            ctx.bezierCurveTo(4.8, 7, 2.6, 11.2, 4.8, 16)
-            ctx.moveTo(12, 3.5)
-            ctx.lineTo(15.5, 7)
-            ctx.lineTo(12, 10.5)
-            break
-        case "copy":
-            ctx.moveTo(6, 14)
-            ctx.lineTo(3.5, 14)
-            ctx.lineTo(3.5, 3.5)
-            ctx.lineTo(14, 3.5)
-            ctx.lineTo(14, 6)
-            ctx.moveTo(7, 6)
-            ctx.lineTo(16.5, 6)
-            ctx.lineTo(16.5, 16.5)
-            ctx.lineTo(7, 16.5)
-            ctx.closePath()
-            break
-        case "save":
-            ctx.moveTo(10, 3)
-            ctx.lineTo(10, 13)
-            ctx.moveTo(6.2, 9.4)
-            ctx.lineTo(10, 13.2)
-            ctx.lineTo(13.8, 9.4)
-            ctx.moveTo(3.5, 15)
-            ctx.lineTo(3.5, 17)
-            ctx.lineTo(16.5, 17)
-            ctx.lineTo(16.5, 15)
+        case "marker": {
+            fillPath(() => ctx.arc(12, 12, 8.5, 0, Math.PI * 2), iconFill)
+            ctx.fillStyle = brightness > 0.68 ? ink : paper
+            ctx.font = "bold 13px sans-serif"
+            ctx.textAlign = "center"
+            ctx.textBaseline = "middle"
+            ctx.fillText("1", 12, 12.5)
             break
         }
-        ctx.stroke()
+
+        case "undo":
+            strokePath(undoArrow)
+            break
+        case "redo":
+            ctx.save()
+            ctx.translate(24, 0)
+            ctx.scale(-1, 1)
+            strokePath(undoArrow)
+            ctx.restore()
+            break
+        case "copy":
+            fillPath(() => roundedRect(3.3, 3.3, 12.7, 12.7, 1.5), paper)
+            fillPath(() => roundedRect(8, 8, 12.7, 12.7, 1.5), paper)
+            break
+        case "save":
+            strokePath(() => {
+                ctx.moveTo(12, 3.4)
+                ctx.lineTo(12, 15)
+                ctx.moveTo(7.4, 10.7)
+                ctx.lineTo(12, 15.3)
+                ctx.lineTo(16.6, 10.7)
+                ctx.moveTo(4.5, 16.9)
+                ctx.lineTo(4.5, 20)
+                ctx.lineTo(19.5, 20)
+                ctx.lineTo(19.5, 16.9)
+            })
+            break
+        }
+        ctx.restore()
     }
 }

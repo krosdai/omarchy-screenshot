@@ -672,12 +672,12 @@ Item {
             id: toolsRow
             anchors.centerIn: parent
             spacing: 2
-            width: Math.max(60, Math.min(root.width - 28, (toolbarRepeater.count + 1) * 62))
+            width: Math.max(64, Math.min(root.width - 28, (toolbarRepeater.count + 1) * 66))
             height: childrenRect.height
             Rectangle {
                 id: colorButton
                 objectName: "colorButton"
-                width: 60
+                width: 64
                 height: 36
                 radius: 4
                 color: "transparent"
@@ -732,14 +732,14 @@ Item {
                 ]
                 delegate: Rectangle {
                     required property var modelData
-                    width: 60
+                    width: 64
                     height: 36
                     radius: 4
                     color: "transparent"
                     Rectangle {
                         objectName: modelData.action === "select" ? "selectHighlight" : ""
                         anchors.centerIn: parent
-                        width: 56
+                        width: 60
                         height: 30
                         radius: 5
                         color: captureController.tool === root.displayedTool(modelData.action) ? "#dcecff" :
