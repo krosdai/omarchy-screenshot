@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Andy Stewart
+// SPDX-License-Identifier: GPL-3.0-only
+
 #pragma once
 
 #include <QQuickPaintedItem>
