@@ -7,7 +7,7 @@ arch=('x86_64')
 url="https://github.com/manateelazycat/omarchy-screenshot"
 license=('GPL-3.0-only')
 depends=('qt6-base' 'qt6-declarative' 'qt6-wayland' 'layer-shell-qt' 'grim' 'wl-clipboard' 'hyprland')
-makedepends=('cmake')
+makedepends=('cmake' 'qt6-tools' 'python')
 optdepends=('tesseract: OCR text recognition' 'tesseract-data-chi_sim: Chinese OCR')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
 sha256sums=('SKIP')
@@ -17,6 +17,10 @@ build() {
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr
     cmake --build build --parallel
+}
+
+check() {
+    ctest --test-dir build --output-on-failure
 }
 
 package() {

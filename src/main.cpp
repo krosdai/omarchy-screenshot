@@ -5,10 +5,12 @@
 #include "mosaicoverlay.h"
 
 #include <LayerShellQt/window.h>
+#include <QCommandLineParser>
 #include <QDir>
 #include <QFile>
 #include <QGuiApplication>
 #include <QKeyEvent>
+#include <QLocale>
 #include <QMouseEvent>
 #include <QQmlContext>
 #include <QQmlEngine>
@@ -17,10 +19,12 @@
 #include <QQuickItemGrabResult>
 #include <QQuickView>
 #include <QSettings>
+#include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QTest>
 #include <QTextStream>
 #include <QTimer>
+#include <QTranslator>
 
 #include <functional>
 #include <memory>
@@ -65,6 +69,51 @@ int main(int argc, char **argv) {
   QGuiApplication app(argc, argv);
   app.setApplicationName(QStringLiteral("omarchy-screenshot"));
   app.setOrganizationName(QStringLiteral("Omarchy"));
+
+  // Parse once before translation so even --help uses the requested language.
+  QList<QCommandLineOption> options = {
+      {QStringLiteral("language"), QString(), QStringLiteral("locale")},
+      {QStringLiteral("self-test"), QString()},
+      {QStringLiteral("ui-self-test"), QString()}};
+  options[1].setFlags(QCommandLineOption::HiddenFromHelp);
+  options[2].setFlags(QCommandLineOption::HiddenFromHelp);
+  QCommandLineParser languageParser;
+  languageParser.addHelpOption();
+  languageParser.addOptions(options);
+  languageParser.parse(app.arguments());
+  const QString requestedLanguage = languageParser.isSet(QStringLiteral("language"))
+      ? languageParser.value(QStringLiteral("language"))
+      : qEnvironmentVariable("OMARCHY_SCREENSHOT_LANGUAGE");
+  const QLocale requestedLocale = requestedLanguage.isEmpty()
+      ? QLocale::system() : QLocale(requestedLanguage);
+  QTranslator translator;
+  bool translated = false;
+  for (const QString &language : requestedLocale.uiLanguages()) {
+    const QLocale locale(language);
+    // English is the source language, not a missing catalog to skip over.
+    if (locale.language() == QLocale::English || locale.language() == QLocale::C)
+      break;
+    if (translator.load(locale, QStringLiteral("omarchy-screenshot"),
+                        QStringLiteral("_"), QStringLiteral(":/i18n"))) {
+      translated = true;
+      break;
+    }
+  }
+  if (translated)
+    app.installTranslator(&translator);
+  const QLocale uiLocale = translated ? QLocale(translator.language())
+                                     : QLocale(QLocale::English);
+  QLocale::setDefault(uiLocale);
+  QGuiApplication::setLayoutDirection(uiLocale.textDirection());
+
+  options[0].setDescription(QCoreApplication::translate(
+      "main", "Interface language (for example de, pt_BR or zh_TW)."));
+  QCommandLineParser parser;
+  parser.setApplicationDescription(QCoreApplication::translate(
+      "main", "Capture and annotate screenshots on Hyprland."));
+  parser.addHelpOption();
+  parser.addOptions(options);
+  parser.process(app);
 
   std::unique_ptr<QTemporaryDir> testSettings;
   if (app.arguments().contains(QStringLiteral("--self-test")) ||
@@ -213,8 +262,9 @@ int main(int argc, char **argv) {
                                            &controller);
   engine.addImageProvider(QStringLiteral("captures"),
                           new CaptureImageProvider(&controller));
-  QObject::connect(&controller, &CaptureController::done, &app,
-                   &QCoreApplication::quit);
+  if (!app.arguments().contains(QStringLiteral("--ui-self-test")))
+    QObject::connect(&controller, &CaptureController::done, &app,
+                     &QCoreApplication::quit);
 
   std::vector<std::unique_ptr<QQuickView>> views;
   for (int i = 0; i < controller.monitors().size(); ++i) {
@@ -889,7 +939,8 @@ int main(int argc, char **argv) {
         const QString textTooltip =
             views[0]->rootObject()->property("toolbarTooltipText").toString();
         hoverDescriptionWorked =
-            mosaicTooltip == QStringLiteral("马赛克：拖动选择矩形区域") &&
+            mosaicTooltip == QCoreApplication::translate(
+                "Overlay", "Mosaic: drag to select a rectangular area") &&
             textTooltip.contains(QStringLiteral("Alt"));
         if (!hoverDescriptionWorked)
           QTextStream(stdout) << "Tooltip diagnostic: text=" << textTooltip
@@ -1140,6 +1191,91 @@ int main(int argc, char **argv) {
       QCoreApplication::sendEvent(views[0].get(), &escapePanel);
       escapeCloses = editorEscapeClosed && panelOpened && escapeSignals == 2;
       QObject::disconnect(escapeConnection);
+
+      // Check long translations on a narrow output without changing desktop settings.
+      auto *previewRoot = const_cast<QQuickItem *>(root);
+      previewRoot->setWidth(380);
+      variantPanel->setVisible(false);
+      auto *toolbar = root->findChild<QQuickItem *>(QStringLiteral("toolbar"));
+      auto *tooltip = root->findChild<QQuickItem *>(QStringLiteral("toolbarTooltip"));
+      auto *label = root->findChild<QQuickItem *>(QStringLiteral("tooltipLabel"));
+      bool translationLayoutWorked = toolbar && tooltip && label;
+      if (translationLayoutWorked) {
+        previewRoot->setProperty("toolbarTooltipText", QCoreApplication::translate(
+            "Overlay", "Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px"));
+        previewRoot->setProperty("toolbarTooltipX", 190);
+        previewRoot->setProperty("toolbarTooltipY", toolbar->y());
+        previewRoot->setProperty("toolbarTooltipVisible", true);
+        QTest::qWait(50);
+        translationLayoutWorked = tooltip->isVisible() && tooltip->x() >= 0 &&
+            tooltip->x() + tooltip->width() <= previewRoot->width() &&
+            label->property("contentWidth").toReal() <= label->width() + 1 &&
+            label->height() <= tooltip->height() - 12 &&
+            label->property("horizontalAlignment").toInt() ==
+                (uiLocale.textDirection() == Qt::RightToLeft ? Qt::AlignRight : Qt::AlignLeft);
+
+        QFile blockedDirectory(testSettings->filePath(QStringLiteral("not-a-directory")));
+        const bool blocked = blockedDirectory.open(QIODevice::WriteOnly);
+        blockedDirectory.close();
+        const QByteArray oldSaveDirectory = qgetenv("OMARCHY_SCREENSHOT_DIR");
+        const bool hadSaveDirectory = qEnvironmentVariableIsSet("OMARCHY_SCREENSHOT_DIR");
+        const QString errorPath = blockedDirectory.fileName() +
+            QStringLiteral("/<test-folder>/a-long-directory-name-for-wrapping");
+        qputenv("OMARCHY_SCREENSHOT_DIR", QFile::encodeName(errorPath));
+        controller.save();
+        if (hadSaveDirectory)
+          qputenv("OMARCHY_SCREENSHOT_DIR", oldSaveDirectory);
+        else
+          qunsetenv("OMARCHY_SCREENSHOT_DIR");
+        auto *status = root->findChild<QQuickItem *>(QStringLiteral("statusPanel"));
+        auto *statusLabel = root->findChild<QQuickItem *>(QStringLiteral("statusText"));
+        QTest::qWait(50);
+        translationLayoutWorked &= blocked && status && statusLabel &&
+            status->isVisible() && status->width() <= previewRoot->width() - 16 &&
+            statusLabel->property("text").toString() ==
+                CaptureController::tr("Cannot create directory: %1").arg(errorPath) &&
+            statusLabel->property("textFormat").toInt() == 0 &&
+            statusLabel->property("contentWidth").toReal() <= statusLabel->width() + 1 &&
+            statusLabel->height() <= status->height() - 16;
+
+        // Optional review crops contain only this app's UI, never captured desktop pixels.
+        const QString artifacts = qEnvironmentVariable("OMARCHY_SCREENSHOT_TEST_ARTIFACT_DIR");
+        if (!artifacts.isEmpty()) {
+          root->findChild<QQuickItem *>(QStringLiteral("screenCaptureImage"))->setVisible(false);
+          root->findChild<QQuickItem *>(QStringLiteral("mosaicOverlay"))->setVisible(false);
+          root->findChild<QQuickItem *>(QStringLiteral("selectionBorder"))->setVisible(false);
+          root->findChild<QQuickItem *>(QStringLiteral("selectionDimensions"))->setVisible(false);
+          translationLayoutWorked &= QDir().mkpath(artifacts);
+          for (bool dark : {false, true}) {
+            controller.setDarkToolbar(dark);
+            auto grab = previewRoot->grabToImage();
+            if (!grab) {
+              translationLayoutWorked = false;
+              continue;
+            }
+            QSignalSpy ready(grab.get(), &QQuickItemGrabResult::ready);
+            if (!ready.wait(1000)) {
+              translationLayoutWorked = false;
+              continue;
+            }
+            const QRectF crop = QRectF(tooltip->x(), tooltip->y(), tooltip->width(),
+                                       tooltip->height()).united(
+                QRectF(toolbar->x(), toolbar->y(), toolbar->width(), toolbar->height()))
+                                   .adjusted(-6, -6, 6, 6);
+            const qreal scale = grab->image().width() / previewRoot->width();
+            const QRect pixels = QRectF(crop.topLeft() * scale, crop.size() * scale)
+                                     .toAlignedRect();
+            const QString path = QDir(artifacts).filePath(
+                uiLocale.name() + (dark ? QStringLiteral("-dark.png")
+                                       : QStringLiteral("-light.png")));
+            translationLayoutWorked &= grab->image().copy(pixels).save(path);
+            const QRect statusPixels = QRectF(status->x() * scale, status->y() * scale,
+                status->width() * scale, status->height() * scale).toAlignedRect();
+            translationLayoutWorked &= grab->image().copy(statusPixels).save(
+                QDir(artifacts).filePath(uiLocale.name() + QStringLiteral("-status.png")));
+          }
+        }
+      }
       QTextStream(stdout) << "Mosaic preview: " << mosaicVisible
                           << ", toolbar: " << toolbarWorked
                           << ", toolbar order: " << toolbarOrderWorked
@@ -1185,7 +1321,8 @@ int main(int argc, char **argv) {
                           << ", exported rows: " << exportedTextRows
                           << ", editor focused: " << editorFocused
                           << ", captures ready: " << capturesReady
-                          << ", double-click copy: " << doubleClickCopied << "\n";
+                          << ", double-click copy: " << doubleClickCopied
+                          << ", translation layout: " << translationLayoutWorked << "\n";
       app.exit(mosaicVisible && toolbarWorked && toolbarOrderWorked &&
                        groupedToolbarWorked && redoShortcutWorked &&
                        escapeCloses &&
@@ -1207,7 +1344,8 @@ int main(int argc, char **argv) {
                        penPreviewVisible && textVisible && multilineEditing &&
                        editorBorderDashed && editorBackgroundTransparent &&
                        previewRowsCentered && exportedTextRows &&
-                       editorFocused && capturesReady && doubleClickCopied
+                       editorFocused && capturesReady && doubleClickCopied &&
+                       translationLayoutWorked
                    ? 0
                    : 2);
     });
