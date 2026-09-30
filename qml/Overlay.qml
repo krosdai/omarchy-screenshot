@@ -189,6 +189,14 @@ Item {
         onTriggered: root.toolbarTooltipVisible = true
     }
 
+    Connections {
+        target: captureController
+        function onDraftChanged() {
+            if (variantPanel.visible && captureController.draft.type)
+                variantPanel.visible = false
+        }
+    }
+
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
             captureController.cancel()
@@ -552,6 +560,7 @@ Item {
                 captureController.cancel()
                 return
             }
+            if (variantPanel.visible) variantPanel.visible = false
             root.forceActiveFocus()
             if (captureController.selected && captureController.tool === "text") {
                 let gx = screenRect.x + mouse.x
@@ -836,7 +845,7 @@ Item {
     MouseArea {
         anchors.fill: parent
         z: 9
-        visible: colorPanel.visible || variantPanel.visible
+        visible: colorPanel.visible
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: {
             colorPanel.visible = false

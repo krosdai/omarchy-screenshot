@@ -313,6 +313,7 @@ int main(int argc, char **argv) {
   bool arrowResizeWorked = false;
   bool repeatingArrowResizeWorked = false;
   bool leftHandHotkeysWorked = false;
+  bool variantFirstDragWorked = false;
   bool hoverDescriptionWorked = false;
   bool dragPreviewWorked = false;
   bool mosaicExportChanged = false;
@@ -986,6 +987,35 @@ int main(int argc, char **argv) {
         pressArrow(Qt::Key_Right, Qt::ShiftModifier, true);
       repeatingArrowResizeWorked &= controller.selection() == afterTopResize;
 
+      const QPointF rectGroupButton = toolbarCenter(1);
+      sendMouse(QEvent::MouseButtonPress, rectGroupButton, Qt::LeftButton,
+                Qt::LeftButton);
+      sendMouse(QEvent::MouseButtonRelease, rectGroupButton, Qt::LeftButton,
+                Qt::NoButton);
+      auto *activeVariantPanel =
+          root->findChild<QQuickItem *>(QStringLiteral("variantPanel"));
+      const bool variantOpened =
+          activeVariantPanel && activeVariantPanel->isVisible();
+      const int beforeFirstDrag = controller.annotations().size();
+      sendMouse(QEvent::MouseButtonPress, QPointF(500, 350), Qt::LeftButton,
+                Qt::LeftButton);
+      const bool firstPressStartedDrawing =
+          variantOpened && !activeVariantPanel->isVisible() &&
+          controller.draft().value(QStringLiteral("type")).toString() ==
+              QStringLiteral("roundrect");
+      sendMouse(QEvent::MouseMove, QPointF(560, 400), Qt::NoButton,
+                Qt::LeftButton);
+      sendMouse(QEvent::MouseButtonRelease, QPointF(560, 400), Qt::LeftButton,
+                Qt::NoButton);
+      variantFirstDragWorked =
+          firstPressStartedDrawing &&
+          controller.annotations().size() == beforeFirstDrag + 1 &&
+          controller.annotations()
+                  .last()
+                  .toMap()
+                  .value(QStringLiteral("type"))
+                  .toString() == QStringLiteral("roundrect");
+
       controller.setTool(QStringLiteral("pen"));
       controller.setTool(QStringLiteral("text"));
       const QPointF altTextSpot(450, 350);
@@ -1130,6 +1160,7 @@ int main(int argc, char **argv) {
                           << ", held arrow resize: "
                           << repeatingArrowResizeWorked
                           << ", left-hand keys: " << leftHandHotkeysWorked
+                          << ", variant first drag: " << variantFirstDragWorked
                           << ", redo X: " << redoShortcutWorked
                           << ", escape closes: " << escapeCloses
                           << ", hover text: " << hoverDescriptionWorked
@@ -1166,7 +1197,8 @@ int main(int argc, char **argv) {
                        cursorIconRendered && handlesInitiallyVisible &&
                        handlesHiddenForMosaic && handleResizeWorked &&
                        arrowResizeWorked && repeatingArrowResizeWorked &&
-                       leftHandHotkeysWorked && hoverDescriptionWorked &&
+                       leftHandHotkeysWorked && variantFirstDragWorked &&
+                       hoverDescriptionWorked &&
                        altFromEditorWorked && altFromToolWorked &&
                        dragPreviewWorked && mosaicExportChanged &&
                        rectangleShapeWorked && mosaicPixelsVisible &&
