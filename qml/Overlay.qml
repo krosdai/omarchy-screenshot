@@ -1173,7 +1173,7 @@ Item {
     Rectangle {
         id: toolbarTooltip
         objectName: "toolbarTooltip"
-        visible: (root.toolbarTooltipVisible || editor.visible) && toolbar.visible
+        visible: (root.toolbarTooltipVisible && toolbar.visible) || editor.visible
         z: 30
         width: Math.min(tooltipLabel.implicitWidth + 20, root.width - 16)
         height: tooltipLabel.implicitHeight + 12

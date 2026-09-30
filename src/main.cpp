@@ -1285,12 +1285,16 @@ int main(int argc, char **argv) {
           controller.setTool(QStringLiteral("pen"));
           controller.setTool(QStringLiteral("text"));
           previewRoot->setProperty("toolbarTooltipVisible", false);
+          const int originalScreenIndex = root->property("screenIndex").toInt();
           for (const QPointF position : {QPointF(12, 20), QPointF(370, 350)}) {
+            // Simulate editing on an output that does not own the toolbar.
+            previewRoot->setProperty("screenIndex", position.x() == 12 ? originalScreenIndex : -1);
             previewRoot->setProperty("textX", position.x());
             previewRoot->setProperty("textY", position.y());
             textEditor->setVisible(true);
             QTest::qWait(50);
             contextualTextHintWorked &= tooltip->isVisible() &&
+                toolbar->isVisible() == (position.x() == 12) &&
                 label->property("text").toString() == QCoreApplication::translate(
                     "Overlay", "Enter: confirm · Shift+Enter: new line · Alt: confirm & return to previous tool") &&
                 tooltip->x() >= 8 && tooltip->x() + tooltip->width() <= previewRoot->width() - 8 &&
@@ -1313,6 +1317,7 @@ int main(int argc, char **argv) {
               }
             }
           }
+          previewRoot->setProperty("screenIndex", originalScreenIndex);
           auto *input = root->findChild<QQuickItem *>(QStringLiteral("textEditorInput"));
           input->forceActiveFocus();
           QKeyEvent enter(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier);
