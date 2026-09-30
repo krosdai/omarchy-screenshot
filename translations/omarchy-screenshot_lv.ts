@@ -77,7 +77,7 @@
         </message>
         <message>
             <source>Redo</source>
-            <translation>Atatsaukt</translation>
+            <translation>Atkārtot</translation>
         </message>
         <message>
             <source>Copy screenshot</source>
