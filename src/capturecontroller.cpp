@@ -12,6 +12,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QLineF>
+#include <QLocale>
 #include <QPainter>
 #include <QPainterPath>
 #include <QProcess>
@@ -46,15 +47,15 @@ bool copyBytes(const QByteArray &bytes, const QString &mimeType,
                 {QStringLiteral("--type"), mimeType});
   if (!process.waitForStarted(3000)) {
     if (error)
-      *error =
-          QStringLiteral("无法启动 wl-copy：%1").arg(process.errorString());
+      *error = CaptureController::tr("Cannot start wl-copy: %1")
+                   .arg(process.errorString());
     return false;
   }
   process.write(bytes);
   process.closeWriteChannel();
   if (!process.waitForFinished(10000) || process.exitCode() != 0) {
     if (error)
-      *error = QStringLiteral("复制到剪贴板失败：%1")
+      *error = CaptureController::tr("Failed to copy to the clipboard: %1")
                    .arg(QString::fromUtf8(process.readAllStandardError()));
     return false;
   }
@@ -174,7 +175,7 @@ bool CaptureController::initialize(QString *error) {
   if (qEnvironmentVariable("XDG_SESSION_TYPE") != QStringLiteral("wayland") ||
       qEnvironmentVariableIsEmpty("HYPRLAND_INSTANCE_SIGNATURE")) {
     if (error)
-      *error = QStringLiteral("需要在 Hyprland Wayland 会话中运行。");
+      *error = tr("Run this application in a Hyprland Wayland session.");
     return false;
   }
 
@@ -185,7 +186,7 @@ bool CaptureController::initialize(QString *error) {
       &parseError);
   if (!monitorData.isArray() || monitorData.array().isEmpty()) {
     if (error && error->isEmpty())
-      *error = QStringLiteral("无法读取显示器信息：%1")
+      *error = tr("Cannot read monitor information: %1")
                    .arg(parseError.errorString());
     return false;
   }
@@ -209,13 +210,13 @@ bool CaptureController::initialize(QString *error) {
     }
     if (!monitor.screen) {
       if (error)
-        *error = QStringLiteral("Qt 找不到显示器 %1。").arg(monitor.name);
+        *error = tr("Qt cannot find monitor %1.").arg(monitor.name);
       return false;
     }
     const qreal scale = data.value(QStringLiteral("scale")).toDouble(1.0);
     if (scale <= 0) {
       if (error)
-        *error = QStringLiteral("显示器 %1 的缩放比例无效。").arg(monitor.name);
+        *error = tr("Invalid scale for monitor %1.").arg(monitor.name);
       return false;
     }
     qreal width = data.value(QStringLiteral("width")).toDouble() / scale;
@@ -236,7 +237,7 @@ bool CaptureController::initialize(QString *error) {
     monitor.image = QImage::fromData(bytes);
     if (monitor.image.isNull()) {
       if (error && error->isEmpty())
-        *error = QStringLiteral("无法截取显示器 %1。").arg(monitor.name);
+        *error = tr("Cannot capture monitor %1.").arg(monitor.name);
       return false;
     }
     const QImage coarse =
@@ -905,28 +906,40 @@ void CaptureController::ocr() {
 
   const QString languages = QString::fromUtf8(run(
       QStringLiteral("tesseract"), {QStringLiteral("--list-langs")}, nullptr));
-  const QString language = languages.contains(QStringLiteral("chi_sim"))
-                               ? QStringLiteral("chi_sim+eng")
-                               : QStringLiteral("eng");
+  const QStringList available = languages.split(QLatin1Char('\n'));
+  const QLocale locale;
+  QString preferred = QLocale::languageToCode(locale.language(), QLocale::ISO639Part3);
+  if (locale.language() == QLocale::Chinese)
+    preferred = locale.script() == QLocale::TraditionalHanScript
+                    ? QStringLiteral("chi_tra") : QStringLiteral("chi_sim");
+  else if (locale.language() == QLocale::NorwegianBokmal)
+    preferred = QStringLiteral("nor");
+  QStringList selected;
+  if (available.contains(preferred))
+    selected.append(preferred);
+  if (available.contains(QStringLiteral("eng")) && preferred != QStringLiteral("eng"))
+    selected.append(QStringLiteral("eng"));
+  const QString language = selected.isEmpty() ? QStringLiteral("eng")
+                                             : selected.join(QLatin1Char('+'));
   QProcess process;
   process.start(QStringLiteral("tesseract"),
                 {QStringLiteral("stdin"), QStringLiteral("stdout"),
                  QStringLiteral("-l"), language});
   if (!process.waitForStarted(3000)) {
-    setStatus(QStringLiteral("OCR 需要安装 tesseract"));
+    setStatus(tr("Install tesseract to use OCR"));
     return;
   }
   process.write(png);
   process.closeWriteChannel();
   if (!process.waitForFinished(30000) || process.exitCode() != 0) {
     setStatus(
-        QStringLiteral("识字失败：%1")
+        tr("Text recognition failed: %1")
             .arg(QString::fromUtf8(process.readAllStandardError()).trimmed()));
     return;
   }
   const QByteArray recognized = process.readAllStandardOutput().trimmed();
   if (recognized.isEmpty()) {
-    setStatus(QStringLiteral("没有识别到文字"));
+    setStatus(tr("No text recognized"));
     return;
   }
   QString error;
@@ -948,7 +961,7 @@ void CaptureController::save() {
   if (directory.isEmpty())
     directory = QDir::homePath() + QStringLiteral("/Pictures");
   if (!QDir().mkpath(directory)) {
-    setStatus(QStringLiteral("无法创建目录：%1").arg(directory));
+    setStatus(tr("Cannot create directory: %1").arg(directory));
     return;
   }
   const QString filename = QStringLiteral("screenshot-%1.png")
@@ -956,7 +969,7 @@ void CaptureController::save() {
                                    QStringLiteral("yyyy-MM-dd_HH-mm-ss-zzz")));
   const QString path = QDir(directory).filePath(filename);
   if (!image.save(path, "PNG")) {
-    setStatus(QStringLiteral("无法保存：%1").arg(path));
+    setStatus(tr("Cannot save: %1").arg(path));
     return;
   }
   QTextStream(stdout) << path << '\n';

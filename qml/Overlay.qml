@@ -51,21 +51,21 @@ Item {
     function toolGroupOptions(group) {
         switch (group) {
         case "rect": return [
-            {action: "rect", label: "矩形"},
-            {action: "roundrect", label: "圆角矩形"},
-            {action: "fillrect", label: "实心矩形"}]
+            {action: "rect", label: qsTr("Rectangle")},
+            {action: "roundrect", label: qsTr("Rounded rectangle")},
+            {action: "fillrect", label: qsTr("Filled rectangle")}]
         case "ellipse": return [
-            {action: "ellipse", label: "椭圆"},
-            {action: "fillellipse", label: "实心椭圆"},
-            {action: "spotlight", label: "聚光灯"}]
+            {action: "ellipse", label: qsTr("Ellipse")},
+            {action: "fillellipse", label: qsTr("Filled ellipse")},
+            {action: "spotlight", label: qsTr("Spotlight")}]
         case "arrow": return [
-            {action: "arrow", label: "箭头"},
-            {action: "curvedarrow", label: "弯曲箭头"},
-            {action: "doublearrow", label: "双向弯曲箭头"},
-            {action: "line", label: "直线"}]
+            {action: "arrow", label: qsTr("Arrow")},
+            {action: "curvedarrow", label: qsTr("Curved arrow")},
+            {action: "doublearrow", label: qsTr("Double-headed curved arrow")},
+            {action: "line", label: qsTr("Line")}]
         case "pen": return [
-            {action: "pen", label: "画笔"},
-            {action: "highlighter", label: "荧光笔"}]
+            {action: "pen", label: qsTr("Pen")},
+            {action: "highlighter", label: qsTr("Highlighter")}]
         }
         return []
     }
@@ -277,6 +277,7 @@ Item {
     Rectangle { x: root.holeRight; y: root.holeTop; width: root.width - x; height: root.holeBottom - y; color: "#85000000" }
 
     Rectangle {
+        objectName: "selectionBorder"
         visible: root.activeRect.width > 0 && root.activeRect.height > 0
         x: root.localX
         y: root.localY
@@ -677,6 +678,7 @@ Item {
     }
 
     Rectangle {
+        objectName: "selectionDimensions"
         visible: root.activeRect.width > 0 && root.activeRect.height > 0
         x: Math.max(8, Math.min(root.localX, root.width - width - 8))
         y: Math.max(8, Math.min(root.localY - height - 5, root.height - height - 8))
@@ -732,7 +734,7 @@ Item {
                     anchors.centerIn: parent
                     spacing: 2
                     Text {
-                        text: "Q："
+                        text: "Q:"
                         width: 25
                         height: 20
                         color: root.toolbarInk
@@ -750,7 +752,7 @@ Item {
                     id: colorButtonMouse
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered: root.showToolbarTooltip("颜色：点击预设色或拖动调色盘", colorButtonMouse)
+                    onEntered: root.showToolbarTooltip(qsTr("Color"), colorButtonMouse)
                     onExited: root.hideToolbarTooltip()
                     onClicked: {
                         root.hideToolbarTooltip()
@@ -764,18 +766,18 @@ Item {
             Repeater {
                 id: toolbarRepeater
                 model: [
-                    {key: "V", action: "select", hint: "选区：拖动方块调整边框；方向键扩展 1px，Shift+方向键收缩 1px"},
-                    {key: "R", action: "rect_group", hint: "矩形组：点击选择矩形、圆角矩形或实心矩形"},
-                    {key: "E", action: "ellipse_group", hint: "圆形组：点击选择椭圆、实心椭圆或聚光灯"},
-                    {key: "A", action: "arrow_group", hint: "箭头组：点击选择箭头、弯曲箭头、双向弯曲箭头或直线"},
-                    {key: "D", action: "pen_group", hint: "画笔组：点击选择画笔或荧光笔"},
-                    {key: "T", action: "text", hint: "文字：单击输入，Shift+Enter 换行；按 Alt 确认文字并返回上一个工具"},
-                    {key: "G", action: "mosaic", hint: "马赛克：拖动选择矩形区域"},
-                    {key: "B", action: "marker", hint: "编号标记：单击放置自动编号"},
-                    {key: "Z", action: "undo", hint: "撤销：移除上一项标注"},
-                    {key: "X", action: "redo", hint: "重做：恢复刚撤销的标注"},
-                    {key: "C", action: "copy", hint: "复制：将截图复制到剪贴板"},
-                    {key: "S", action: "save", hint: "保存：将截图保存为 PNG"}
+                    {key: "V", action: "select", hint: qsTr("Selection · Arrow keys expand, Shift+arrows shrink (1 px)")},
+                    {key: "R", action: "rect_group", hint: qsTr("Rectangle")},
+                    {key: "E", action: "ellipse_group", hint: qsTr("Ellipse")},
+                    {key: "A", action: "arrow_group", hint: qsTr("Arrow")},
+                    {key: "D", action: "pen_group", hint: qsTr("Pen")},
+                    {key: "T", action: "text", hint: qsTr("Text · Click to type")},
+                    {key: "G", action: "mosaic", hint: qsTr("Mosaic · Drag to redact")},
+                    {key: "B", action: "marker", hint: qsTr("Number · Click to add")},
+                    {key: "Z", action: "undo", hint: qsTr("Undo")},
+                    {key: "X", action: "redo", hint: qsTr("Redo")},
+                    {key: "C", action: "copy", hint: qsTr("Copy screenshot")},
+                    {key: "S", action: "save", hint: qsTr("Save PNG")}
                 ]
                 delegate: Rectangle {
                     required property var modelData
@@ -797,7 +799,7 @@ Item {
                         anchors.centerIn: parent
                         spacing: 2
                         Text {
-                            text: modelData.key + "："
+                            text: modelData.key + ":"
                             width: 25
                             height: 20
                             color: root.toolbarInk
@@ -991,8 +993,8 @@ Item {
                     Repeater {
                         id: themeRepeater
                         model: [
-                            {action: "theme_light", dark: false, hint: "浅色工具栏"},
-                            {action: "theme_dark", dark: true, hint: "深色工具栏"}
+                            {action: "theme_light", dark: false, hint: qsTr("Light")},
+                            {action: "theme_dark", dark: true, hint: qsTr("Dark")}
                         ]
                         delegate: Rectangle {
                             required property var modelData
@@ -1170,40 +1172,58 @@ Item {
 
     Rectangle {
         id: toolbarTooltip
-        visible: root.toolbarTooltipVisible && toolbar.visible
+        objectName: "toolbarTooltip"
+        visible: (root.toolbarTooltipVisible && toolbar.visible) || editor.visible
         z: 30
-        width: tooltipLabel.implicitWidth + 20
+        width: Math.min(tooltipLabel.implicitWidth + 20, root.width - 16)
         height: tooltipLabel.implicitHeight + 12
-        x: Math.max(8, Math.min(root.toolbarTooltipX - width / 2,
+        readonly property real anchorX: editor.visible ? editor.x + editor.width / 2 : root.toolbarTooltipX
+        readonly property real anchorY: editor.visible ? editor.y : root.toolbarTooltipY
+        x: Math.max(8, Math.min(anchorX - width / 2,
                                 root.width - width - 8))
-        y: root.toolbarTooltipY - height - 8 >= 8
-           ? root.toolbarTooltipY - height - 8
-           : root.toolbarTooltipY + 40
+        y: anchorY - height - 8 >= 8
+           ? anchorY - height - 8
+           : anchorY + (editor.visible ? editor.height + 8 : 40)
         radius: 5
         color: "#f0202734"
         border.color: "#748090"
         Text {
             id: tooltipLabel
+            objectName: "tooltipLabel"
             anchors.centerIn: parent
-            text: root.toolbarTooltipText
+            width: parent.width - 20
+            text: editor.visible
+                  ? qsTr("Enter: confirm · Shift+Enter: new line · Alt: confirm & return to previous tool")
+                  : root.toolbarTooltipText
+            textFormat: Text.PlainText
+            wrapMode: Text.Wrap
+            horizontalAlignment: Qt.application.layoutDirection === Qt.RightToLeft
+                                 ? Text.AlignRight : Text.AlignLeft
             color: "white"
             font.pixelSize: 13
         }
     }
 
     Rectangle {
+        objectName: "statusPanel"
         visible: captureController.status.length > 0
         z: 20
         anchors.horizontalCenter: parent.horizontalCenter
         y: 8
-        width: statusText.contentWidth + 24
-        height: 32
+        width: Math.min(statusText.implicitWidth + 24, root.width - 16)
+        height: statusText.implicitHeight + 16
         radius: 5
         color: "#db9d2735"
         Text {
             id: statusText
+            objectName: "statusText"
             anchors.centerIn: parent
+            width: parent.width - 24
             text: captureController.status
+            textFormat: Text.PlainText
+            wrapMode: Text.Wrap
+            horizontalAlignment: Qt.application.layoutDirection === Qt.RightToLeft
+                                 ? Text.AlignRight : Text.AlignLeft
             color: "white"
         }
     }

@@ -15,12 +15,55 @@
 - 工具栏采用 QQ 截图风格的细线图标；调色盘顶部可切换深色或浅色工具栏，选择会保存。工具选中背景与快捷键、图标之间留有空隙。
 - 操作快捷键位于 QWERTY 键盘左手区域；鼠标悬停工具栏图标可查看功能说明。识字保留 F 快捷键，不在工具栏显示。
 - 复制 PNG 到 Wayland 剪贴板，或保存到图片目录。设置 `OMARCHY_SCREENSHOT_DIR` 可更改保存目录。
-- 可选 OCR：安装 `tesseract` 后将识别文本复制到剪贴板；安装 `tesseract-data-chi_sim` 后自动识别中英文。
+- 多语言界面：工具提示、工具名称、主题名称和错误信息跟随系统语言；支持长文本换行和希伯来语右向左显示。
+- 可选 OCR：安装 `tesseract` 和相应的 `tesseract-data-*` 语言包后，将识别文本复制到剪贴板。优先使用当前界面语言；如果同时安装英语数据，会一并识别英语。未安装对应语言包时回退到英语。
 - 处理负坐标、旋转显示器和不同缩放比例；导出时按各屏图像拼接。
+
+## 界面语言
+
+截至 2026 年 9 月 30 日，Omarchy 上游的[安装选项](https://github.com/omacom/omarchy/blob/8b4eae66da2938ba9559f103b18dbf85cdf28a70/install/provisioning/setup-form.sh#L32-L102)提供的是 48 种**键盘布局**，不是界面语言；安装器默认系统语言为英语。本工具覆盖这些布局对应的所有语言，并保留简体和繁体中文支持，共提供 42 种语言／地区模式（英语原文及 41 份翻译）。键盘布局不会改变界面语言。
+
+默认按 Qt 的系统界面语言偏好选择翻译，遵循 `LANGUAGE`、`LC_ALL`、`LC_MESSAGES` 和 `LANG`。也可以只为本工具指定语言，不修改系统设置：
+
+```sh
+omarchy-screenshot --language zh_CN
+omarchy-screenshot --language de
+OMARCHY_SCREENSHOT_LANGUAGE=ja omarchy-screenshot
+```
+
+优先级为 `--language` > `OMARCHY_SCREENSHOT_LANGUAGE` > 系统语言偏好。语言在启动时选定；下次启动时读取新的设置。支持 `pt-BR`、`zh-Hant` 等 Qt 语言标签；没有对应翻译时回退到英语。快捷键不随翻译改变。
+
+| 语言 | 代码 | 语言 | 代码 |
+| --- | --- | --- | --- |
+| 英语 | `en` | 阿塞拜疆语 | `az` |
+| 白俄罗斯语 | `be` | 保加利亚语 | `bg` |
+| 克罗地亚语 | `hr` | 捷克语 | `cs` |
+| 丹麦语 | `da` | 荷兰语 | `nl` |
+| 爱沙尼亚语 | `et` | 芬兰语 | `fi` |
+| 法语 | `fr` | 格鲁吉亚语 | `ka` |
+| 德语 | `de` | 希腊语 | `el` |
+| 希伯来语 | `he` | 匈牙利语 | `hu` |
+| 冰岛语 | `is` | 爱尔兰语 | `ga` |
+| 意大利语 | `it` | 日语 | `ja` |
+| 哈萨克语 | `kk` | 吉尔吉斯语 | `ky` |
+| 老挝语 | `lo` | 拉脱维亚语 | `lv` |
+| 立陶宛语 | `lt` | 马其顿语 | `mk` |
+| 挪威语（博克马尔） | `nb` | 波兰语 | `pl` |
+| 葡萄牙语（葡萄牙） | `pt_PT` | 葡萄牙语（巴西） | `pt_BR` |
+| 罗马尼亚语 | `ro` | 俄语 | `ru` |
+| 塞尔维亚语（西里尔字母） | `sr` | 斯洛伐克语 | `sk` |
+| 斯洛文尼亚语 | `sl` | 西班牙语 | `es` |
+| 瑞典语 | `sv` | 塔吉克语 | `tg` |
+| 土耳其语 | `tr` | 乌克兰语 | `uk` |
+| 简体中文 | `zh_CN` | 繁体中文 | `zh_TW` |
+
+英国英语使用英语原文；加拿大／瑞士法语、瑞士德语和拉丁美洲西班牙语分别使用法语、德语和西班牙语翻译。葡萄牙语和中文区分地区／文字形式。不同文字的字体由系统提供，建议安装 `noto-fonts` 和 `noto-fonts-cjk`。
+
+翻译使用 Qt Linguist 的 `.ts` 格式，位于 `translations/`；构建时编译为 `.qm` 并内嵌到程序，安装时不需要另外复制翻译目录。添加或修改界面文字后，运行 `cmake --build build --target update_translations` 更新目录，再补齐每份翻译；不要翻译 `%1` 占位符、程序名或快捷键。
 
 ## 构建与运行
 
-在 Arch / Omarchy 上需要 `cmake`、`gcc`、`qt6-base`、`qt6-declarative`、`qt6-wayland`、`layer-shell-qt`、`grim`、`wl-clipboard` 和 `hyprland`。
+在 Arch / Omarchy 上需要 `cmake`、`gcc`、`qt6-base`、`qt6-declarative`、`qt6-wayland`、`qt6-tools`、`layer-shell-qt`、`grim`、`wl-clipboard` 和 `hyprland`。默认构建自动化测试还需要 `python`；只构建程序时可传入 `-DBUILD_TESTING=OFF`。
 
 可在 Omarchy 上从 AUR 安装：
 
@@ -28,7 +71,7 @@
 omarchy pkg aur add omarchy-screenshot
 ```
 
-AUR 软件包会从对应的 GitHub 版本标签下载源码、编译并安装 `omarchy-screenshot`。可选安装 `tesseract` 和 `tesseract-data-chi_sim` 来使用 OCR。
+AUR 软件包会从对应的 GitHub 版本标签下载源码、编译并安装 `omarchy-screenshot`。可选安装 `tesseract` 及对应的语言数据来使用 OCR，例如 `tesseract-data-chi_sim`（简体中文）、`tesseract-data-chi_tra`（繁体中文）、`tesseract-data-deu`（德语）和 `tesseract-data-eng`（英语）。
 
 安装后，可在 `~/.config/hypr/bindings.lua` 中把 `Ctrl+Alt+A` 绑定为截图快捷键；如果已有同键绑定，先取消旧绑定：
 
@@ -45,9 +88,11 @@ cmake --build build -j
 ./build/omarchy-screenshot
 ```
 
+运行 `ctest --test-dir build --output-on-failure`，无需桌面会话即可检查所有翻译的完整性、占位符、内嵌加载、语言优先级／回退，以及 OCR 语言选择。
+
 连接至少两块显示器时，可运行 `./build/omarchy-screenshot --self-test`，在内存中检查跨屏选区、撤销与重做及编号标记，不显示覆盖层或保存图片。
 
-可运行 `./build/omarchy-screenshot --ui-self-test`，短暂打开覆盖层，模拟工具栏与调色盘操作、深浅主题切换、拖动矩形马赛克和画笔，检查设置保存、选中留白、预览、导出结果及文字输入，然后自动退出。自检使用临时设置目录，不会改动平时保存的颜色和主题。
+可运行 `./build/omarchy-screenshot --ui-self-test --language he`，短暂打开覆盖层，模拟工具栏与调色盘操作、深浅主题切换、拖动矩形马赛克和画笔，检查设置保存、选中留白、预览、导出结果、文字输入和窄屏翻译排版，然后自动退出。自检使用临时设置目录，不会改动平时保存的颜色和主题。可设置 `OMARCHY_SCREENSHOT_TEST_ARTIFACT_DIR` 导出深浅主题的界面局部截图；截图不包含桌面捕获像素。
 
 也可执行 `cmake --install build --prefix ~/.local`，安装到 `~/.local/bin/omarchy-screenshot`。需要在 Hyprland Wayland 会话中运行。
 
