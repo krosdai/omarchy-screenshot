@@ -292,6 +292,7 @@ int main(int argc, char **argv) {
   bool toolbarWorked = false;
   bool colorPickerWorked = false;
   bool colorPersistenceWorked = false;
+  bool toolbarThemeWorked = false;
   bool toolbarPaddingWorked = false;
   bool toolbarOrderWorked = false;
   bool groupedToolbarWorked = false;
@@ -397,6 +398,8 @@ int main(int argc, char **argv) {
           QStringLiteral("colorButton"));
       auto *colorPanel = views[0]->rootObject()->findChild<QQuickItem *>(
           QStringLiteral("colorPanel"));
+      auto *toolbarItem = views[0]->rootObject()->findChild<QQuickItem *>(
+          QStringLiteral("toolbar"));
       auto *saturationValueField =
           views[0]->rootObject()->findChild<QQuickItem *>(
               QStringLiteral("saturationValueField"));
@@ -418,6 +421,39 @@ int main(int argc, char **argv) {
         sendMouse(QEvent::MouseButtonRelease, buttonCenter, Qt::LeftButton,
                   Qt::NoButton);
         const bool opened = colorPanel->isVisible();
+        auto themeCenter = [&](int index) {
+          QVariant position;
+          QMetaObject::invokeMethod(views[0]->rootObject(), "themeButtonCenter",
+                                    Q_RETURN_ARG(QVariant, position),
+                                    Q_ARG(QVariant, index));
+          const auto point = position.toMap();
+          return QPointF(point.value(QStringLiteral("x"), -1).toDouble(),
+                         point.value(QStringLiteral("y"), -1).toDouble());
+        };
+        const QPointF lightCenter = themeCenter(0);
+        const QPointF darkCenter = themeCenter(1);
+        if (opened && toolbarItem && darkCenter.x() >= 0 &&
+            lightCenter.x() >= 0) {
+          const QColor lightSurface = toolbarItem->property("color").value<QColor>();
+          sendMouse(QEvent::MouseButtonPress, darkCenter, Qt::LeftButton,
+                    Qt::LeftButton);
+          sendMouse(QEvent::MouseButtonRelease, darkCenter, Qt::LeftButton,
+                    Qt::NoButton);
+          const bool darkApplied = controller.darkToolbar() &&
+                                   toolbarItem->property("color").value<QColor>() !=
+                                       lightSurface;
+          CaptureController restoredTheme;
+          const bool darkPersisted = restoredTheme.darkToolbar();
+          sendMouse(QEvent::MouseButtonPress, lightCenter, Qt::LeftButton,
+                    Qt::LeftButton);
+          sendMouse(QEvent::MouseButtonRelease, lightCenter, Qt::LeftButton,
+                    Qt::NoButton);
+          toolbarThemeWorked = darkApplied && darkPersisted &&
+                               !controller.darkToolbar() &&
+                               toolbarItem->property("color").value<QColor>() ==
+                                   lightSurface &&
+                               colorPanel->isVisible();
+        }
         const bool colorButtonUnselected =
             colorButton->property("color").value<QColor>().alpha() == 0;
         const QPointF huePoint = hueField->mapToItem(
@@ -1037,6 +1073,7 @@ int main(int argc, char **argv) {
                           << ", grouped tools: " << groupedToolbarWorked
                           << ", color picker: " << colorPickerWorked
                           << ", saved color: " << colorPersistenceWorked
+                          << ", toolbar theme: " << toolbarThemeWorked
                           << ", button padding: " << toolbarPaddingWorked
                           << ", old/new colors: " << annotationColorsKept
                           << ", colored text export: " << coloredTextExported
@@ -1077,7 +1114,8 @@ int main(int argc, char **argv) {
                        groupedToolbarWorked && redoShortcutWorked &&
                        escapeCloses &&
                        colorPickerWorked &&
-                       colorPersistenceWorked && toolbarPaddingWorked &&
+                       colorPersistenceWorked && toolbarThemeWorked &&
+                       toolbarPaddingWorked &&
                        annotationColorsKept && coloredTextExported &&
                        coloredPenExported && ocrButtonRemoved &&
                        cursorIconRendered && handlesInitiallyVisible &&

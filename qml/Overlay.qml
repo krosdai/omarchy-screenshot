@@ -30,6 +30,13 @@ Item {
     property real toolbarTooltipX: 0
     property real toolbarTooltipY: 0
     property bool toolbarTooltipVisible: false
+    readonly property bool darkToolbar: captureController.darkToolbar
+    readonly property color toolbarSurface: darkToolbar ? "#f0222b36" : "#f8ffffff"
+    readonly property color panelSurface: darkToolbar ? "#222b36" : "#ffffff"
+    readonly property color panelBorder: darkToolbar ? "#526171" : "#cbd4de"
+    readonly property color toolbarInk: darkToolbar ? "#e9f0f6" : "#26313d"
+    readonly property color toolbarHover: darkToolbar ? "#354352" : "#edf3f9"
+    readonly property color toolbarSelected: darkToolbar ? "#315577" : "#dcecff"
 
     function isToolGroup(action) { return action.endsWith("_group") }
     function groupName(action) { return action.substring(0, action.length - 6) }
@@ -99,6 +106,13 @@ Item {
         let swatch = colorPresetRepeater.itemAt(index)
         if (swatch === null) return {x: -1, y: -1}
         let point = swatch.mapToItem(root, swatch.width / 2, swatch.height / 2)
+        return {x: point.x, y: point.y}
+    }
+
+    function themeButtonCenter(index) {
+        let button = themeRepeater.itemAt(index)
+        if (button === null) return {x: -1, y: -1}
+        let point = button.mapToItem(root, button.width / 2, button.height / 2)
         return {x: point.x, y: point.y}
     }
 
@@ -649,6 +663,7 @@ Item {
 
     Rectangle {
         id: toolbar
+        objectName: "toolbar"
         visible: captureController.selected && captureController.toolbarScreen === screenIndex
         onVisibleChanged: if (!visible) {
             root.hideToolbarTooltip()
@@ -659,8 +674,8 @@ Item {
         width: toolsRow.width + 12
         height: toolsRow.height + 10
         radius: 6
-        color: "#f8ffffff"
-        border.color: "#cbd4de"
+        color: root.toolbarSurface
+        border.color: root.panelBorder
         x: Math.max(8, Math.min(root.localX + captureController.selection.width - width,
                                 root.width - width - 8))
         y: root.localY + captureController.selection.height + height + 8 < root.height
@@ -688,7 +703,7 @@ Item {
                         text: "Q："
                         width: 25
                         height: 20
-                        color: "#26313d"
+                        color: root.toolbarInk
                         font.pixelSize: 14
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
@@ -696,6 +711,7 @@ Item {
                     ToolbarGlyph {
                         action: "color"
                         accentColor: captureController.annotationColor
+                        darkMode: root.darkToolbar
                     }
                 }
                 MouseArea {
@@ -741,8 +757,8 @@ Item {
                         width: 60
                         height: 30
                         radius: 5
-                        color: captureController.tool === root.displayedTool(modelData.action) ? "#dcecff" :
-                               button.containsMouse ? "#edf3f9" : "transparent"
+                        color: captureController.tool === root.displayedTool(modelData.action) ? root.toolbarSelected :
+                               button.containsMouse ? root.toolbarHover : "transparent"
                     }
                     Row {
                         objectName: modelData.action === "select" ? "selectContent" : ""
@@ -752,7 +768,7 @@ Item {
                             text: modelData.key + "："
                             width: 25
                             height: 20
-                            color: "#26313d"
+                            color: root.toolbarInk
                             font.pixelSize: 14
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
@@ -761,6 +777,7 @@ Item {
                             objectName: modelData.action === "select" ? "selectCursorGlyph" : ""
                             action: root.displayedTool(modelData.action)
                             accentColor: captureController.annotationColor
+                            darkMode: root.darkToolbar
                         }
                     }
                     MouseArea {
@@ -815,8 +832,8 @@ Item {
         width: options.length * 38 + 10
         height: 48
         radius: 7
-        color: "#ffffff"
-        border.color: "#cbd4de"
+        color: root.panelSurface
+        border.color: root.panelBorder
         x: Math.max(8, Math.min(anchorX - width / 2, root.width - width - 8))
         y: toolbar.y - height - 8 >= 8
            ? toolbar.y - height - 8
@@ -847,12 +864,13 @@ Item {
                         anchors.margins: 3
                         radius: 5
                         color: captureController.tool === modelData.action
-                               ? "#dcecff" : optionMouse.containsMouse ? "#edf3f9" : "transparent"
+                               ? root.toolbarSelected : optionMouse.containsMouse ? root.toolbarHover : "transparent"
                     }
                     ToolbarGlyph {
                         anchors.centerIn: parent
                         action: modelData.action
                         accentColor: captureController.annotationColor
+                        darkMode: root.darkToolbar
                     }
                     MouseArea {
                         id: optionMouse
@@ -883,8 +901,8 @@ Item {
         width: 260
         height: 238
         radius: 7
-        color: "#ffffff"
-        border.color: "#cbd4de"
+        color: root.panelSurface
+        border.color: root.panelBorder
         x: Math.max(8, Math.min(toolbar.x, root.width - width - 8))
         y: toolbar.y - height - 8 >= 8
            ? toolbar.y - height - 8
@@ -934,12 +952,45 @@ Item {
             Item {
                 width: 238
                 height: 18
-                Text {
+                Row {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "绘制颜色"
-                    color: "#26313d"
-                    font.pixelSize: 13
+                    spacing: 4
+                    Repeater {
+                        id: themeRepeater
+                        model: [
+                            {action: "theme_light", dark: false, hint: "浅色工具栏"},
+                            {action: "theme_dark", dark: true, hint: "深色工具栏"}
+                        ]
+                        delegate: Rectangle {
+                            required property var modelData
+                            objectName: modelData.dark ? "darkThemeButton" : "lightThemeButton"
+                            width: 23
+                            height: 18
+                            radius: 4
+                            color: root.darkToolbar === modelData.dark
+                                   ? root.toolbarSelected
+                                   : themeButtonMouse.containsMouse ? root.toolbarHover : "transparent"
+                            ToolbarGlyph {
+                                anchors.centerIn: parent
+                                width: 16
+                                height: 16
+                                action: modelData.action
+                                darkMode: root.darkToolbar
+                            }
+                            MouseArea {
+                                id: themeButtonMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onEntered: root.showToolbarTooltip(modelData.hint, themeButtonMouse)
+                                onExited: root.hideToolbarTooltip()
+                                onClicked: {
+                                    root.hideToolbarTooltip()
+                                    captureController.darkToolbar = modelData.dark
+                                }
+                            }
+                        }
+                    }
                 }
                 Rectangle {
                     anchors.right: parent.right
@@ -948,7 +999,7 @@ Item {
                     height: 18
                     radius: 9
                     color: captureController.annotationColor
-                    border.color: "#8d98a5"
+                    border.color: root.panelBorder
                 }
             }
 
@@ -1069,7 +1120,7 @@ Item {
                         radius: 4
                         color: modelData
                         border.color: captureController.annotationColor === modelData
-                                      ? "#27313d" : "#a8b1bb"
+                                      ? root.toolbarInk : root.panelBorder
                         border.width: captureController.annotationColor === modelData ? 2 : 1
                         MouseArea {
                             anchors.fill: parent

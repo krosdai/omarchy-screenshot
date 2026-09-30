@@ -156,6 +156,7 @@ CaptureController::CaptureController(QObject *parent) : QObject(parent) {
           .toString());
   if (stored.isValid() && stored.alpha() == 255)
     m_annotationColor = stored.name(QColor::HexRgb);
+  m_darkToolbar = QSettings().value(QStringLiteral("toolbar/dark"), false).toBool();
   m_colorSaveTimer.setSingleShot(true);
   m_colorSaveTimer.setInterval(250);
   connect(&m_colorSaveTimer, &QTimer::timeout, this,
@@ -411,6 +412,16 @@ void CaptureController::saveAnnotationColor() {
   settings.setValue(QStringLiteral("drawing/color"), m_annotationColor);
   settings.sync();
   m_colorDirty = false;
+}
+
+void CaptureController::setDarkToolbar(bool dark) {
+  if (m_darkToolbar == dark)
+    return;
+  m_darkToolbar = dark;
+  QSettings settings;
+  settings.setValue(QStringLiteral("toolbar/dark"), dark);
+  settings.sync();
+  emit darkToolbarChanged();
 }
 
 void CaptureController::adjustSelectionEdge(int key, bool shrink) {

@@ -32,6 +32,8 @@ class CaptureController final : public QObject {
   Q_PROPERTY(QVariantMap toolVariants READ toolVariants NOTIFY toolVariantsChanged)
   Q_PROPERTY(QString annotationColor READ annotationColor WRITE
                  setAnnotationColor NOTIFY annotationColorChanged)
+  Q_PROPERTY(bool darkToolbar READ darkToolbar WRITE setDarkToolbar NOTIFY
+                 darkToolbarChanged)
   Q_PROPERTY(
       QVariantList annotations READ annotations NOTIFY annotationsChanged)
   Q_PROPERTY(QVariantMap draft READ draft NOTIFY draftChanged)
@@ -50,6 +52,7 @@ public:
   QString tool() const { return m_tool; }
   QVariantMap toolVariants() const { return m_toolVariants; }
   QString annotationColor() const { return m_annotationColor; }
+  bool darkToolbar() const { return m_darkToolbar; }
   QVariantList annotations() const { return m_annotations; }
   QVariantMap draft() const { return m_draft; }
   int toolbarScreen() const;
@@ -75,6 +78,7 @@ public:
   Q_INVOKABLE void setAnnotationColorFromHsv(qreal hue, qreal saturation,
                                              qreal value);
   Q_INVOKABLE void saveAnnotationColor();
+  Q_INVOKABLE void setDarkToolbar(bool dark);
   Q_INVOKABLE void adjustSelectionEdge(int key, bool shrink);
   Q_INVOKABLE QVariantList
   smoothedFreehandPoints(const QVariantList &points) const;
@@ -86,6 +90,7 @@ signals:
   void toolChanged();
   void toolVariantsChanged();
   void annotationColorChanged();
+  void darkToolbarChanged();
   void annotationsChanged();
   void draftChanged();
   void statusChanged();
@@ -123,6 +128,7 @@ private:
       {QStringLiteral("arrow"), QStringLiteral("arrow")},
       {QStringLiteral("pen"), QStringLiteral("pen")}};
   QString m_annotationColor = QStringLiteral("#ff4b55");
+  bool m_darkToolbar = false;
   QTimer m_colorSaveTimer;
   bool m_colorDirty = false;
   QVariantList m_annotations;

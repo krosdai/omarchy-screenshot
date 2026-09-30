@@ -4,16 +4,18 @@ Canvas {
     id: glyph
     required property string action
     property color accentColor: "#ff4b55"
+    property bool darkMode: false
     width: 22
     height: 22
     antialiasing: true
     onActionChanged: requestPaint()
     onAccentColorChanged: requestPaint()
+    onDarkModeChanged: requestPaint()
 
     onPaint: {
         const ctx = getContext("2d")
-        const ink = "#293340"
-        const paper = "#ffffff"
+        const ink = darkMode ? "#e9f0f6" : "#293340"
+        const paper = darkMode ? "#222b36" : "#ffffff"
         const brightness = accentColor.r * 0.2126 +
                            accentColor.g * 0.7152 + accentColor.b * 0.0722
         const iconFill = brightness > 0.87 ? "#d9e2ec" : accentColor
@@ -220,10 +222,15 @@ Canvas {
             })
             break
         case "mosaic":
-            ctx.fillStyle = "#74889c"
+            ctx.fillStyle = "#202020"
             ctx.fillRect(4, 4, 8, 8)
-            ctx.fillStyle = iconFill
+            ctx.fillStyle = "#ededed"
+            ctx.fillRect(12, 4, 8, 8)
+            ctx.fillStyle = "#a4a4a4"
+            ctx.fillRect(4, 12, 8, 8)
+            ctx.fillStyle = "#555555"
             ctx.fillRect(12, 12, 8, 8)
+            ctx.strokeStyle = darkMode ? "#f4f4f4" : "#242424"
             strokePath(() => {
                 ctx.rect(4, 4, 16, 16)
                 ctx.moveTo(12, 4)
@@ -233,14 +240,33 @@ Canvas {
             })
             break
         case "marker": {
-            fillPath(() => ctx.arc(12, 12, 8.5, 0, Math.PI * 2), iconFill)
-            ctx.fillStyle = brightness > 0.68 ? ink : paper
+            strokePath(() => ctx.arc(12, 12, 8.5, 0, Math.PI * 2))
+            ctx.fillStyle = ink
             ctx.font = "bold 13px sans-serif"
             ctx.textAlign = "center"
             ctx.textBaseline = "middle"
             ctx.fillText("1", 12, 12.5)
             break
         }
+
+        case "theme_light":
+            strokePath(() => ctx.arc(12, 12, 4.2, 0, Math.PI * 2))
+            for (let i = 0; i < 8; ++i) {
+                const angle = i * Math.PI / 4
+                const dx = Math.cos(angle)
+                const dy = Math.sin(angle)
+                strokePath(() => {
+                    ctx.moveTo(12 + dx * 7.2, 12 + dy * 7.2)
+                    ctx.lineTo(12 + dx * 9.8, 12 + dy * 9.8)
+                })
+            }
+            break
+        case "theme_dark":
+            strokePath(() => {
+                ctx.arc(12, 12, 8.4, -Math.PI * .3, Math.PI * .7)
+                ctx.bezierCurveTo(8.2, 17.8, 7.7, 8.4, 15.3, 4.1)
+            })
+            break
 
         case "undo":
             strokePath(undoArrow)
