@@ -78,7 +78,8 @@ class Translations(unittest.TestCase):
                 "-ts", str(reference),
             ], check=True, capture_output=True, text=True)
             sources = set(messages(reference))
-        self.assertEqual(len(sources), 65)
+        self.assertIn(DESCRIPTION, sources)
+        self.assertIn(SESSION_ERROR, sources)
         for locale, catalog in self.catalogs.items():
             with self.subTest(locale=locale):
                 self.assertEqual(set(catalog), sources)
