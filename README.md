@@ -22,6 +22,16 @@
 
 在 Arch / Omarchy 上需要 `cmake`、`gcc`、`qt6-base`、`qt6-declarative`、`qt6-wayland`、`layer-shell-qt`、`grim`、`wl-clipboard` 和 `hyprland`。
 
+发布到 AUR 后，可在 Omarchy 上安装：
+
+```sh
+omarchy pkg aur add omarchy-screenshot
+```
+
+AUR 软件包会从对应的 GitHub 版本标签下载源码、编译并安装 `omarchy-screenshot`。可选安装 `tesseract` 和 `tesseract-data-chi_sim` 来使用 OCR。
+
+如果从当前源码手动构建：
+
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
@@ -33,6 +43,10 @@ cmake --build build -j
 可运行 `./build/omarchy-screenshot --ui-self-test`，短暂打开覆盖层，模拟工具栏与调色盘操作、深浅主题切换、拖动矩形马赛克和画笔，检查设置保存、选中留白、预览、导出结果及文字输入，然后自动退出。自检使用临时设置目录，不会改动平时保存的颜色和主题。
 
 也可执行 `cmake --install build --prefix ~/.local`，安装到 `~/.local/bin/omarchy-screenshot`。需要在 Hyprland Wayland 会话中运行。
+
+### AUR 发布
+
+仓库根目录的 [PKGBUILD](PKGBUILD) 定义了 AUR 包。`.github/workflows/publish-aur.yml` 沿用 lazycat-terminal 的发布方式：推送 `v主版本.次版本.修订号` 标签后，GitHub Actions 更新软件包版本和源码校验和，并提交到 AUR。首次发布前，需要在 GitHub 仓库中配置 `AUR_USERNAME`、`AUR_EMAIL` 和 `AUR_SSH_PRIVATE_KEY` 三个 Actions Secrets，并确保对应的公钥已添加到 AUR 账户。
 
 ## 操作
 

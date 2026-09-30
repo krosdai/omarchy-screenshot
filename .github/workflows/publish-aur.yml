@@ -1,0 +1,41 @@
+name: Publish to AUR
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  publish-aur:
+    name: Publish to AUR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version
+        id: version
+        run: |
+          if [[ ! "$GITHUB_REF_NAME" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "Expected a vMAJOR.MINOR.PATCH tag" >&2
+            exit 1
+          fi
+          version="${BASH_REMATCH[1]}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          sed -i "s/^pkgver=.*/pkgver=$version/" PKGBUILD
+          sed -i 's/^pkgrel=.*/pkgrel=1/' PKGBUILD
+
+      - name: Publish AUR package
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.2
+        with:
+          pkgname: omarchy-screenshot
+          pkgbuild: ./PKGBUILD
+          updpkgsums: true
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: "Update to version ${{ steps.version.outputs.version }}"
+          ssh_keyscan_types: rsa,ecdsa,ed25519
