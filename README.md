@@ -18,11 +18,54 @@
 - 尚未标注时可点击工具栏的滚动截图按钮：一个窗口直接开始，多个窗口先选择目标。选择时，选区附近提示“点击一个窗口，开始长截图”，各窗口蒙版标明“点击开始长截图”，悬停会高亮目标；单击窗口直接开始，Esc 取消。软件只在该窗口与选区的交集内取图，使用虚拟滚轮分段滚动并自动拼接。固定页眉和页脚会尽量去重，无法可靠拼接时保留已有长图。
 - 滚动中不显示截图预览，工具栏提示“点击鼠标停止截图”；在截图区域空白处单击即可停止，移动鼠标不会停止。完成后长图在屏幕内适配显示，高度不超过屏幕的 4/5；放大后，选区工具 V 下可左键拖动长图内部上下查看，拖动边框或八个调整点仍调整选区，标注工具仍用于绘制。也可滚轮平移、Ctrl+滚轮缩放、中键拖动，继续标注、复制与保存。长图工具栏提供“继续截图”，原有标注保留；若窗口未响应，先点击实际滚动区域，再点“继续滚动”。
 - 普通截图与长图共用工具栏样式、分组图标和调色盘；普通截图的滚动按钮位于编号标记右侧，长图的缩小、放大和“继续截图”依次位于编号标记与撤销之间。滚动中的停止提示持续显示，完成后的顶部提示使用工具栏的中性背景。
+- 多语言界面：工具提示、工具名称、主题名称和错误信息跟随系统语言；支持长文本换行和希伯来语右向左显示。
 - 处理负坐标、旋转显示器和不同缩放比例；导出时按各屏图像拼接。
+
+## 界面语言
+
+截至 2026 年 9 月 30 日，Omarchy 上游的[安装选项](https://github.com/omacom/omarchy/blob/8b4eae66da2938ba9559f103b18dbf85cdf28a70/install/provisioning/setup-form.sh#L32-L102)提供的是 48 种**键盘布局**，不是界面语言；安装器默认系统语言为英语。本工具覆盖这些布局对应的所有语言，并保留简体和繁体中文支持，共提供 42 种语言／地区模式（英语原文及 41 份翻译）。键盘布局不会改变界面语言。
+
+默认按 Qt 的系统界面语言偏好选择翻译，遵循 `LANGUAGE`、`LC_ALL`、`LC_MESSAGES` 和 `LANG`。也可以只为本工具指定语言，不修改系统设置：
+
+```sh
+omarchy-screenshot --language zh_CN
+omarchy-screenshot --language de
+OMARCHY_SCREENSHOT_LANGUAGE=ja omarchy-screenshot
+```
+
+优先级为 `--language` > `OMARCHY_SCREENSHOT_LANGUAGE` > 系统语言偏好。语言在启动时选定；下次启动时读取新的设置。支持 `pt-BR`、`zh-Hant` 等 Qt 语言标签；没有对应翻译时回退到英语。快捷键不随翻译改变。
+
+| 语言 | 代码 | 语言 | 代码 |
+| --- | --- | --- | --- |
+| 英语 | `en` | 阿塞拜疆语 | `az` |
+| 白俄罗斯语 | `be` | 保加利亚语 | `bg` |
+| 克罗地亚语 | `hr` | 捷克语 | `cs` |
+| 丹麦语 | `da` | 荷兰语 | `nl` |
+| 爱沙尼亚语 | `et` | 芬兰语 | `fi` |
+| 法语 | `fr` | 格鲁吉亚语 | `ka` |
+| 德语 | `de` | 希腊语 | `el` |
+| 希伯来语 | `he` | 匈牙利语 | `hu` |
+| 冰岛语 | `is` | 爱尔兰语 | `ga` |
+| 意大利语 | `it` | 日语 | `ja` |
+| 哈萨克语 | `kk` | 吉尔吉斯语 | `ky` |
+| 老挝语 | `lo` | 拉脱维亚语 | `lv` |
+| 立陶宛语 | `lt` | 马其顿语 | `mk` |
+| 挪威语（博克马尔） | `nb` | 波兰语 | `pl` |
+| 葡萄牙语（葡萄牙） | `pt_PT` | 葡萄牙语（巴西） | `pt_BR` |
+| 罗马尼亚语 | `ro` | 俄语 | `ru` |
+| 塞尔维亚语（西里尔字母） | `sr` | 斯洛伐克语 | `sk` |
+| 斯洛文尼亚语 | `sl` | 西班牙语 | `es` |
+| 瑞典语 | `sv` | 塔吉克语 | `tg` |
+| 土耳其语 | `tr` | 乌克兰语 | `uk` |
+| 简体中文 | `zh_CN` | 繁体中文 | `zh_TW` |
+
+英国英语使用英语原文；加拿大／瑞士法语、瑞士德语和拉丁美洲西班牙语分别使用法语、德语和西班牙语翻译。葡萄牙语和中文区分地区／文字形式。不同文字的字体由系统提供，建议安装 `noto-fonts` 和 `noto-fonts-cjk`。
+
+翻译使用 Qt Linguist 的 `.ts` 格式，位于 `translations/`；构建时编译为 `.qm` 并内嵌到程序，安装时不需要另外复制翻译目录。添加或修改界面文字后，运行 `cmake --build build --target update_translations` 更新目录，再补齐每份翻译；不要翻译 `%1` 占位符、程序名或快捷键。
 
 ## 构建与运行
 
-在 Arch / Omarchy 上需要 `cmake`、`gcc`、`pkgconf`、`wayland`、`qt6-base`、`qt6-declarative`、`qt6-wayland`、`layer-shell-qt`、`grim`、`wl-clipboard` 和 `hyprland`。滚动截图使用 Hyprland 暴露的 wlr 虚拟指针协议。
+在 Arch / Omarchy 上需要 `cmake`、`gcc`、`pkgconf`、`wayland`、`qt6-base`、`qt6-declarative`、`qt6-wayland`、`qt6-tools`、`layer-shell-qt`、`grim`、`wl-clipboard` 和 `hyprland`。滚动截图使用 Hyprland 暴露的 wlr 虚拟指针协议。默认构建自动化测试还需要 `python`；只构建程序时可传入 `-DBUILD_TESTING=OFF`。
 
 可在 Omarchy 上从 AUR 安装：
 
@@ -47,9 +90,11 @@ cmake --build build -j
 ./build/omarchy-screenshot
 ```
 
+运行 `ctest --test-dir build --output-on-failure`，无需桌面会话即可检查所有翻译的完整性、占位符、内嵌加载和语言优先级／回退。
+
 连接至少两块显示器时，可运行 `./build/omarchy-screenshot --self-test`，在内存中检查跨屏选区、撤销与重做及编号标记，不显示覆盖层或保存图片。
 
-可运行 `./build/omarchy-screenshot --ui-self-test`，短暂打开覆盖层，模拟工具栏与调色盘操作、深浅主题切换、拖动矩形马赛克和画笔，检查设置保存、选中留白、预览、导出结果及文字输入，然后自动退出。自检使用临时设置目录，不会改动平时保存的颜色和主题。
+可运行 `./build/omarchy-screenshot --ui-self-test --language he`，短暂打开覆盖层，模拟工具栏与调色盘操作、深浅主题切换、拖动矩形马赛克和画笔，检查设置保存、选中留白、预览、导出结果、文字输入和窄屏翻译排版，然后自动退出。自检使用临时设置目录，不会改动平时保存的颜色和主题。可设置 `OMARCHY_SCREENSHOT_TEST_ARTIFACT_DIR` 导出深浅主题的界面局部截图；截图不包含桌面捕获像素。
 
 滚动拼接和长图界面可分别运行 `./build/omarchy-screenshot --scroll-stitch-test` 与 `./build/omarchy-screenshot --scroll-ui-self-test` 检查。
 
