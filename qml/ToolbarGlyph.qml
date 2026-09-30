@@ -244,11 +244,14 @@ Canvas {
             break
         case "marker": {
             strokePath(() => ctx.arc(12, 12, 8.5, 0, Math.PI * 2))
-            ctx.fillStyle = ink
-            ctx.font = "bold 13px sans-serif"
-            ctx.textAlign = "center"
-            ctx.textBaseline = "middle"
-            ctx.fillText("1", 12, 12.5)
+            ctx.lineWidth = 2.1
+            strokePath(() => {
+                ctx.moveTo(9.8, 10.1)
+                ctx.lineTo(12.3, 8.1)
+                ctx.lineTo(12.3, 16.5)
+                ctx.moveTo(9.6, 16.6)
+                ctx.lineTo(15, 16.6)
+            })
             break
         }
 

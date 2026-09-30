@@ -902,7 +902,7 @@ Item {
         visible: false
         z: 20
         width: 260
-        height: 238
+        height: 246
         radius: 7
         color: root.panelSurface
         border.color: root.panelBorder
@@ -954,7 +954,7 @@ Item {
 
             Item {
                 width: 238
-                height: 18
+                height: 26
                 Row {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
@@ -968,9 +968,9 @@ Item {
                         delegate: Rectangle {
                             required property var modelData
                             objectName: modelData.dark ? "darkThemeButton" : "lightThemeButton"
-                            width: 23
-                            height: 18
-                            radius: 4
+                            width: 28
+                            height: 26
+                            radius: 5
                             color: root.darkToolbar === modelData.dark
                                    ? root.toolbarSelected
                                    : themeButtonMouse.containsMouse ? root.toolbarHover : "transparent"
