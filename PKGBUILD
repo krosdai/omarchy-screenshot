@@ -4,7 +4,7 @@ pkgver=0.1.5
 pkgrel=1
 pkgdesc="Qt 6 screenshot and annotation tool for Omarchy and Hyprland"
 arch=('x86_64')
-url="https://github.com/manateelazycat/omarchy-screenshot"
+url="https://github.com/krosdai/omarchy-screenshot"
 license=('GPL-3.0-only')
 depends=('qt6-base' 'qt6-declarative' 'qt6-wayland' 'layer-shell-qt' 'grim' 'wl-clipboard' 'hyprland')
 makedepends=('cmake' 'qt6-tools' 'python')
@@ -20,7 +20,7 @@ build() {
 }
 
 check() {
-    ctest --test-dir build --output-on-failure
+    ctest --test-dir build --output-on-failure --no-tests=error
 }
 
 package() {
