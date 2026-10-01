@@ -67,6 +67,8 @@ OMARCHY_SCREENSHOT_LANGUAGE=ja omarchy-screenshot
 
 在 Arch / Omarchy 上需要 `cmake`、`gcc`、`pkgconf`、`wayland`、`wayland-protocols`、`qt6-base`、`qt6-declarative`、`qt6-wayland`、`qt6-tools`、`layer-shell-qt`、`grim`、`wl-clipboard` 和 `hyprland`。滚动截图使用 Hyprland 暴露的 wlr 虚拟指针协议。程序通过 `ext-image-copy-capture-v1` 协议直接抓取显示器画面；合成器不支持该协议或显示器经过旋转时改用 `grim`。默认构建自动化测试还需要 `python`；只构建程序时可传入 `-DBUILD_TESTING=OFF`。
 
+支持 `x86_64` 和 `aarch64`（64 位 ARM）架构。在 ARM 机器上使用相同的构建命令，CMake 会使用本机工具链生成 ARM 可执行文件；`PKGBUILD` 也声明了这两种架构，无需通过 `makepkg --ignorearch` 跳过架构检查。
+
 可在 Omarchy 上从 AUR 安装：
 
 ```sh
