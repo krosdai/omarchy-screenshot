@@ -94,7 +94,7 @@ cmake --build build -j
 ./build/omarchy-screenshot
 ```
 
-运行 `ctest --test-dir build --output-on-failure`，无需桌面会话即可检查所有翻译的完整性、占位符、内嵌加载，以及语言优先级／回退；同时离线检查滚动拼接，以及 1、1.25、1.5 和 2 倍缩放下的光标图标抓取和逻辑坐标像素采样。缩放测试使用独立进程和软件渲染，不修改桌面缩放。`--ui-self-test` 中的光标、马赛克和画笔预览检查也会把抓取图像转换为逻辑尺寸后采样，可直接在 2 倍缩放的 Wayland 会话中运行。
+运行 `ctest --test-dir build --output-on-failure`，无需桌面会话即可检查所有翻译的完整性、占位符、内嵌加载，以及语言优先级／回退；同时离线检查滚动拼接、常驻进程的套接字处理和截图状态重置，以及 1、1.25、1.5 和 2 倍缩放下的光标图标抓取和逻辑坐标像素采样。缩放测试使用独立进程和软件渲染，不修改桌面缩放。`--ui-self-test` 中的光标、马赛克和画笔预览检查也会把抓取图像转换为逻辑尺寸后采样，可直接在 2 倍缩放的 Wayland 会话中运行。
 
 连接至少两块显示器时，可运行 `./build/omarchy-screenshot --self-test`，在内存中检查跨屏选区、撤销与重做及编号标记，不显示覆盖层或保存图片。
 
@@ -104,7 +104,37 @@ cmake --build build -j
 
 工具栏的离线交互检查可运行 `QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME= QT_QUICK_BACKEND=software /usr/lib/qt6/bin/qmltestrunner -input tests`，覆盖分组菜单、调色盘、主题一致性和按钮位置。
 
-也可执行 `cmake --install build --prefix ~/.local`，安装到 `~/.local/bin/omarchy-screenshot`。需要在 Hyprland Wayland 会话中运行。
+也可执行 `cmake --install build --prefix ~/.local`，安装到 `~/.local/bin/omarchy-screenshot`。本地安装后如需使用常驻模式，配置时加上 `-DSYSTEMD_USER_UNIT_DIR=$HOME/.local/share/systemd/user`，让 systemd 找到对应单元。需要在 Hyprland Wayland 会话中运行。
+
+### 常驻模式
+
+普通启动要先启动 Qt、加载覆盖层并初始化 GPU，才能显示画面。常驻模式在两次截图之间保留这些准备工作：`omarchy-screenshot` 把请求交给正在运行的后台进程后立即退出。在 5K 显示器上，覆盖层出现的时间从约 230 ms 缩短到约 60–90 ms。
+
+常驻模式默认关闭：安装软件包不会改变任何行为，`omarchy-screenshot` 仍像以前一样自行截图。如需开启，启用软件包安装的 systemd 用户套接字，它会在第一次截图时启动后台进程：
+
+```sh
+systemctl --user enable --now omarchy-screenshot.socket
+```
+
+后台进程启动后的第一次截图，耗时与普通启动相近。之后它保持就绪，连续 10 分钟没有截图就退出并释放全部内存，下次截图时再自动启动。运行期间，它在 5K 显示器上约占 100 MB 内存，外加约 320 MB 显存；集成显卡的显存来自系统内存。
+
+如需调整保持就绪的时间，运行 `systemctl --user edit omarchy-screenshot.service` 替换启动命令；`--idle-timeout 0` 表示一直运行：
+
+```ini
+[Service]
+ExecStart=
+ExecStart=/usr/bin/omarchy-screenshot --daemon --idle-timeout 1800
+```
+
+不使用 systemd 时，可以在会话自启动中运行 `omarchy-screenshot --daemon`。快捷键无需修改：没有后台进程时，`omarchy-screenshot` 会自行截图。只有不带参数的启动才会交给后台进程；`--language` 和各项自测始终独立运行，后台进程沿用启动时的界面语言。
+
+如需关闭常驻模式，运行 `systemctl --user disable --now omarchy-screenshot.socket`，正在运行的后台进程也会一并停止；不使用 systemd 时，从自启动中移除 `omarchy-screenshot --daemon` 即可。
+
+Omarchy 默认让新的覆盖层淡入，两种模式下都会让覆盖层最多晚 400 ms 出现。如需立即显示，可在 `~/.config/hypr/hyprland.lua` 中加入以下规则：
+
+```lua
+hl.layer_rule({ match = { namespace = "^omarchy-screenshot$" }, no_anim = true, animation = "none" })
+```
 
 ### AUR 发布
 

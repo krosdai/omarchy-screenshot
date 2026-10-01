@@ -1,0 +1,11 @@
+[Unit]
+Description=Omarchy Screenshot capture requests
+PartOf=graphical-session.target
+
+[Socket]
+ListenStream=%t/omarchy-screenshot.sock
+SocketMode=0600
+RemoveOnStop=yes
+
+[Install]
+WantedBy=graphical-session.target

@@ -134,7 +134,20 @@ if(BUILD_TESTING)
         ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1")
 endif()
 
-install(TARGETS omarchy-screenshot RUNTIME DESTINATION bin)
+include(GNUInstallDirs)
+install(TARGETS omarchy-screenshot RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+# systemd starts the resident daemon on the first request and lets it exit
+# when idle. A per-user install (~/.local) should point this at
+# ~/.local/share/systemd/user.
+set(SYSTEMD_USER_UNIT_DIR "${CMAKE_INSTALL_PREFIX}/lib/systemd/user"
+    CACHE PATH "Where to install the systemd user units")
+configure_file(systemd/omarchy-screenshot.service.in
+    "${CMAKE_CURRENT_BINARY_DIR}/omarchy-screenshot.service" @ONLY)
+install(FILES
+    systemd/omarchy-screenshot.socket
+    "${CMAKE_CURRENT_BINARY_DIR}/omarchy-screenshot.service"
+    DESTINATION "${SYSTEMD_USER_UNIT_DIR}")
 
 include(CTest)
 if(BUILD_TESTING)
