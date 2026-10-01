@@ -4,6 +4,8 @@
 #include "capturecontroller.h"
 #include "virtualpointer.h"
 
+#include "screencapture.h"
+
 #include <QBuffer>
 #include <QDateTime>
 #include <QDir>
@@ -25,6 +27,8 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <memory>
+#include <vector>
 
 namespace {
 QByteArray run(const QString &program, const QStringList &arguments,
@@ -186,10 +190,81 @@ CaptureController::CaptureController(QObject *parent) : QObject(parent) {
 }
 
 CaptureController::~CaptureController() {
+  if (m_exportThread)
+    m_exportThread->wait();
   saveAnnotationColor();
 }
 
 bool CaptureController::initialize(QString *error) {
+  return startCapture(error) && finishCapture(error);
+}
+
+CaptureController::CaptureResult
+CaptureController::captureMonitors(const QStringList &names,
+                                   const QList<bool> &direct) {
+  CaptureResult result;
+  QStringList wanted;
+  for (int i = 0; i < names.size(); ++i)
+    wanted.append(direct[i] ? names[i] : QString());
+  result.images = captureOutputs(wanted, 2000);
+
+  // grim covers what the protocol could not; its outputs are fetched in
+  // parallel. PPM skips the PNG compression that dominates grim's runtime.
+  std::vector<std::unique_ptr<QProcess>> fallbacks(names.size());
+  for (int i = 0; i < names.size(); ++i) {
+    if (!result.images[i].isNull())
+      continue;
+    fallbacks[i] = std::make_unique<QProcess>();
+    fallbacks[i]->start(QStringLiteral("grim"),
+                        {QStringLiteral("-t"), QStringLiteral("ppm"),
+                         QStringLiteral("-o"), names[i], QStringLiteral("-")});
+  }
+  for (int i = 0; i < names.size(); ++i) {
+    QProcess *process = fallbacks[i].get();
+    if (!process)
+      continue;
+    if (!process->waitForStarted(3000) || !process->waitForFinished(15000) ||
+        process->exitCode() != 0) {
+      result.error = QStringLiteral("grim: %1").arg(
+          QString::fromUtf8(process->readAllStandardError()).trimmed());
+      return result;
+    }
+    result.images[i] = QImage::fromData(process->readAllStandardOutput());
+  }
+  for (int i = 0; i < names.size(); ++i) {
+    const QImage &image = result.images[i];
+    if (image.isNull()) {
+      result.error = tr("Cannot capture monitor %1.").arg(names[i]);
+      return result;
+    }
+    result.mosaics.append(image.scaled(qMax(1, image.width() / 12),
+                                       qMax(1, image.height() / 12),
+                                       Qt::IgnoreAspectRatio,
+                                       Qt::FastTransformation));
+  }
+  return result;
+}
+
+bool CaptureController::finishCapture(QString *error) {
+  if (!m_capture.valid())
+    return m_imagesReady;
+  const CaptureResult result = m_capture.get();
+  addWindowCandidates(m_clients.get());
+  if (!result.error.isEmpty()) {
+    if (error)
+      *error = result.error;
+    return false;
+  }
+  for (int i = 0; i < m_monitors.size(); ++i) {
+    m_monitors[i].image = result.images[i];
+    m_monitors[i].mosaicImage = result.mosaics[i];
+  }
+  m_imagesReady = true;
+  emit imagesReadyChanged();
+  return true;
+}
+
+bool CaptureController::startCapture(QString *error) {
   if (qEnvironmentVariable("XDG_SESSION_TYPE") != QStringLiteral("wayland") ||
       qEnvironmentVariableIsEmpty("HYPRLAND_INSTANCE_SIGNATURE")) {
     if (error)
@@ -210,6 +285,8 @@ bool CaptureController::initialize(QString *error) {
   }
 
   const auto screens = QGuiApplication::screens();
+  QStringList names;
+  QList<bool> direct;
   for (const auto &entry : monitorData.array()) {
     const auto data = entry.toObject();
     CaptureMonitor monitor;
@@ -246,25 +323,24 @@ bool CaptureController::initialize(QString *error) {
         QRectF(data.value(QStringLiteral("x")).toDouble(),
                data.value(QStringLiteral("y")).toDouble(), width, height);
 
-    monitor.image = captureWithoutCursor(QStringLiteral("-o"), monitor.name, error);
-    if (monitor.image.isNull()) {
-      if (error && error->isEmpty())
-        *error = tr("Cannot capture monitor %1.").arg(monitor.name);
-      return false;
-    }
-    const QImage coarse =
-        monitor.image.scaled(qMax(1, monitor.image.width() / 12),
-                             qMax(1, monitor.image.height() / 12),
-                             Qt::IgnoreAspectRatio, Qt::FastTransformation);
-    monitor.mosaicImage = coarse.scaled(
-        monitor.image.size(), Qt::IgnoreAspectRatio, Qt::FastTransformation);
+    names.append(monitor.name);
+    direct.append(transform == 0);
     m_candidates.push_back({monitor.geometry, false});
     m_monitors.push_back(std::move(monitor));
   }
+  m_capture = std::async(std::launch::async, [names, direct] {
+    return captureMonitors(names, direct);
+  });
+  // Hyprland answers IPC only after it finishes the copy, so wait off-thread.
+  m_clients = std::async(std::launch::async, [] {
+    return run(QStringLiteral("hyprctl"),
+               {QStringLiteral("-j"), QStringLiteral("clients")}, nullptr);
+  });
+  return true;
+}
 
-  const auto clients = QJsonDocument::fromJson(
-      run(QStringLiteral("hyprctl"),
-          {QStringLiteral("-j"), QStringLiteral("clients")}, nullptr));
+void CaptureController::addWindowCandidates(const QByteArray &json) {
+  const auto clients = QJsonDocument::fromJson(json);
   for (const auto &entry : clients.array()) {
     const auto data = entry.toObject();
     if (!data.value(QStringLiteral("mapped")).toBool() ||
@@ -299,7 +375,6 @@ bool CaptureController::initialize(QString *error) {
           {rect, true, data.value(QStringLiteral("address")).toString(),
            data.value(QStringLiteral("title")).toString(), monitorIndex});
   }
-  return true;
 }
 
 QVariantList CaptureController::scrollCandidates() const {
@@ -1373,20 +1448,43 @@ QImage CaptureController::renderedImage() const {
   return result;
 }
 
+void CaptureController::exportInBackground(std::function<QString()> job) {
+  if (m_exporting)
+    return;
+  m_exporting = true;
+  emit exportingChanged();
+  m_exportThread = QThread::create([this, job = std::move(job)] {
+    const QString error = job();
+    QMetaObject::invokeMethod(
+        this, [this, error] { finishExport(error); }, Qt::QueuedConnection);
+  });
+  connect(m_exportThread, &QThread::finished, m_exportThread,
+          &QObject::deleteLater);
+  m_exportThread->start();
+}
+
+void CaptureController::finishExport(const QString &error) {
+  m_exporting = false;
+  emit exportingChanged();
+  if (error.isEmpty())
+    emit done();
+  else
+    setStatus(error);
+}
+
 void CaptureController::copy() {
   const auto image = renderedImage();
   if (image.isNull())
     return;
-  QByteArray png;
-  QBuffer buffer(&png);
-  buffer.open(QIODevice::WriteOnly);
-  image.save(&buffer, "PNG");
-  QString error;
-  if (!copyBytes(png, QStringLiteral("image/png"), &error)) {
-    setStatus(error);
-    return;
-  }
-  emit done();
+  exportInBackground([image] {
+    QByteArray png;
+    QBuffer buffer(&png);
+    buffer.open(QIODevice::WriteOnly);
+    image.save(&buffer, "PNG");
+    QString error;
+    copyBytes(png, QStringLiteral("image/png"), &error);
+    return error;
+  });
 }
 
 void CaptureController::save() {
@@ -1407,12 +1505,12 @@ void CaptureController::save() {
                                .arg(QDateTime::currentDateTime().toString(
                                    QStringLiteral("yyyy-MM-dd_HH-mm-ss-zzz")));
   const QString path = QDir(directory).filePath(filename);
-  if (!image.save(path, "PNG")) {
-    setStatus(tr("Cannot save: %1").arg(path));
-    return;
-  }
-  QTextStream(stdout) << path << '\n';
-  emit done();
+  exportInBackground([image, path] {
+    if (!image.save(path, "PNG"))
+      return tr("Cannot save: %1").arg(path);
+    QTextStream(stdout) << path << '\n';
+    return QString();
+  });
 }
 
 void CaptureController::cancel() { emit done(); }

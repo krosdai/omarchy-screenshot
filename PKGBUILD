@@ -7,7 +7,7 @@ arch=('x86_64')
 url="https://github.com/manateelazycat/omarchy-screenshot"
 license=('GPL-3.0-only' 'MIT')
 depends=('qt6-base' 'qt6-declarative' 'qt6-wayland' 'layer-shell-qt' 'grim' 'wl-clipboard' 'hyprland' 'wayland')
-makedepends=('cmake' 'pkgconf' 'qt6-tools' 'python')
+makedepends=('cmake' 'pkgconf' 'qt6-tools' 'python' 'wayland-protocols')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
 sha256sums=('SKIP')
 

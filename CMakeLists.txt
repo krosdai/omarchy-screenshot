@@ -12,6 +12,8 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Qml Quick Test LinguistTools)
 find_package(LayerShellQt REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(WAYLAND_CLIENT REQUIRED IMPORTED_TARGET wayland-client)
+pkg_check_modules(WAYLAND_PROTOCOLS REQUIRED wayland-protocols>=1.37)
+pkg_get_variable(WAYLAND_PROTOCOLS_DIR wayland-protocols pkgdatadir)
 find_program(WAYLAND_SCANNER wayland-scanner REQUIRED)
 
 set(VIRTUAL_POINTER_XML ${CMAKE_CURRENT_SOURCE_DIR}/protocols/wlr-virtual-pointer-unstable-v1.xml)
@@ -26,12 +28,32 @@ add_custom_command(
 qt_policy(SET QTP0001 NEW)
 qt_policy(SET QTP0004 NEW)
 
+# The image source protocol references foreign toplevels, so its generated
+# code needs that interface too.
+set(capture_protocols
+    staging/ext-foreign-toplevel-list/ext-foreign-toplevel-list-v1.xml
+    staging/ext-image-capture-source/ext-image-capture-source-v1.xml
+    staging/ext-image-copy-capture/ext-image-copy-capture-v1.xml
+)
+foreach(protocol IN LISTS capture_protocols)
+    get_filename_component(protocol_name "${protocol}" NAME_WE)
+    set(protocol_xml "${WAYLAND_PROTOCOLS_DIR}/${protocol}")
+    set(protocol_header "${CMAKE_CURRENT_BINARY_DIR}/${protocol_name}-client-protocol.h")
+    set(protocol_code "${CMAKE_CURRENT_BINARY_DIR}/${protocol_name}-protocol.c")
+    add_custom_command(
+        OUTPUT "${protocol_header}" "${protocol_code}"
+        COMMAND "${WAYLAND_SCANNER}" client-header "${protocol_xml}" "${protocol_header}"
+        COMMAND "${WAYLAND_SCANNER}" private-code "${protocol_xml}" "${protocol_code}"
+        DEPENDS "${protocol_xml}"
+        VERBATIM
+    )
+    list(APPEND protocol_sources "${protocol_header}" "${protocol_code}")
+endforeach()
+
 qt_add_executable(omarchy-screenshot
     src/main.cpp
     src/capturecontroller.cpp
     src/capturecontroller.h
-    src/mosaicoverlay.cpp
-    src/mosaicoverlay.h
     src/scrollstitcher.cpp
     src/scrollstitcher.h
     src/longimageitem.cpp
@@ -40,6 +62,9 @@ qt_add_executable(omarchy-screenshot
     src/virtualpointer.h
     ${VIRTUAL_POINTER_CODE}
     ${VIRTUAL_POINTER_HEADER}
+    src/screencapture.cpp
+    src/screencapture.h
+    ${protocol_sources}
 )
 
 set_source_files_properties(qml/Overlay.qml PROPERTIES QT_RESOURCE_ALIAS Overlay.qml)
