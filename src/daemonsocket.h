@@ -25,7 +25,11 @@ int activatedSocket();
 
 enum class ListenResult { Listening, AlreadyRunning, Failed };
 
-// Binds path for a daemon started by hand. A socket left by a dead daemon is
-// replaced; one a live daemon still answers is left alone.
+// Binds path for a daemon started by hand and locks path + ".lock", which
+// the daemon keeps until it exits. A socket left by a dead daemon is
+// replaced; one a live daemon or systemd still answers is left alone.
 ListenResult listenForCaptureRequests(const std::string &path, int *fd,
-                                      std::string *error);
+                                      int *lock, std::string *error);
+
+// Accepts every queued connection and returns how many asked for a capture.
+int takeCaptureRequests(int listener);
