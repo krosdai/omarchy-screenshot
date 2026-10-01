@@ -271,16 +271,26 @@ int main(int argc, char **argv) {
                      &QCoreApplication::quit);
 
   std::vector<std::unique_ptr<QQuickView>> views;
-  // Unmap the frozen overlay as soon as an export starts; it only comes back
-  // to show an error.
-  if (!uiTest)
+  // Unmap the frozen overlay as soon as an export starts. Success quits with
+  // it still hidden; a failure reports through the status line, which is the
+  // only thing that brings it back.
+  if (!uiTest) {
     QObject::connect(&controller, &CaptureController::exportingChanged, &app,
                      [&] {
+                       if (!controller.exporting())
+                         return;
                        for (const auto &view : views)
-                         view->setVisible(!controller.exporting());
-                       if (!controller.exporting() && !views.empty())
-                         views.back()->requestActivate();
+                         view->hide();
                      });
+    QObject::connect(&controller, &CaptureController::statusChanged, &app,
+                     [&] {
+                       if (views.empty() || views.back()->isVisible())
+                         return;
+                       for (const auto &view : views)
+                         view->show();
+                       views.back()->requestActivate();
+                     });
+  }
   for (int i = 0; i < controller.monitors().size(); ++i) {
     const auto &monitor = controller.monitors()[i];
     auto view = std::make_unique<QQuickView>(&engine, nullptr);
