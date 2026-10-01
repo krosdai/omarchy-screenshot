@@ -620,6 +620,13 @@ void CaptureController::prepareScrollStep() {
   if (m_scrollState != ScrollState::Capturing || m_scrollPauseRequested ||
       m_scrollAwaitingPane)
     return;
+  // Focus while clicks are still intercepted: the hyprctl round trip would
+  // otherwise widen the window in which a stop click reaches the app below.
+  if (!focusScrollWindow()) {
+    setStatus(tr("The window moved or closed; kept what was captured"));
+    finishScrollCapture();
+    return;
+  }
   emit scrollInputAboutToSend();
   const int generation = m_scrollGeneration;
   QTimer::singleShot(80, this, [this, generation] {
@@ -632,11 +639,6 @@ void CaptureController::sendScrollStep() {
   if (m_scrollState != ScrollState::Capturing || m_scrollPauseRequested ||
       m_scrollAwaitingPane)
     return;
-  if (!focusScrollWindow()) {
-    setStatus(tr("The window moved or closed; kept what was captured"));
-    finishScrollCapture();
-    return;
-  }
   QRectF desktop = m_monitors.first().geometry;
   for (const auto &monitor : m_monitors)
     desktop = desktop.united(monitor.geometry);
