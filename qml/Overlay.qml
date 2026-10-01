@@ -94,6 +94,8 @@ Item {
     function resetForCapture() {
         editor.visible = false
         textInput.text = ""
+        // Otherwise a double-click copy could undo the next capture's edit.
+        picker.lastMarkerClickAdded = false
         annotationToolbar.closePopups()
         root.forceActiveFocus()
     }
