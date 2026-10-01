@@ -350,7 +350,6 @@ Item {
         Text {
             id: info
             anchors.centerIn: parent
-            // The percentage is part of the message so locales can place the sign.
             text: root.imageWidth + " × " + root.imageHeight + " · " +
                   qsTr("%1% · Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom")
                       .arg(Math.round(root.zoom * 100))

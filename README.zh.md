@@ -69,6 +69,8 @@ OMARCHY_SCREENSHOT_LANGUAGE=ja omarchy-screenshot
 
 在 Arch / Omarchy 上需要 `cmake`、`gcc`、`pkgconf`、`qt6-base`、`qt6-declarative`、`qt6-wayland`、`qt6-tools`、`layer-shell-qt`、`wayland`、`wayland-protocols`、`grim`、`wl-clipboard` 和 `hyprland`。程序通过 `ext-image-copy-capture-v1` 协议直接抓取显示器画面；合成器不支持该协议或显示器经过旋转时改用 `grim`。滚动截图使用 Hyprland 暴露的 wlr 虚拟指针协议。默认构建自动化测试还需要 `python`；只构建程序时可传入 `-DBUILD_TESTING=OFF`。
 
+支持 `x86_64` 和 `aarch64`（64 位 ARM）架构。在 ARM 机器上使用相同的构建命令，CMake 会使用本机工具链生成 ARM 可执行文件；`PKGBUILD` 也声明了这两种架构，无需通过 `makepkg --ignorearch` 跳过架构检查。
+
 可在 Omarchy 上从 AUR 安装：
 
 ```sh
@@ -92,7 +94,7 @@ cmake --build build -j
 ./build/omarchy-screenshot
 ```
 
-运行 `ctest --test-dir build --output-on-failure`，无需桌面会话即可检查所有翻译的完整性、占位符、内嵌加载，以及语言优先级／回退。
+运行 `ctest --test-dir build --output-on-failure`，无需桌面会话即可检查所有翻译的完整性、占位符、内嵌加载，以及语言优先级／回退；同时离线检查滚动拼接，以及 1、1.25、1.5 和 2 倍缩放下的光标图标抓取和逻辑坐标像素采样。缩放测试使用独立进程和软件渲染，不修改桌面缩放。`--ui-self-test` 中的光标、马赛克和画笔预览检查也会把抓取图像转换为逻辑尺寸后采样，可直接在 2 倍缩放的 Wayland 会话中运行。
 
 连接至少两块显示器时，可运行 `./build/omarchy-screenshot --self-test`，在内存中检查跨屏选区、撤销与重做及编号标记，不显示覆盖层或保存图片。
 

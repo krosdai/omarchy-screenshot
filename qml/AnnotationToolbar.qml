@@ -17,9 +17,9 @@ Item {
     property real toolbarTooltipX: 0
     property real toolbarTooltipY: 0
     property bool toolbarTooltipVisible: false
-    // While this text editor is open, the tooltip shows its key hints beside it,
-    // even on outputs where the toolbar itself is hidden.
-    property Item textEditor: null
+    // While text is being edited the tooltip shows editing keys beside it.
+    property bool editing: false
+    property rect editorRect: Qt.rect(0, 0, 0, 0)
     signal commitRequested()
     signal focusRequested()
     signal zoomRequested(real factor)
@@ -169,14 +169,13 @@ Item {
     }
 
     function handleShortcut(event) {
-        if (colorPanel.visible) {
-            if (event.key === Qt.Key_Q) {
-                colorPanel.visible = false
-                root.focusRequested()
-                event.accepted = true
-            }
+        if (colorPanel.visible && event.key === Qt.Key_Q) {
+            colorPanel.visible = false
+            root.focusRequested()
+            event.accepted = true
             return true
         }
+        const closeColorPanel = colorPanel.visible
         if (variantPanel.visible) {
             variantPanel.visible = false
         }
@@ -231,6 +230,7 @@ Item {
         else if (captureController.selected && event.key === Qt.Key_B &&
                  event.modifiers === Qt.NoModifier) captureController.tool = "marker"
         else return false
+        if (closeColorPanel) colorPanel.visible = false
         event.accepted = true
         return true
     }
@@ -714,18 +714,17 @@ Item {
     Rectangle {
         id: toolbarTooltip
         objectName: "toolbarTooltip"
-        readonly property bool editing: !!root.textEditor && root.textEditor.visible
-        visible: (root.toolbarTooltipVisible && toolbar.visible) || editing
+        visible: (root.toolbarTooltipVisible && toolbar.visible) || root.editing
         z: 30
         width: Math.min(tooltipLabel.implicitWidth + 20, root.width - 16)
         height: tooltipLabel.implicitHeight + 12
-        readonly property real anchorX: editing ? root.textEditor.x + root.textEditor.width / 2 : root.toolbarTooltipX
-        readonly property real anchorY: editing ? root.textEditor.y : root.toolbarTooltipY
+        readonly property real anchorX: root.editing ? root.editorRect.x + root.editorRect.width / 2 : root.toolbarTooltipX
+        readonly property real anchorY: root.editing ? root.editorRect.y : root.toolbarTooltipY
         x: Math.max(8, Math.min(anchorX - width / 2,
                                 root.width - width - 8))
         y: anchorY - height - 8 >= 8
            ? anchorY - height - 8
-           : anchorY + (editing ? root.textEditor.height + 8 : 40)
+           : anchorY + (root.editing ? root.editorRect.height + 8 : 40)
         radius: 5
         color: "#f0202734"
         border.color: "#748090"
@@ -734,7 +733,7 @@ Item {
             objectName: "tooltipLabel"
             anchors.centerIn: parent
             width: parent.width - 20
-            text: toolbarTooltip.editing
+            text: root.editing
                   ? qsTr("Enter: confirm · Shift+Enter: new line · Alt: confirm & return to previous tool")
                   : root.toolbarTooltipText
             textFormat: Text.PlainText

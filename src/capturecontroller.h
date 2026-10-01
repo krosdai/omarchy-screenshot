@@ -24,8 +24,8 @@
 
 class QScreen;
 class QPainter;
-class QThread;
 class VirtualPointer;
+class QThread;
 
 struct CaptureMonitor {
   QString name;
@@ -57,8 +57,6 @@ class CaptureController final : public QObject {
   Q_PROPERTY(QVariantMap draft READ draft NOTIFY draftChanged)
   Q_PROPERTY(int toolbarScreen READ toolbarScreen NOTIFY selectionChanged)
   Q_PROPERTY(QString status READ status NOTIFY statusChanged)
-  Q_PROPERTY(bool imagesReady READ imagesReady NOTIFY imagesReadyChanged)
-  Q_PROPERTY(bool exporting READ exporting NOTIFY exportingChanged)
   Q_PROPERTY(int scrollState READ scrollState NOTIFY scrollStateChanged)
   Q_PROPERTY(QVariantList scrollCandidates READ scrollCandidates NOTIFY scrollStateChanged)
   Q_PROPERTY(int scrollRevision READ scrollRevision NOTIFY scrollImageChanged)
@@ -68,6 +66,8 @@ class CaptureController final : public QObject {
   Q_PROPERTY(bool scrollPaneSelected READ scrollPaneSelected NOTIFY scrollAwaitingPaneChanged)
   Q_PROPERTY(bool scrollStopping READ scrollStopping NOTIFY scrollStoppingChanged)
   Q_PROPERTY(QRectF scrollRegion READ scrollRegion NOTIFY scrollStateChanged)
+  Q_PROPERTY(bool imagesReady READ imagesReady NOTIFY imagesReadyChanged)
+  Q_PROPERTY(bool exporting READ exporting NOTIFY exportingChanged)
 
 public:
   explicit CaptureController(QObject *parent = nullptr);
@@ -90,8 +90,6 @@ public:
   QVariantMap draft() const { return m_draft; }
   int toolbarScreen() const;
   QString status() const { return m_status; }
-  bool imagesReady() const { return m_imagesReady; }
-  bool exporting() const { return m_exporting; }
   enum class ScrollState { Idle, Choosing, Capturing, Reviewing };
   int scrollState() const { return int(m_scrollState); }
   QVariantList scrollCandidates() const;
@@ -104,6 +102,8 @@ public:
   const QImage &scrollImage() const { return m_scrollStitcher.image(); }
   const QImage &scrollMosaicImage() const { return m_scrollMosaicImage; }
   QRectF scrollRegion() const { return m_scrollRegion; }
+  bool imagesReady() const { return m_imagesReady; }
+  bool exporting() const { return m_exporting; }
   QImage renderedImage() const;
   void paintScrollPreview(QPainter &painter, const QRectF &source,
                           const QRectF &target) const;
@@ -186,12 +186,6 @@ private:
   void setStatus(const QString &message);
   void paintAnnotation(QPainter &painter, const QVariantMap &item) const;
   void appendAnnotation(const QVariantMap &item);
-  // Runs job off the GUI thread; job returns an error message or nothing.
-  void exportInBackground(std::function<QString()> job);
-  void finishExport(const QString &error);
-  void addWindowCandidates(const QByteArray &json);
-  static CaptureResult captureMonitors(const QStringList &names,
-                                       const QList<bool> &direct);
   void setScrollState(ScrollState state);
   void captureScrollFrame();
   void prepareScrollFrame();
@@ -201,6 +195,12 @@ private:
   bool scrollWindowUnchanged();
   bool focusScrollWindow();
   void prepareScrollMosaic();
+  // Runs job off the GUI thread; job returns an error message or nothing.
+  void exportInBackground(std::function<QString()> job);
+  void finishExport(const QString &error);
+  void addWindowCandidates(const QByteArray &json);
+  static CaptureResult captureMonitors(const QStringList &names,
+                                       const QList<bool> &direct);
 
   QVector<CaptureMonitor> m_monitors;
   QVector<Candidate> m_candidates;
@@ -229,11 +229,6 @@ private:
   QVariantList m_initialAnnotations;
   QVariantMap m_draft;
   QString m_status;
-  std::future<CaptureResult> m_capture;
-  std::future<QByteArray> m_clients;
-  bool m_imagesReady = false;
-  bool m_exporting = false;
-  QPointer<QThread> m_exportThread;
   ScrollState m_scrollState = ScrollState::Idle;
   ScrollStitcher m_scrollStitcher;
   QImage m_scrollMosaicImage;
@@ -257,4 +252,9 @@ private:
   int m_scrollReviewedHeight = 0;
   int m_scrollRevision = 0;
   int m_scrollGeneration = 0;
+  std::future<CaptureResult> m_capture;
+  std::future<QByteArray> m_clients;
+  bool m_imagesReady = false;
+  bool m_exporting = false;
+  QPointer<QThread> m_exportThread;
 };

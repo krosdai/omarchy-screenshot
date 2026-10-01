@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <QCoreApplication>
 #include <QPointF>
 #include <QRectF>
 #include <QString>
@@ -13,6 +14,8 @@ struct zwlr_virtual_pointer_manager_v1;
 struct zwlr_virtual_pointer_v1;
 
 class VirtualPointer {
+  Q_DECLARE_TR_FUNCTIONS(VirtualPointer)
+
 public:
   VirtualPointer();
   ~VirtualPointer();

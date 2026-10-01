@@ -217,6 +217,29 @@ TestCase {
         compare(captureController.annotationColor, "#ff9d42")
         compare(longToolbar.colorPanelVisible, false)
     }
+    function test_palette_allows_toolbar_shortcuts() {
+        let normalColor = visualItem(normalToolbar, "colorButton")
+        mouseClick(normalColor, normalColor.width / 2, normalColor.height / 2)
+        tryCompare(normalToolbar, "colorPanelVisible", true)
+        keyClick(Qt.Key_R)
+        compare(captureController.tool, "rect")
+        compare(normalToolbar.colorPanelVisible, false)
+
+        keyClick(Qt.Key_Q)
+        compare(normalToolbar.colorPanelVisible, true)
+        keyClick(Qt.Key_Q)
+        compare(normalToolbar.colorPanelVisible, false)
+
+        normalToolbar.visible = false
+        longToolbar.visible = true
+        let longColor = visualItem(longToolbar, "colorButton")
+        mouseClick(longColor, longColor.width / 2, longColor.height / 2)
+        tryCompare(longToolbar, "colorPanelVisible", true)
+        keyClick(Qt.Key_Equal)
+        compare(zoomSpy.count, 1)
+        compare(zoomSpy.signalArguments[0][0], 1.25)
+        compare(longToolbar.colorPanelVisible, false)
+    }
     function test_zoom_and_resume_before_undo() {
         normalToolbar.visible = false
         longToolbar.visible = true
