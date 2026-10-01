@@ -148,15 +148,21 @@ const ext_image_copy_capture_frame_v1_listener frameListener = {
     frameTransform, frameDamage, framePresentationTime, frameReady,
     frameFailed};
 
+// Constraints re-sent after the frame exists describe a buffer this one-shot
+// capture never allocates; the frame already wraps its own mapping's size.
 void sessionBufferSize(void *data, ext_image_copy_capture_session_v1 *,
                        uint32_t width, uint32_t height) {
   auto *capture = static_cast<Capture *>(data);
+  if (capture->frame)
+    return;
   capture->width = int(width);
   capture->height = int(height);
 }
 void sessionShmFormat(void *data, ext_image_copy_capture_session_v1 *,
                       uint32_t format) {
   auto *capture = static_cast<Capture *>(data);
+  if (capture->frame)
+    return;
   if (format == WL_SHM_FORMAT_XRGB8888)
     capture->xrgb = true;
   else if (format == WL_SHM_FORMAT_ARGB8888)
