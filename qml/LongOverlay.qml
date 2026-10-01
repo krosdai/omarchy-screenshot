@@ -23,6 +23,10 @@ Item {
                                                 viewport.width / imageScale,
                                                 viewport.height / imageScale)
     property bool movingImage: false
+    // The text editor is anchored in image coordinates so panning or zooming
+    // while typing keeps it, and the committed text, where the user clicked.
+    property real textAnchorX: 0
+    property real textAnchorY: 0
     property real lastMouseX: 0
     property real lastMouseY: 0
 
@@ -39,11 +43,12 @@ Item {
         const crop = captureController.selection
         const right = crop.x + crop.width
         const bottom = crop.y + crop.height
-        // Match the controller's border tolerance in image coordinates.
-        return p.x >= crop.x - 7 && p.x <= right + 7 &&
-               p.y >= crop.y - 7 && p.y <= bottom + 7 &&
-               (Math.abs(p.x - crop.x) <= 7 || Math.abs(p.x - right) <= 7 ||
-                Math.abs(p.y - crop.y) <= 7 || Math.abs(p.y - bottom) <= 7)
+        // Match the controller's 7 px screen-space border tolerance.
+        const edge = 7 / imageScale
+        return p.x >= crop.x - edge && p.x <= right + edge &&
+               p.y >= crop.y - edge && p.y <= bottom + edge &&
+               (Math.abs(p.x - crop.x) <= edge || Math.abs(p.x - right) <= edge ||
+                Math.abs(p.y - crop.y) <= edge || Math.abs(p.y - bottom) <= edge)
     }
     function beginPan(x, y) {
         movingImage = true
@@ -70,8 +75,7 @@ Item {
         let value = textInput.text
         textEditor.visible = false
         if (value.trim().length > 0) {
-            let p = pointInImage(textEditor.x, textEditor.y + 12)
-            captureController.addText(p.x, p.y, value)
+            captureController.addText(textAnchorX, textAnchorY + 12 / imageScale, value)
         }
         forceActiveFocus()
     }
@@ -106,7 +110,22 @@ Item {
         event.accepted = true
     }
 
+    Binding {
+        target: captureController
+        property: "reviewScale"
+        value: root.imageScale
+    }
+
     Rectangle { anchors.fill: parent; color: "#db111820" }
+
+    // Right-click exits, as in the regular overlay. Items above take only
+    // the buttons they use, so right-clicks anywhere fall through to here.
+    MouseArea {
+        objectName: "longExitArea"
+        anchors.fill: parent
+        acceptedButtons: Qt.RightButton
+        onPressed: captureController.cancel()
+    }
 
     Rectangle {
         id: viewport
@@ -164,8 +183,8 @@ Item {
                     if (p.x < crop.x || p.y < crop.y ||
                         p.x > crop.x + crop.width || p.y > crop.y + crop.height)
                         return
-                    textEditor.x = mouse.x
-                    textEditor.y = mouse.y
+                    root.textAnchorX = p.x
+                    root.textAnchorY = p.y
                     textInput.text = ""
                     textEditor.visible = true
                     textInput.forceActiveFocus()
@@ -222,6 +241,8 @@ Item {
             id: textEditor
             objectName: "longTextEditor"
             visible: false
+            x: (root.textAnchorX - root.sourceRect.x) * root.imageScale
+            y: (root.textAnchorY - root.sourceRect.y) * root.imageScale
             width: Math.max(140, textInput.contentWidth + 12)
             height: Math.max(34, textInput.contentHeight + 12)
             color: "#eeffffff"

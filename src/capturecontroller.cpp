@@ -96,8 +96,8 @@ QPointF limited(const QPointF &p, const QRectF &rect) {
           std::clamp(p.y(), rect.top(), rect.bottom())};
 }
 
-int resizeHandleAt(const QRectF &rect, const QPointF &point) {
-  constexpr qreal hitRadius = 15;
+int resizeHandleAt(const QRectF &rect, const QPointF &point,
+                   qreal hitRadius = 15) {
   const qreal middleX = rect.center().x();
   const qreal middleY = rect.center().y();
   struct Handle {
@@ -482,11 +482,10 @@ void CaptureController::chooseScrollWindow(int index) {
   }
 }
 
-bool CaptureController::focusScrollWindow() {
+bool CaptureController::scrollWindowUnchanged() {
   const auto clients = QJsonDocument::fromJson(
       run(QStringLiteral("hyprctl"),
           {QStringLiteral("-j"), QStringLiteral("clients")}, nullptr));
-  bool found = false;
   for (const QJsonValue &entry : clients.array()) {
     const QJsonObject data = entry.toObject();
     if (data.value(QStringLiteral("address")).toString() !=
@@ -498,12 +497,13 @@ bool CaptureController::focusScrollWindow() {
       return false;
     const QRectF now(at[0].toDouble(), at[1].toDouble(), size[0].toDouble(),
                      size[1].toDouble());
-    if (now != m_scrollWindowGeometry)
-      return false;
-    found = true;
-    break;
+    return now == m_scrollWindowGeometry;
   }
-  if (!found)
+  return false;
+}
+
+bool CaptureController::focusScrollWindow() {
+  if (!scrollWindowUnchanged())
     return false;
   bool validAddress = false;
   const qulonglong address = m_scrollWindowAddress.toULongLong(&validAddress, 16);
@@ -620,6 +620,13 @@ void CaptureController::prepareScrollStep() {
   if (m_scrollState != ScrollState::Capturing || m_scrollPauseRequested ||
       m_scrollAwaitingPane)
     return;
+  // Focus while clicks are still intercepted: the hyprctl round trip would
+  // otherwise widen the window in which a stop click reaches the app below.
+  if (!focusScrollWindow()) {
+    setStatus(tr("The window moved or closed; kept what was captured"));
+    finishScrollCapture();
+    return;
+  }
   emit scrollInputAboutToSend();
   const int generation = m_scrollGeneration;
   QTimer::singleShot(80, this, [this, generation] {
@@ -632,7 +639,9 @@ void CaptureController::sendScrollStep() {
   if (m_scrollState != ScrollState::Capturing || m_scrollPauseRequested ||
       m_scrollAwaitingPane)
     return;
-  if (!focusScrollWindow()) {
+  // The window may have moved or closed during the delay; never send the
+  // wheel to whatever now sits under the scroll point.
+  if (!scrollWindowUnchanged()) {
     setStatus(tr("The window moved or closed; kept what was captured"));
     finishScrollCapture();
     return;
@@ -672,6 +681,9 @@ void CaptureController::finishScrollCapture() {
   }
   const QSize size = m_scrollStitcher.image().size();
   if (!m_scrollReviewInitialized) {
+    // The long image replaces the canvas only now; a capture that fails
+    // before its first frame returns to the screenshot with redo intact.
+    m_redoAnnotations.clear();
     m_selected = true;
     setSelection(QRectF(QPointF(0, 0), QSizeF(size)));
     m_scrollReviewInitialized = true;
@@ -1030,6 +1042,10 @@ void CaptureController::pointerMove(int screenIndex, qreal x, qreal y) {
 
 void CaptureController::pointerPress(int screenIndex, qreal x, qreal y) {
   const QPointF point = globalPoint(screenIndex, x, y);
+  // Review coordinates are image pixels; hit areas are meant in screen pixels.
+  const qreal hitScale =
+      m_scrollState == ScrollState::Reviewing && m_reviewScale > 0
+          ? m_reviewScale : 1;
   m_press = point;
   m_moved = false;
   if (m_selected && m_tool != QStringLiteral("select")) {
@@ -1047,23 +1063,24 @@ void CaptureController::pointerPress(int screenIndex, qreal x, qreal y) {
     return;
   }
   if (m_selected && m_tool == QStringLiteral("select")) {
-    m_resizeEdges = resizeHandleAt(m_selection, point);
+    m_resizeEdges = resizeHandleAt(m_selection, point, 15 / hitScale);
     if (m_resizeEdges) {
       m_initialSelection = m_selection;
       m_drag = Drag::Resize;
       return;
     }
   }
-  if (m_selected && m_selection.adjusted(-7, -7, 7, 7).contains(point)) {
+  const qreal edge = 7 / hitScale;
+  if (m_selected && m_selection.adjusted(-edge, -edge, edge, edge).contains(point)) {
     m_initialSelection = m_selection;
     m_resizeEdges = 0;
-    if (std::abs(point.x() - m_selection.left()) <= 7)
+    if (std::abs(point.x() - m_selection.left()) <= edge)
       m_resizeEdges |= 1;
-    if (std::abs(point.x() - m_selection.right()) <= 7)
+    if (std::abs(point.x() - m_selection.right()) <= edge)
       m_resizeEdges |= 2;
-    if (std::abs(point.y() - m_selection.top()) <= 7)
+    if (std::abs(point.y() - m_selection.top()) <= edge)
       m_resizeEdges |= 4;
-    if (std::abs(point.y() - m_selection.bottom()) <= 7)
+    if (std::abs(point.y() - m_selection.bottom()) <= edge)
       m_resizeEdges |= 8;
     m_drag = m_resizeEdges ? Drag::Resize : Drag::Move;
     if (m_drag == Drag::Move && m_scrollState != ScrollState::Reviewing)
