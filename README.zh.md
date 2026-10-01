@@ -65,7 +65,7 @@ OMARCHY_SCREENSHOT_LANGUAGE=ja omarchy-screenshot
 
 ## 构建与运行
 
-在 Arch / Omarchy 上需要 `cmake`、`gcc`、`qt6-base`、`qt6-declarative`、`qt6-wayland`、`qt6-tools`、`layer-shell-qt`、`grim`、`wl-clipboard` 和 `hyprland`。默认构建自动化测试还需要 `python`；只构建程序时可传入 `-DBUILD_TESTING=OFF`。
+在 Arch / Omarchy 上需要 `cmake`、`gcc`、`qt6-base`、`qt6-declarative`、`qt6-wayland`、`qt6-tools`、`layer-shell-qt`、`wayland`、`wayland-protocols`、`grim`、`wl-clipboard` 和 `hyprland`。程序通过 `ext-image-copy-capture-v1` 协议直接抓取显示器画面；合成器不支持该协议或显示器经过旋转时改用 `grim`。默认构建自动化测试还需要 `python`；只构建程序时可传入 `-DBUILD_TESTING=OFF`。
 
 可在 Omarchy 上从 AUR 安装：
 

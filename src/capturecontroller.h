@@ -13,13 +13,17 @@
 #include <QVariantMap>
 #include <QVector>
 
+#include <future>
+
 class QScreen;
 class QPainter;
+class QThread;
 
 struct CaptureMonitor {
   QString name;
   QRectF geometry;
   QImage image;
+  // One pixel per mosaic block; painting it unsmoothed at full size pixelates.
   QImage mosaicImage;
   QScreen *screen = nullptr;
   int id = -1;
@@ -42,12 +46,17 @@ class CaptureController final : public QObject {
   Q_PROPERTY(QVariantMap draft READ draft NOTIFY draftChanged)
   Q_PROPERTY(int toolbarScreen READ toolbarScreen NOTIFY selectionChanged)
   Q_PROPERTY(QString status READ status NOTIFY statusChanged)
+  Q_PROPERTY(bool imagesReady READ imagesReady NOTIFY imagesReadyChanged)
 
 public:
   explicit CaptureController(QObject *parent = nullptr);
   ~CaptureController() override;
 
   bool initialize(QString *error);
+  // Split form of initialize(): the capture runs on a worker thread between
+  // the two calls so the caller can load the UI meanwhile.
+  bool startCapture(QString *error);
+  bool finishCapture(QString *error);
   const QVector<CaptureMonitor> &monitors() const { return m_monitors; }
   QRectF selection() const { return m_selection; }
   QRectF hovered() const { return m_hovered; }
@@ -60,6 +69,7 @@ public:
   QVariantMap draft() const { return m_draft; }
   int toolbarScreen() const;
   QString status() const { return m_status; }
+  bool imagesReady() const { return m_imagesReady; }
   QImage renderedImage() const;
   static QPainterPath freehandPath(const QVariantList &points);
   static QPainterPath mosaicPath(const QVariantMap &item);
@@ -98,6 +108,7 @@ signals:
   void annotationsChanged();
   void draftChanged();
   void statusChanged();
+  void imagesReadyChanged();
   void done();
 
 private:
@@ -106,6 +117,11 @@ private:
     bool window = false;
   };
   enum class Drag { None, Select, Move, Resize, Draw };
+  struct CaptureResult {
+    QList<QImage> images;
+    QList<QImage> mosaics;
+    QString error;
+  };
 
   QPointF globalPoint(int screenIndex, qreal x, qreal y) const;
   QRectF candidateAt(const QPointF &point) const;
@@ -114,6 +130,9 @@ private:
   void setStatus(const QString &message);
   void paintAnnotation(QPainter &painter, const QVariantMap &item) const;
   void appendAnnotation(const QVariantMap &item);
+  void addWindowCandidates(const QByteArray &json);
+  static CaptureResult captureMonitors(const QStringList &names,
+                                       const QList<bool> &direct);
 
   QVector<CaptureMonitor> m_monitors;
   QVector<Candidate> m_candidates;
@@ -141,4 +160,7 @@ private:
   QVariantList m_initialAnnotations;
   QVariantMap m_draft;
   QString m_status;
+  std::future<CaptureResult> m_capture;
+  std::future<QByteArray> m_clients;
+  bool m_imagesReady = false;
 };
