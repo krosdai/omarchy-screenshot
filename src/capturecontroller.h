@@ -8,7 +8,9 @@
 #include <QObject>
 #include <QPainterPath>
 #include <QPointF>
+#include <QPointer>
 #include <QRectF>
+#include <QThread>
 #include <QTimer>
 #include <QVariantList>
 #include <QVariantMap>
@@ -17,6 +19,7 @@
 
 #include "scrollstitcher.h"
 
+#include <functional>
 #include <future>
 
 class QScreen;
@@ -61,6 +64,7 @@ class CaptureController final : public QObject {
   Q_PROPERTY(bool scrollStopping READ scrollStopping NOTIFY scrollStoppingChanged)
   Q_PROPERTY(QRectF scrollRegion READ scrollRegion NOTIFY scrollStateChanged)
   Q_PROPERTY(bool imagesReady READ imagesReady NOTIFY imagesReadyChanged)
+  Q_PROPERTY(bool exporting READ exporting NOTIFY exportingChanged)
 
 public:
   explicit CaptureController(QObject *parent = nullptr);
@@ -96,6 +100,7 @@ public:
   const QImage &scrollMosaicImage() const { return m_scrollMosaicImage; }
   QRectF scrollRegion() const { return m_scrollRegion; }
   bool imagesReady() const { return m_imagesReady; }
+  bool exporting() const { return m_exporting; }
   QImage renderedImage() const;
   void paintScrollPreview(QPainter &painter, const QRectF &source,
                           const QRectF &target) const;
@@ -144,6 +149,7 @@ signals:
   void draftChanged();
   void statusChanged();
   void imagesReadyChanged();
+  void exportingChanged();
   void done();
   void scrollStateChanged();
   void scrollImageChanged();
@@ -184,6 +190,9 @@ private:
   void finishScrollCapture();
   bool focusScrollWindow();
   void prepareScrollMosaic();
+  // Runs job off the GUI thread; job returns an error message or nothing.
+  void exportInBackground(std::function<QString()> job);
+  void finishExport(const QString &error);
   void addWindowCandidates(const QByteArray &json);
   static CaptureResult captureMonitors(const QStringList &names,
                                        const QList<bool> &direct);
@@ -240,4 +249,6 @@ private:
   std::future<CaptureResult> m_capture;
   std::future<QByteArray> m_clients;
   bool m_imagesReady = false;
+  bool m_exporting = false;
+  QPointer<QThread> m_exportThread;
 };

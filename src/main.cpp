@@ -664,6 +664,34 @@ int main(int argc, char **argv) {
         view->show();
     }
   });
+  // Unmap whichever overlay is showing as soon as an export starts. Success
+  // quits with it still hidden; a failure reports through the status line,
+  // which brings back only what the export hid, so scroll capture's own
+  // status messages never reveal overlays it hid on purpose.
+  std::vector<QWindow *> hiddenForExport;
+  if (!uiTest) {
+    QObject::connect(&controller, &CaptureController::exportingChanged, &app,
+                     [&] {
+                       if (!controller.exporting())
+                         return;
+                       for (const auto &view : views)
+                         if (view->isVisible())
+                           hiddenForExport.push_back(view.get());
+                       if (longView && longView->isVisible())
+                         hiddenForExport.push_back(longView.get());
+                       for (QWindow *window : hiddenForExport)
+                         window->hide();
+                     });
+    QObject::connect(&controller, &CaptureController::statusChanged, &app,
+                     [&] {
+                       if (hiddenForExport.empty())
+                         return;
+                       for (QWindow *window : hiddenForExport)
+                         window->show();
+                       hiddenForExport.back()->requestActivate();
+                       hiddenForExport.clear();
+                     });
+  }
   // Keep click interception active during capture. Only release the input
   // region briefly while delivering the virtual wheel to the underlying app.
   QObject::connect(&controller, &CaptureController::scrollInputAboutToSend,
@@ -1656,6 +1684,8 @@ int main(int argc, char **argv) {
           QFile::remove(clipboardFile);
           QTest::mouseDClick(views[0].get(), Qt::LeftButton, Qt::NoModifier,
                              blankSpot.toPoint());
+          // Copying finishes on a worker thread; passed checks the outcome.
+          (void)QTest::qWaitFor([&] { return closedAfterCopy; }, 5000);
           QFile captured(clipboardFile);
           const QImage clipboardImage = captured.open(QIODevice::ReadOnly)
                                             ? QImage::fromData(captured.readAll())

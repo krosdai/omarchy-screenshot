@@ -189,6 +189,8 @@ CaptureController::CaptureController(QObject *parent) : QObject(parent) {
 }
 
 CaptureController::~CaptureController() {
+  if (m_exportThread)
+    m_exportThread->wait();
   saveAnnotationColor();
 }
 
@@ -1445,20 +1447,43 @@ QImage CaptureController::renderedImage() const {
   return result;
 }
 
+void CaptureController::exportInBackground(std::function<QString()> job) {
+  if (m_exporting)
+    return;
+  m_exporting = true;
+  emit exportingChanged();
+  m_exportThread = QThread::create([this, job = std::move(job)] {
+    const QString error = job();
+    QMetaObject::invokeMethod(
+        this, [this, error] { finishExport(error); }, Qt::QueuedConnection);
+  });
+  connect(m_exportThread, &QThread::finished, m_exportThread,
+          &QObject::deleteLater);
+  m_exportThread->start();
+}
+
+void CaptureController::finishExport(const QString &error) {
+  m_exporting = false;
+  emit exportingChanged();
+  if (error.isEmpty())
+    emit done();
+  else
+    setStatus(error);
+}
+
 void CaptureController::copy() {
   const auto image = renderedImage();
   if (image.isNull())
     return;
-  QByteArray png;
-  QBuffer buffer(&png);
-  buffer.open(QIODevice::WriteOnly);
-  image.save(&buffer, "PNG");
-  QString error;
-  if (!copyBytes(png, QStringLiteral("image/png"), &error)) {
-    setStatus(error);
-    return;
-  }
-  emit done();
+  exportInBackground([image] {
+    QByteArray png;
+    QBuffer buffer(&png);
+    buffer.open(QIODevice::WriteOnly);
+    image.save(&buffer, "PNG");
+    QString error;
+    copyBytes(png, QStringLiteral("image/png"), &error);
+    return error;
+  });
 }
 
 void CaptureController::save() {
@@ -1479,12 +1504,12 @@ void CaptureController::save() {
                                .arg(QDateTime::currentDateTime().toString(
                                    QStringLiteral("yyyy-MM-dd_HH-mm-ss-zzz")));
   const QString path = QDir(directory).filePath(filename);
-  if (!image.save(path, "PNG")) {
-    setStatus(QStringLiteral("无法保存：%1").arg(path));
-    return;
-  }
-  QTextStream(stdout) << path << '\n';
-  emit done();
+  exportInBackground([image, path] {
+    if (!image.save(path, "PNG"))
+      return QStringLiteral("无法保存：%1").arg(path);
+    QTextStream(stdout) << path << '\n';
+    return QString();
+  });
 }
 
 void CaptureController::cancel() { emit done(); }
