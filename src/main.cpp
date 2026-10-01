@@ -28,6 +28,7 @@
 #include <QRegion>
 #include <QProcess>
 #include <QSettings>
+#include <QSurfaceFormat>
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QTest>
@@ -562,6 +563,12 @@ int main(int argc, char **argv) {
   for (int i = 0; i < controller.monitors().size(); ++i) {
     const auto &monitor = controller.monitors()[i];
     auto view = std::make_unique<QQuickView>(&engine, nullptr);
+    // Every clip in the overlay is an axis-aligned rectangle, which the scene
+    // graph scissors; a 5K depth/stencil buffer would only hold ~60 MB.
+    QSurfaceFormat format = view->format();
+    format.setDepthBufferSize(0);
+    format.setStencilBufferSize(0);
+    view->setFormat(format);
     view->setResizeMode(QQuickView::SizeRootObjectToView);
     view->setColor(Qt::transparent);
     view->setFlags(Qt::FramelessWindowHint);
