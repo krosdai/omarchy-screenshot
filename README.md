@@ -102,6 +102,8 @@ cmake --build build -j
 
 工具栏的离线交互检查可运行 `QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME= QT_QUICK_BACKEND=software /usr/lib/qt6/bin/qmltestrunner -input tests`，覆盖分组菜单、调色盘、主题一致性和按钮位置。
 
+构建后运行 `ctest --test-dir build --output-on-failure`，可离线检查 1、1.25、1.5 和 2 倍缩放下的光标图标抓取及逻辑坐标像素采样。测试使用独立进程和软件渲染，不修改桌面缩放。`--ui-self-test` 中的光标、马赛克和画笔预览检查也会将抓取图像转换为逻辑尺寸后采样，可直接在 2 倍缩放的 Wayland 会话中运行。
+
 也可执行 `cmake --install build --prefix ~/.local`，安装到 `~/.local/bin/omarchy-screenshot`。需要在 Hyprland Wayland 会话中运行。
 
 ### AUR 发布
