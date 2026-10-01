@@ -550,26 +550,6 @@ int main(int argc, char **argv) {
                      &QCoreApplication::quit);
 
   std::vector<std::unique_ptr<QQuickView>> views;
-  // Unmap the frozen overlay as soon as an export starts. Success quits with
-  // it still hidden; a failure reports through the status line, which is the
-  // only thing that brings it back.
-  if (!uiTest) {
-    QObject::connect(&controller, &CaptureController::exportingChanged, &app,
-                     [&] {
-                       if (!controller.exporting())
-                         return;
-                       for (const auto &view : views)
-                         view->hide();
-                     });
-    QObject::connect(&controller, &CaptureController::statusChanged, &app,
-                     [&] {
-                       if (views.empty() || views.back()->isVisible())
-                         return;
-                       for (const auto &view : views)
-                         view->show();
-                       views.back()->requestActivate();
-                     });
-  }
   for (int i = 0; i < controller.monitors().size(); ++i) {
     const auto &monitor = controller.monitors()[i];
     auto view = std::make_unique<QQuickView>(&engine, nullptr);
@@ -732,6 +712,34 @@ int main(int argc, char **argv) {
         view->show();
     }
   });
+  // Unmap whichever overlay is showing as soon as an export starts. Success
+  // quits with it still hidden; a failure reports through the status line,
+  // which brings back only what the export hid, so scroll capture's own
+  // status messages never reveal overlays it hid on purpose.
+  std::vector<QWindow *> hiddenForExport;
+  if (!uiTest) {
+    QObject::connect(&controller, &CaptureController::exportingChanged, &app,
+                     [&] {
+                       if (!controller.exporting())
+                         return;
+                       for (const auto &view : views)
+                         if (view->isVisible())
+                           hiddenForExport.push_back(view.get());
+                       if (longView && longView->isVisible())
+                         hiddenForExport.push_back(longView.get());
+                       for (QWindow *window : hiddenForExport)
+                         window->hide();
+                     });
+    QObject::connect(&controller, &CaptureController::statusChanged, &app,
+                     [&] {
+                       if (hiddenForExport.empty())
+                         return;
+                       for (QWindow *window : hiddenForExport)
+                         window->show();
+                       hiddenForExport.back()->requestActivate();
+                       hiddenForExport.clear();
+                     });
+  }
   // Keep click interception active during capture. Only release the input
   // region briefly while delivering the virtual wheel to the underlying app.
   QObject::connect(&controller, &CaptureController::scrollInputAboutToSend,
