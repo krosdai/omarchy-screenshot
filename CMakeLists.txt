@@ -30,8 +30,6 @@ qt_add_executable(omarchy-screenshot
     src/main.cpp
     src/capturecontroller.cpp
     src/capturecontroller.h
-    src/mosaicoverlay.cpp
-    src/mosaicoverlay.h
     src/scrollstitcher.cpp
     src/scrollstitcher.h
     src/longimageitem.cpp

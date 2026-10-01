@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "capturecontroller.h"
-#include "mosaicoverlay.h"
 #include "longimageitem.h"
 #include "virtualpointer.h"
 
@@ -475,7 +474,6 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  qmlRegisterType<MosaicOverlay>("ScreenshotInternals", 1, 0, "MosaicOverlay");
   qmlRegisterType<LongImageItem>("ScreenshotInternals", 1, 0,
                                  "LongImageItem");
   QQmlEngine engine;
