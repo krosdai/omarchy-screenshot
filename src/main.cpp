@@ -47,6 +47,7 @@
 #include <unistd.h>
 #include <memory>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 class CaptureImageProvider final : public QQuickImageProvider {
@@ -879,6 +880,8 @@ int main(int argc, char **argv) {
   QTimer idleTimer;
   idleTimer.setSingleShot(true);
   idleTimer.setInterval(std::chrono::seconds(idleTimeout));
+  // A press during an export asks for the next capture; it waits for done().
+  bool captureQueued = false;
   // The connections below call these, so they live as long as main().
   auto overlayVisible = [&] {
     return !views.empty() && views.back()->isVisible();
@@ -919,7 +922,9 @@ int main(int argc, char **argv) {
   };
   auto captureAndShow = [&] {
     if (capturing()) {
-      if (overlayVisible())
+      if (controller.exporting())
+        captureQueued = true;
+      else if (overlayVisible())
         views.back()->requestActivate();
       return;
     }
@@ -960,7 +965,17 @@ int main(int argc, char **argv) {
       else
         QCoreApplication::quit();
     });
-    QObject::connect(&controller, &CaptureController::done, &app, becomeIdle);
+    QObject::connect(&controller, &CaptureController::done, &app, [&] {
+      becomeIdle();
+      if (std::exchange(captureQueued, false))
+        QTimer::singleShot(0, &app, captureAndShow);
+    });
+    // A failed export brings the overlay back, so a queued press was only
+    // about the capture still on screen.
+    QObject::connect(&controller, &CaptureController::statusChanged, &app, [&] {
+      if (!controller.status().isEmpty())
+        captureQueued = false;
+    });
     // Draining every queued request coalesces repeated presses.
     requests = std::make_unique<QSocketNotifier>(listener, QSocketNotifier::Read);
     QObject::connect(requests.get(), &QSocketNotifier::activated, &app,
