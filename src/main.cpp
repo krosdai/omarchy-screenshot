@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "capturecontroller.h"
-#include "mosaicoverlay.h"
 
 #include <LayerShellQt/window.h>
 #include <QCommandLineParser>
@@ -126,12 +125,17 @@ int main(int argc, char **argv) {
 
   CaptureController controller;
   QString error;
-  if (!controller.initialize(&error)) {
+  // Capturing continues on a worker thread while the overlay loads below.
+  if (!controller.startCapture(&error)) {
     qCritical().noquote() << error;
     return 1;
   }
 
   if (app.arguments().contains(QStringLiteral("--self-test"))) {
+    if (!controller.finishCapture(&error)) {
+      qCritical().noquote() << error;
+      return 1;
+    }
     if (controller.monitors().size() < 2) {
       qCritical() << "Cross-monitor self-test needs two displays";
       return 2;
@@ -251,7 +255,6 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  qmlRegisterType<MosaicOverlay>("ScreenshotInternals", 1, 0, "MosaicOverlay");
   QQmlEngine engine;
   QObject::connect(&engine, &QQmlEngine::warnings, &app,
                    [](const QList<QQmlError> &warnings) {
@@ -262,11 +265,32 @@ int main(int argc, char **argv) {
                                            &controller);
   engine.addImageProvider(QStringLiteral("captures"),
                           new CaptureImageProvider(&controller));
-  if (!app.arguments().contains(QStringLiteral("--ui-self-test")))
+  const bool uiTest = app.arguments().contains(QStringLiteral("--ui-self-test"));
+  if (!uiTest)
     QObject::connect(&controller, &CaptureController::done, &app,
                      &QCoreApplication::quit);
 
   std::vector<std::unique_ptr<QQuickView>> views;
+  // Unmap the frozen overlay as soon as an export starts. Success quits with
+  // it still hidden; a failure reports through the status line, which is the
+  // only thing that brings it back.
+  if (!uiTest) {
+    QObject::connect(&controller, &CaptureController::exportingChanged, &app,
+                     [&] {
+                       if (!controller.exporting())
+                         return;
+                       for (const auto &view : views)
+                         view->hide();
+                     });
+    QObject::connect(&controller, &CaptureController::statusChanged, &app,
+                     [&] {
+                       if (views.empty() || views.back()->isVisible())
+                         return;
+                       for (const auto &view : views)
+                         view->show();
+                       views.back()->requestActivate();
+                     });
+  }
   for (int i = 0; i < controller.monitors().size(); ++i) {
     const auto &monitor = controller.monitors()[i];
     auto view = std::make_unique<QQuickView>(&engine, nullptr);
@@ -287,8 +311,6 @@ int main(int argc, char **argv) {
         LayerShellQt::Window::AnchorRight);
     // Ignore the bar's reserved area: the frozen image uses the full output.
     layer->setExclusiveZone(-1);
-    const bool uiTest =
-        app.arguments().contains(QStringLiteral("--ui-self-test"));
     layer->setKeyboardInteractivity(
         uiTest ? (i == 0 ? LayerShellQt::Window::KeyboardInteractivityExclusive
                          : LayerShellQt::Window::KeyboardInteractivityNone)
@@ -301,6 +323,15 @@ int main(int argc, char **argv) {
       qCritical() << "Cannot load Overlay.qml for" << monitor.name;
       return 1;
     }
+    views.push_back(std::move(view));
+  }
+  if (!controller.finishCapture(&error)) {
+    qCritical().noquote() << error;
+    return 1;
+  }
+  for (int i = 0; i < controller.monitors().size(); ++i) {
+    const auto &monitor = controller.monitors()[i];
+    const auto &view = views[i];
     const auto *root = view->rootObject();
     const auto *image =
         root->findChild<QObject *>(QStringLiteral("screenCaptureImage"));
@@ -312,12 +343,9 @@ int main(int argc, char **argv) {
       return 1;
     }
     view->show();
-    views.push_back(std::move(view));
   }
   if (!views.empty())
-    (app.arguments().contains(QStringLiteral("--ui-self-test")) ? views.front()
-                                                                : views.back())
-        ->requestActivate();
+    (uiTest ? views.front() : views.back())->requestActivate();
 
   auto sendMouse = [&](QEvent::Type type, const QPointF &local,
                        Qt::MouseButton button, Qt::MouseButtons buttons) {
@@ -381,7 +409,7 @@ int main(int argc, char **argv) {
   bool editorBackgroundTransparent = false;
   bool exportedTextRows = false;
   bool doubleClickCopied = false;
-  if (app.arguments().contains(QStringLiteral("--ui-self-test"))) {
+  if (uiTest) {
     controller.pointerPress(0, 100, 100);
     controller.pointerMove(0, 900, 600);
     controller.pointerRelease(0, 900, 600);
@@ -1140,6 +1168,8 @@ int main(int argc, char **argv) {
           QFile::remove(clipboardFile);
           QTest::mouseDClick(views[0].get(), Qt::LeftButton, Qt::NoModifier,
                              blankSpot.toPoint());
+          // Copying finishes on a worker thread; passed checks the outcome.
+          (void)QTest::qWaitFor([&] { return closedAfterCopy; }, 5000);
           QFile captured(clipboardFile);
           const QImage clipboardImage = captured.open(QIODevice::ReadOnly)
                                             ? QImage::fromData(captured.readAll())

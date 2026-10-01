@@ -66,7 +66,7 @@ Translations use Qt Linguist's `.ts` format in `translations/`. The build compil
 
 ## Build and run
 
-On Arch Linux or Omarchy, you need `cmake`, `gcc`, `qt6-base`, `qt6-declarative`, `qt6-wayland`, `qt6-tools`, `layer-shell-qt`, `grim`, `wl-clipboard`, and `hyprland`. Building the automated tests, which are enabled by default, also requires `python`. Pass `-DBUILD_TESTING=OFF` to build only the app.
+On Arch Linux or Omarchy, you need `cmake`, `gcc`, `qt6-base`, `qt6-declarative`, `qt6-wayland`, `qt6-tools`, `layer-shell-qt`, `wayland`, `wayland-protocols`, `grim`, `wl-clipboard`, and `hyprland`. The app captures each display directly through the `ext-image-copy-capture-v1` protocol and falls back to `grim` when the compositor lacks the protocol or a display is rotated. Building the automated tests, which are enabled by default, also requires `python`. Pass `-DBUILD_TESTING=OFF` to build only the app.
 
 To install from the AUR on Omarchy:
 

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import QtQuick
-import ScreenshotInternals
 
 Item {
     id: root
@@ -265,7 +264,8 @@ Item {
         id: screenImage
         objectName: "screenCaptureImage"
         anchors.fill: parent
-        source: screenIndex >= 0 ? "image://captures/screen/" + screenIndex : ""
+        source: screenIndex >= 0 && captureController.imagesReady
+                ? "image://captures/screen/" + screenIndex : ""
         fillMode: Image.Stretch
         smooth: true
         cache: true
@@ -288,13 +288,70 @@ Item {
         border.width: 2
     }
 
-    MosaicOverlay {
+    // Each patch shows the coarse capture stretched without smoothing, so the
+    // GPU pixelates it and dragging a mosaic never repaints on the CPU.
+    component MosaicPatch: Item {
+        id: patch
+        property var mark
+        property rect screen
+        property string source
+        readonly property bool active: !!mark && mark.type === "mosaic" && !!mark.start && !!mark.end
+        visible: active
+        x: active ? Math.min(mark.start.x, mark.end.x) - screen.x : 0
+        y: active ? Math.min(mark.start.y, mark.end.y) - screen.y : 0
+        width: active ? Math.abs(mark.end.x - mark.start.x) : 0
+        height: active ? Math.abs(mark.end.y - mark.start.y) : 0
+        clip: true
+        Image {
+            x: -patch.x
+            y: -patch.y
+            width: patch.screen.width
+            height: patch.screen.height
+            source: patch.active ? patch.source : ""
+            smooth: false
+            cache: true
+        }
+    }
+
+    Item {
         id: mosaicOverlay
         objectName: "mosaicOverlay"
         anchors.fill: parent
-        controller: captureController
-        screenIndex: root.screenIndex
-        visible: captureController.selected
+        readonly property bool hasMosaic: draftPatch.active ||
+            captureController.annotations.some(item => item.type === "mosaic")
+        readonly property bool imageReady: captureController.imagesReady
+        readonly property string source: root.screenIndex >= 0 && captureController.imagesReady
+                                         ? "image://captures/mosaic/" + root.screenIndex : ""
+        visible: captureController.selected && hasMosaic
+
+        Item {
+            x: root.holeLeft
+            y: root.holeTop
+            width: root.holeRight - root.holeLeft
+            height: root.holeBottom - root.holeTop
+            clip: true
+            Item {
+                x: -parent.x
+                y: -parent.y
+                width: root.width
+                height: root.height
+                Repeater {
+                    model: captureController.annotations.length
+                    delegate: MosaicPatch {
+                        required property int index
+                        mark: captureController.annotations[index]
+                        screen: root.screenRect
+                        source: mosaicOverlay.source
+                    }
+                }
+                MosaicPatch {
+                    id: draftPatch
+                    mark: captureController.draft
+                    screen: root.screenRect
+                    source: mosaicOverlay.source
+                }
+            }
+        }
     }
 
     Rectangle {
@@ -312,12 +369,27 @@ Item {
         border.width: 2
     }
 
+    // Committed marks, clipped to the selection. Canvas rasterizes on the GUI
+    // thread, so it repaints only when the marks or the selection change.
     Canvas {
         id: marks
         objectName: "marksCanvas"
-        anchors.fill: parent
-        visible: captureController.selected
+        readonly property bool spotlightDraft: captureController.draft.type === "spotlight"
+        readonly property bool hasContent: captureController.annotations.length > 0 || spotlightDraft
+        property bool painted: false
+        x: root.holeLeft
+        y: root.holeTop
+        width: root.holeRight - root.holeLeft
+        height: root.holeBottom - root.holeTop
+        visible: captureController.selected && hasContent && width > 0 && height > 0
         antialiasing: true
+
+        function refresh() {
+            // An invisible Canvas still rasterizes on requestPaint().
+            if (hasContent || painted) requestPaint()
+        }
+        onWidthChanged: refresh()
+        onHeightChanged: refresh()
 
         function drawShape(context, item) {
             if (!item || !item.type) return
@@ -437,7 +509,10 @@ Item {
         onPaint: {
             let context = getContext("2d")
             context.clearRect(0, 0, width, height)
+            painted = hasContent
+            if (!hasContent) return
             context.save()
+            context.translate(-x, -y)
             context.beginPath()
             context.rect(root.localX, root.localY,
                          captureController.selection.width, captureController.selection.height)
@@ -468,8 +543,59 @@ Item {
             }
             for (let item of captureController.annotations)
                 if (item.type !== "spotlight") drawShape(context, item)
-            if (captureController.draft.type !== "spotlight")
-                drawShape(context, captureController.draft)
+            context.restore()
+        }
+    }
+
+    // The mark being drawn gets a canvas sized to its own extent, so each
+    // pointer move rasterizes only the pixels the shape can touch.
+    Canvas {
+        id: draftMarks
+        objectName: "draftCanvas"
+        readonly property var mark: captureController.draft
+        readonly property rect bounds: draftBounds(mark)
+        x: bounds.x
+        y: bounds.y
+        width: bounds.width
+        height: bounds.height
+        visible: captureController.selected && width > 0 && height > 0
+        antialiasing: true
+
+        function draftBounds(item) {
+            if (!item || !item.type || !item.start || item.type === "mosaic" ||
+                item.type === "text" || item.type === "spotlight")
+                return Qt.rect(0, 0, 0, 0)
+            let points = [item.start, item.end || item.start]
+            if (item.points) points = points.concat(item.points)
+            if (item.type === "curvedarrow" || item.type === "doublearrow") {
+                let end = item.end || item.start
+                points.push({x: (item.start.x + end.x) / 2 - (end.y - item.start.y) * 0.22,
+                             y: (item.start.y + end.y) / 2 + (end.x - item.start.x) * 0.22})
+            }
+            // Room for arrowheads, marker discs and the highlighter's width.
+            const pad = 20
+            let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity
+            for (let point of points) {
+                left = Math.min(left, point.x)
+                top = Math.min(top, point.y)
+                right = Math.max(right, point.x)
+                bottom = Math.max(bottom, point.y)
+            }
+            left = Math.max(Math.floor(left - pad - screenRect.x), root.holeLeft)
+            top = Math.max(Math.floor(top - pad - screenRect.y), root.holeTop)
+            right = Math.min(Math.ceil(right + pad - screenRect.x), root.holeRight)
+            bottom = Math.min(Math.ceil(bottom + pad - screenRect.y), root.holeBottom)
+            return right > left && bottom > top
+                   ? Qt.rect(left, top, right - left, bottom - top) : Qt.rect(0, 0, 0, 0)
+        }
+
+        onPaint: {
+            let context = getContext("2d")
+            context.clearRect(0, 0, width, height)
+            if (!visible) return
+            context.save()
+            context.translate(-x, -y)
+            marks.drawShape(context, mark)
             context.restore()
         }
     }
@@ -1230,9 +1356,14 @@ Item {
 
     Connections {
         target: captureController
-        function onSelectionChanged() { marks.requestPaint() }
-        function onAnnotationsChanged() { marks.requestPaint() }
-        function onDraftChanged() { marks.requestPaint() }
-        function onSelectedChanged() { marks.requestPaint() }
+        property bool spotlightWasDrafted: false
+        function onSelectionChanged() { marks.refresh() }
+        function onAnnotationsChanged() { marks.refresh() }
+        function onSelectedChanged() { marks.refresh() }
+        function onDraftChanged() {
+            if (draftMarks.visible) draftMarks.requestPaint()
+            if (marks.spotlightDraft || spotlightWasDrafted) marks.refresh()
+            spotlightWasDrafted = marks.spotlightDraft
+        }
     }
 }
