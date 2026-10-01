@@ -113,6 +113,29 @@ private slots:
     QVERIFY(!pending.get());
   }
 
+  // A client that gave up waiting has captured by itself, so the daemon must
+  // not serve its request when it finally reads it.
+  void withdrawnRequestIsNotServed() {
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const std::string path = dir.filePath(QStringLiteral("daemon.sock")).toStdString();
+    int listener = -1;
+    int lock = -1;
+    std::string error;
+    QCOMPARE(listenForCaptureRequests(path, &listener, &lock, &error),
+             ListenResult::Listening);
+    sockaddr_un address{};
+    address.sun_family = AF_UNIX;
+    std::strcpy(address.sun_path, path.c_str());
+    const int client = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
+    QCOMPARE(::connect(client, reinterpret_cast<const sockaddr *>(&address), sizeof address), 0);
+    QCOMPARE(send(client, "capture\n", 8, MSG_NOSIGNAL), ssize_t(8));
+    close(client);
+    QCOMPARE(takeCaptureRequests(listener), 0);
+    close(listener);
+    close(lock);
+  }
+
   // systemd can hold the socket with no daemon behind it; a daemon started
   // by hand must leave it alone without its probe counting as a capture.
   void probeOfAHeldSocketIsNoRequest() {

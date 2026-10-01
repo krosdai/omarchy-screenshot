@@ -66,17 +66,17 @@ bool forwardCaptureRequest(const std::string &path) {
   }
   // A daemon that exits before accepting closes the connection unanswered,
   // and the caller then captures itself. Under systemd the request instead
-  // waits for the restarted daemon, which can take a moment to answer.
-  const timeval timeout{10, 0};
+  // waits for the restarted daemon, which takes well under the timeout.
+  // Giving up closes the connection, which withdraws the request: a daemon
+  // that reads it later can no longer answer, so it will not capture too.
+  const timeval timeout{5, 0};
   setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof timeout);
   char reply[sizeof captureAccepted - 1];
-  const ssize_t received = recv(fd, reply, sizeof reply, MSG_WAITALL);
-  const bool timedOut = received < 0 && (errno == EAGAIN || errno == EWOULDBLOCK);
+  const bool accepted =
+      recv(fd, reply, sizeof reply, MSG_WAITALL) == ssize_t(sizeof reply) &&
+      std::memcmp(reply, captureAccepted, sizeof reply) == 0;
   close(fd);
-  // A daemon too slow to answer is still alive; capturing here as well
-  // would show two overlays.
-  return timedOut || (received == ssize_t(sizeof reply) &&
-                      std::memcmp(reply, captureAccepted, sizeof reply) == 0);
+  return accepted;
 }
 
 int activatedSocket(pid_t self, const char *listenPid, const char *listenFds) {
@@ -167,6 +167,9 @@ ListenResult listenForCaptureRequests(const std::string &path, int *fd,
   if (!bound || listen(listener, 8) != 0) {
     if (error)
       *error = systemError(bound ? "listen" : "bind");
+    // A bound but unused node would block the systemd socket later.
+    if (bound)
+      unlink(path.c_str());
     close(listener);
     close(held);
     return ListenResult::Failed;
@@ -190,10 +193,13 @@ int takeCaptureRequests(int listener) {
         recv(client, buffer, sizeof buffer, MSG_WAITALL) ==
             ssize_t(sizeof buffer) &&
         std::memcmp(buffer, captureRequest, sizeof buffer) == 0;
-    if (request)
-      send(client, captureAccepted, sizeof captureAccepted - 1, MSG_NOSIGNAL);
+    // Only a request whose client still waits for the answer counts; one
+    // that gave up has captured by itself.
+    const bool answered =
+        request && send(client, captureAccepted, sizeof captureAccepted - 1,
+                        MSG_NOSIGNAL) == ssize_t(sizeof captureAccepted - 1);
     close(client);
-    requests += request;
+    requests += answered;
   }
   return requests;
 }

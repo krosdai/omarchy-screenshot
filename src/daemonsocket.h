@@ -32,5 +32,5 @@ ListenResult listenForCaptureRequests(const std::string &path, int *fd,
                                       int *lock, std::string *error);
 
 // Accepts every queued connection, acknowledges each capture request, and
-// returns how many there were.
+// returns how many were acknowledged; a client that already gave up is not.
 int takeCaptureRequests(int listener);
