@@ -7,12 +7,15 @@
 #include <QObject>
 #include <QPainterPath>
 #include <QPointF>
+#include <QPointer>
 #include <QRectF>
+#include <QThread>
 #include <QTimer>
 #include <QVariantList>
 #include <QVariantMap>
 #include <QVector>
 
+#include <functional>
 #include <future>
 
 class QScreen;
@@ -47,6 +50,7 @@ class CaptureController final : public QObject {
   Q_PROPERTY(int toolbarScreen READ toolbarScreen NOTIFY selectionChanged)
   Q_PROPERTY(QString status READ status NOTIFY statusChanged)
   Q_PROPERTY(bool imagesReady READ imagesReady NOTIFY imagesReadyChanged)
+  Q_PROPERTY(bool exporting READ exporting NOTIFY exportingChanged)
 
 public:
   explicit CaptureController(QObject *parent = nullptr);
@@ -70,6 +74,7 @@ public:
   int toolbarScreen() const;
   QString status() const { return m_status; }
   bool imagesReady() const { return m_imagesReady; }
+  bool exporting() const { return m_exporting; }
   QImage renderedImage() const;
   static QPainterPath freehandPath(const QVariantList &points);
   static QPainterPath mosaicPath(const QVariantMap &item);
@@ -109,6 +114,7 @@ signals:
   void draftChanged();
   void statusChanged();
   void imagesReadyChanged();
+  void exportingChanged();
   void done();
 
 private:
@@ -130,7 +136,11 @@ private:
   void setStatus(const QString &message);
   void paintAnnotation(QPainter &painter, const QVariantMap &item) const;
   void appendAnnotation(const QVariantMap &item);
+  // Runs job off the GUI thread; job returns an error message or nothing.
+  void exportInBackground(std::function<QString()> job);
+  void finishExport(const QString &error);
   void addWindowCandidates(const QByteArray &json);
+  static QString recognizeText(const QImage &image);
   static CaptureResult captureMonitors(const QStringList &names,
                                        const QList<bool> &direct);
 
@@ -163,4 +173,6 @@ private:
   std::future<CaptureResult> m_capture;
   std::future<QByteArray> m_clients;
   bool m_imagesReady = false;
+  bool m_exporting = false;
+  QPointer<QThread> m_exportThread;
 };

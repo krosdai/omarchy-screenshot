@@ -85,11 +85,11 @@ private slots:
     controller.pointerMove(0, 80, 50);
     controller.pointerRelease(0, 80, 50);
     controller.ocr();
+    QTRY_COMPARE(controller.status(), QStringLiteral("No text recognized"));
     QFile chosen(temp.filePath(QStringLiteral("chosen")));
     QVERIFY(chosen.open(QIODevice::ReadOnly));
     QCOMPARE(chosen.readAll(), expected);
     QCOMPARE(QImage(temp.filePath(QStringLiteral("input.png"))).size(), QSize(70, 40));
-    QCOMPARE(controller.status(), QStringLiteral("No text recognized"));
   }
 };
 

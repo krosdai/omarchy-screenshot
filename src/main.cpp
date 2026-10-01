@@ -271,6 +271,16 @@ int main(int argc, char **argv) {
                      &QCoreApplication::quit);
 
   std::vector<std::unique_ptr<QQuickView>> views;
+  // Unmap the frozen overlay as soon as an export starts; it only comes back
+  // to show an error.
+  if (!uiTest)
+    QObject::connect(&controller, &CaptureController::exportingChanged, &app,
+                     [&] {
+                       for (const auto &view : views)
+                         view->setVisible(!controller.exporting());
+                       if (!controller.exporting() && !views.empty())
+                         views.back()->requestActivate();
+                     });
   for (int i = 0; i < controller.monitors().size(); ++i) {
     const auto &monitor = controller.monitors()[i];
     auto view = std::make_unique<QQuickView>(&engine, nullptr);
@@ -1148,6 +1158,8 @@ int main(int argc, char **argv) {
           QFile::remove(clipboardFile);
           QTest::mouseDClick(views[0].get(), Qt::LeftButton, Qt::NoModifier,
                              blankSpot.toPoint());
+          // Copying finishes on a worker thread; passed checks the outcome.
+          (void)QTest::qWaitFor([&] { return closedAfterCopy; }, 5000);
           QFile captured(clipboardFile);
           const QImage clipboardImage = captured.open(QIODevice::ReadOnly)
                                             ? QImage::fromData(captured.readAll())

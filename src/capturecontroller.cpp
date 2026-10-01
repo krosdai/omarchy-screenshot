@@ -172,6 +172,8 @@ CaptureController::CaptureController(QObject *parent) : QObject(parent) {
 }
 
 CaptureController::~CaptureController() {
+  if (m_exportThread)
+    m_exportThread->wait();
   saveAnnotationColor();
 }
 
@@ -946,26 +948,53 @@ QImage CaptureController::renderedImage() const {
   return result;
 }
 
+void CaptureController::exportInBackground(std::function<QString()> job) {
+  if (m_exporting)
+    return;
+  m_exporting = true;
+  emit exportingChanged();
+  m_exportThread = QThread::create([this, job = std::move(job)] {
+    const QString error = job();
+    QMetaObject::invokeMethod(
+        this, [this, error] { finishExport(error); }, Qt::QueuedConnection);
+  });
+  connect(m_exportThread, &QThread::finished, m_exportThread,
+          &QObject::deleteLater);
+  m_exportThread->start();
+}
+
+void CaptureController::finishExport(const QString &error) {
+  m_exporting = false;
+  emit exportingChanged();
+  if (error.isEmpty())
+    emit done();
+  else
+    setStatus(error);
+}
+
 void CaptureController::copy() {
   const auto image = renderedImage();
   if (image.isNull())
     return;
-  QByteArray png;
-  QBuffer buffer(&png);
-  buffer.open(QIODevice::WriteOnly);
-  image.save(&buffer, "PNG");
-  QString error;
-  if (!copyBytes(png, QStringLiteral("image/png"), &error)) {
-    setStatus(error);
-    return;
-  }
-  emit done();
+  exportInBackground([image] {
+    QByteArray png;
+    QBuffer buffer(&png);
+    buffer.open(QIODevice::WriteOnly);
+    image.save(&buffer, "PNG");
+    QString error;
+    copyBytes(png, QStringLiteral("image/png"), &error);
+    return error;
+  });
 }
 
 void CaptureController::ocr() {
   const auto image = renderedImage();
   if (image.isNull())
     return;
+  exportInBackground([image] { return recognizeText(image); });
+}
+
+QString CaptureController::recognizeText(const QImage &image) {
   QByteArray png;
   QBuffer buffer(&png);
   buffer.open(QIODevice::WriteOnly);
@@ -992,29 +1021,19 @@ void CaptureController::ocr() {
   process.start(QStringLiteral("tesseract"),
                 {QStringLiteral("stdin"), QStringLiteral("stdout"),
                  QStringLiteral("-l"), language});
-  if (!process.waitForStarted(3000)) {
-    setStatus(tr("Install tesseract to use OCR"));
-    return;
-  }
+  if (!process.waitForStarted(3000))
+    return tr("Install tesseract to use OCR");
   process.write(png);
   process.closeWriteChannel();
-  if (!process.waitForFinished(30000) || process.exitCode() != 0) {
-    setStatus(
-        tr("Text recognition failed: %1")
-            .arg(QString::fromUtf8(process.readAllStandardError()).trimmed()));
-    return;
-  }
+  if (!process.waitForFinished(30000) || process.exitCode() != 0)
+    return tr("Text recognition failed: %1")
+        .arg(QString::fromUtf8(process.readAllStandardError()).trimmed());
   const QByteArray recognized = process.readAllStandardOutput().trimmed();
-  if (recognized.isEmpty()) {
-    setStatus(tr("No text recognized"));
-    return;
-  }
+  if (recognized.isEmpty())
+    return tr("No text recognized");
   QString error;
-  if (!copyBytes(recognized, QStringLiteral("text/plain"), &error)) {
-    setStatus(error);
-    return;
-  }
-  emit done();
+  copyBytes(recognized, QStringLiteral("text/plain"), &error);
+  return error;
 }
 
 void CaptureController::save() {
@@ -1035,12 +1054,12 @@ void CaptureController::save() {
                                .arg(QDateTime::currentDateTime().toString(
                                    QStringLiteral("yyyy-MM-dd_HH-mm-ss-zzz")));
   const QString path = QDir(directory).filePath(filename);
-  if (!image.save(path, "PNG")) {
-    setStatus(tr("Cannot save: %1").arg(path));
-    return;
-  }
-  QTextStream(stdout) << path << '\n';
-  emit done();
+  exportInBackground([image, path] {
+    if (!image.save(path, "PNG"))
+      return tr("Cannot save: %1").arg(path);
+    QTextStream(stdout) << path << '\n';
+    return QString();
+  });
 }
 
 void CaptureController::cancel() { emit done(); }
