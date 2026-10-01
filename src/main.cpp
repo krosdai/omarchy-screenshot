@@ -49,8 +49,9 @@ public:
 
   QImage requestImage(const QString &id, QSize *size,
                       const QSize &requestedSize) override {
+    // "<kind>/<screen>/<generation>"; the generation only defeats caching.
     const QStringList parts = id.split(QLatin1Char('/'));
-    if (parts.size() != 2)
+    if (parts.size() < 2)
       return {};
     bool valid = false;
     const int index = parts[1].toInt(&valid);
@@ -603,7 +604,9 @@ int main(int argc, char **argv) {
     const auto *image =
         root->findChild<QObject *>(QStringLiteral("screenCaptureImage"));
     const QString expectedSource =
-        QStringLiteral("image://captures/screen/%1").arg(i);
+        QStringLiteral("image://captures/screen/%1/%2")
+            .arg(i)
+            .arg(controller.captureGeneration());
     if (root->property("screenIndex").toInt() != i || !image ||
         image->property("source").toUrl().toString() != expectedSource) {
       qCritical() << "Wrong image source for" << monitor.name;
