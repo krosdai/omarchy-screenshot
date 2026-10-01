@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "capturecontroller.h"
-#include "mosaicoverlay.h"
 
 #include <LayerShellQt/window.h>
 #include <QCommandLineParser>
@@ -251,7 +250,6 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  qmlRegisterType<MosaicOverlay>("ScreenshotInternals", 1, 0, "MosaicOverlay");
   QQmlEngine engine;
   QObject::connect(&engine, &QQmlEngine::warnings, &app,
                    [](const QList<QQmlError> &warnings) {

@@ -17,8 +17,6 @@ qt_add_executable(omarchy-screenshot
     src/main.cpp
     src/capturecontroller.cpp
     src/capturecontroller.h
-    src/mosaicoverlay.cpp
-    src/mosaicoverlay.h
 )
 
 set_source_files_properties(qml/Overlay.qml PROPERTIES QT_RESOURCE_ALIAS Overlay.qml)
