@@ -118,6 +118,15 @@ Item {
 
     Rectangle { anchors.fill: parent; color: "#db111820" }
 
+    // Right-click exits, as in the regular overlay. Items above take only
+    // the buttons they use, so right-clicks anywhere fall through to here.
+    MouseArea {
+        objectName: "longExitArea"
+        anchors.fill: parent
+        acceptedButtons: Qt.RightButton
+        onPressed: captureController.cancel()
+    }
+
     Rectangle {
         id: viewport
         objectName: "longViewport"
