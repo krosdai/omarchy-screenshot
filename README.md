@@ -119,7 +119,7 @@ systemctl --user enable --now omarchy-screenshot.socket
 
 The first capture after the daemon starts takes about as long as a normal launch. The daemon then stays ready and exits after 10 minutes without a capture, which returns all of its memory; the next capture starts it again. While it runs, it uses about 100 MB of memory plus about 320 MB of GPU memory on a 5K display, which integrated graphics take from system RAM.
 
-To change how long the daemon stays ready, run `systemctl --user edit omarchy-screenshot.service` and replace the command; `--idle-timeout 0` keeps it running:
+To change how long the daemon stays ready, run `systemctl --user edit omarchy-screenshot.service` and replace the command, keeping the executable path the unit already uses (`/usr/bin` for the package, `~/.local/bin` for a local install); `--idle-timeout 0` keeps it running:
 
 ```ini
 [Service]

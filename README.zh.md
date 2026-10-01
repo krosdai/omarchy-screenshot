@@ -118,7 +118,7 @@ systemctl --user enable --now omarchy-screenshot.socket
 
 后台进程启动后的第一次截图，耗时与普通启动相近。之后它保持就绪，连续 10 分钟没有截图就退出并释放全部内存，下次截图时再自动启动。运行期间，它在 5K 显示器上约占 100 MB 内存，外加约 320 MB 显存；集成显卡的显存来自系统内存。
 
-如需调整保持就绪的时间，运行 `systemctl --user edit omarchy-screenshot.service` 替换启动命令；`--idle-timeout 0` 表示一直运行：
+如需调整保持就绪的时间，运行 `systemctl --user edit omarchy-screenshot.service` 替换启动命令，并保留单元中原有的可执行文件路径（软件包为 `/usr/bin`，本地安装为 `~/.local/bin`）；`--idle-timeout 0` 表示一直运行：
 
 ```ini
 [Service]
