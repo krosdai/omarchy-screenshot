@@ -23,6 +23,10 @@ Item {
                                                 viewport.width / imageScale,
                                                 viewport.height / imageScale)
     property bool movingImage: false
+    // The text editor is anchored in image coordinates so panning or zooming
+    // while typing keeps it, and the committed text, where the user clicked.
+    property real textAnchorX: 0
+    property real textAnchorY: 0
     property real lastMouseX: 0
     property real lastMouseY: 0
 
@@ -70,8 +74,7 @@ Item {
         let value = textInput.text
         textEditor.visible = false
         if (value.trim().length > 0) {
-            let p = pointInImage(textEditor.x, textEditor.y + 12)
-            captureController.addText(p.x, p.y, value)
+            captureController.addText(textAnchorX, textAnchorY + 12 / imageScale, value)
         }
         forceActiveFocus()
     }
@@ -164,8 +167,8 @@ Item {
                     if (p.x < crop.x || p.y < crop.y ||
                         p.x > crop.x + crop.width || p.y > crop.y + crop.height)
                         return
-                    textEditor.x = mouse.x
-                    textEditor.y = mouse.y
+                    root.textAnchorX = p.x
+                    root.textAnchorY = p.y
                     textInput.text = ""
                     textEditor.visible = true
                     textInput.forceActiveFocus()
@@ -222,6 +225,8 @@ Item {
             id: textEditor
             objectName: "longTextEditor"
             visible: false
+            x: (root.textAnchorX - root.sourceRect.x) * root.imageScale
+            y: (root.textAnchorY - root.sourceRect.y) * root.imageScale
             width: Math.max(140, textInput.contentWidth + 12)
             height: Math.max(34, textInput.contentHeight + 12)
             color: "#eeffffff"
