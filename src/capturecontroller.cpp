@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "capturecontroller.h"
+#include "virtualpointer.h"
 
 #include "screencapture.h"
 
@@ -36,12 +37,26 @@ QByteArray run(const QString &program, const QStringList &arguments,
   process.start(program, arguments);
   if (!process.waitForStarted(3000) || !process.waitForFinished(15000) ||
       process.exitCode() != 0) {
-    if (error)
-      *error = QStringLiteral("%1: %2").arg(
-          program, QString::fromUtf8(process.readAllStandardError()).trimmed());
+    if (error) {
+      QString detail = QString::fromUtf8(process.readAllStandardError()).trimmed();
+      if (detail.isEmpty())
+        detail = QString::fromUtf8(process.readAllStandardOutput()).trimmed();
+      *error = QStringLiteral("%1: %2").arg(program, detail);
+    }
     return {};
   }
   return process.readAllStandardOutput();
+}
+
+QImage captureWithoutCursor(const QString &option, const QString &value,
+                            QString *error) {
+  // grim excludes the cursor unless -c is supplied. Use the same cursor-free
+  // capture path for monitor images and every scrolling frame, including resume.
+  // PPM avoids PNG compression while retaining the original pixels.
+  return QImage::fromData(
+      run(QStringLiteral("grim"),
+          {QStringLiteral("-t"), QStringLiteral("ppm"), option, value,
+           QStringLiteral("-")}, error));
 }
 
 bool copyBytes(const QByteArray &bytes, const QString &mimeType,
@@ -169,6 +184,9 @@ CaptureController::CaptureController(QObject *parent) : QObject(parent) {
   m_colorSaveTimer.setInterval(250);
   connect(&m_colorSaveTimer, &QTimer::timeout, this,
           &CaptureController::saveAnnotationColor);
+  m_scrollTimer.setSingleShot(true);
+  connect(&m_scrollTimer, &QTimer::timeout, this,
+          &CaptureController::prepareScrollFrame);
 }
 
 CaptureController::~CaptureController() {
@@ -353,12 +371,403 @@ void CaptureController::addWindowCandidates(const QByteArray &json) {
     const QRectF rect(at[0].toDouble(), at[1].toDouble(), size[0].toDouble(),
                       size[1].toDouble());
     if (rect.isValid())
-      m_candidates.push_back({rect, true});
+      m_candidates.push_back(
+          {rect, true, data.value(QStringLiteral("address")).toString(),
+           data.value(QStringLiteral("title")).toString(), monitorIndex});
   }
+}
+
+QVariantList CaptureController::scrollCandidates() const {
+  QVariantList result;
+  if (!m_selected || m_scrollState == ScrollState::Reviewing)
+    return result;
+  for (const Candidate &candidate : m_candidates) {
+    if (!candidate.window || candidate.address.isEmpty() ||
+        !candidate.geometry.intersects(m_selection))
+      continue;
+    const QRectF visible = candidate.geometry.intersected(m_selection);
+    if (visible.width() < 64 || visible.height() < 64)
+      continue;
+    result.append(QVariantMap{
+        {QStringLiteral("index"), result.size()},
+        {QStringLiteral("x"), visible.x()},
+        {QStringLiteral("y"), visible.y()},
+        {QStringLiteral("width"), visible.width()},
+        {QStringLiteral("height"), visible.height()},
+        {QStringLiteral("title"), candidate.title}});
+  }
+  return result;
+}
+
+void CaptureController::setScrollState(ScrollState state) {
+  if (m_scrollState == state)
+    return;
+  m_scrollState = state;
+  emit scrollStateChanged();
+}
+
+void CaptureController::startScroll() {
+  if (m_scrollState != ScrollState::Idle || !m_selected ||
+      !m_annotations.isEmpty() || m_selection.isEmpty())
+    return;
+  const int count = scrollCandidates().size();
+  if (!count) {
+    setStatus(tr("No window to capture in the selection"));
+    return;
+  }
+  if (count == 1)
+    chooseScrollWindow(0);
+  else
+    setScrollState(ScrollState::Choosing);
+}
+
+void CaptureController::cancelScrollChoice() {
+  if (m_scrollState == ScrollState::Choosing)
+    setScrollState(ScrollState::Idle);
+}
+
+void CaptureController::chooseScrollWindow(int index) {
+  if (m_scrollState != ScrollState::Idle &&
+      m_scrollState != ScrollState::Choosing)
+    return;
+  int seen = 0;
+  for (const Candidate &candidate : m_candidates) {
+    if (!candidate.window || candidate.address.isEmpty() ||
+        !candidate.geometry.intersects(m_selection))
+      continue;
+    const QRectF visible = candidate.geometry.intersected(m_selection);
+    if (visible.width() < 64 || visible.height() < 64)
+      continue;
+    if (seen++ != index)
+      continue;
+    if (candidate.monitorIndex < 0 ||
+        candidate.monitorIndex >= m_monitors.size())
+      return;
+    m_scrollRegion = visible.intersected(
+        m_monitors[candidate.monitorIndex].geometry);
+    if (m_scrollRegion.width() < 64 || m_scrollRegion.height() < 64) {
+      setStatus(tr("The scroll area is too small"));
+      return;
+    }
+    m_scrollWindowAddress = candidate.address;
+    m_scrollWindowGeometry = candidate.geometry;
+    if (!m_virtualPointer)
+      m_virtualPointer = std::make_unique<VirtualPointer>();
+    if (!m_virtualPointer->available()) {
+      setStatus(tr("This compositor lacks the virtual pointer that scrolling capture needs"));
+      return;
+    }
+    m_scrollPoint = m_scrollRegion.center();
+    m_scrollStitcher.reset();
+    setStatus({});
+    m_scrollMosaicImage = {};
+    m_scrollReviewInitialized = false;
+    m_scrollReviewedHeight = 0;
+    m_scrollUnchangedFrames = 0;
+    m_scrollNoMatchRetries = 0;
+    m_scrollSteps = 1;
+    m_scrollPauseRequested = false;
+    emit scrollStoppingChanged();
+    m_scrollResumeCheck = false;
+    m_scrollNeedsPane = false;
+    m_scrollAwaitingPane = false;
+    m_scrollPaneSelected = false;
+    m_scrollInputSent = false;
+    ++m_scrollGeneration;
+    ++m_scrollRevision;
+    emit scrollImageChanged();
+    setScrollState(ScrollState::Capturing);
+    m_scrollTimer.start(220);
+    return;
+  }
+}
+
+bool CaptureController::focusScrollWindow() {
+  const auto clients = QJsonDocument::fromJson(
+      run(QStringLiteral("hyprctl"),
+          {QStringLiteral("-j"), QStringLiteral("clients")}, nullptr));
+  bool found = false;
+  for (const QJsonValue &entry : clients.array()) {
+    const QJsonObject data = entry.toObject();
+    if (data.value(QStringLiteral("address")).toString() !=
+        m_scrollWindowAddress)
+      continue;
+    const auto at = data.value(QStringLiteral("at")).toArray();
+    const auto size = data.value(QStringLiteral("size")).toArray();
+    if (at.size() < 2 || size.size() < 2)
+      return false;
+    const QRectF now(at[0].toDouble(), at[1].toDouble(), size[0].toDouble(),
+                     size[1].toDouble());
+    if (now != m_scrollWindowGeometry)
+      return false;
+    found = true;
+    break;
+  }
+  if (!found)
+    return false;
+  bool validAddress = false;
+  const qulonglong address = m_scrollWindowAddress.toULongLong(&validAddress, 16);
+  if (!validAddress)
+    return false;
+  QString error;
+  run(QStringLiteral("hyprctl"),
+      {QStringLiteral("eval"),
+       QStringLiteral("hl.dispatch(hl.dsp.focus({ window = \"address:0x%1\" }))")
+           .arg(QString::number(address, 16))},
+      &error);
+  return error.isEmpty();
+}
+
+void CaptureController::prepareScrollFrame() {
+  if (m_scrollState != ScrollState::Capturing || m_scrollAwaitingPane)
+    return;
+  emit scrollFrameAboutToCapture();
+  const int generation = m_scrollGeneration;
+  const auto capture = [this, generation] {
+    if (generation == m_scrollGeneration)
+      captureScrollFrame();
+  };
+  // The first frame and its successors must see the same focused window.
+  // Focusing only when sending the first wheel event can change decorations,
+  // opacity or page content between frames and make overlap detection fail.
+  if (!m_scrollInputSent) {
+    if (!focusScrollWindow()) {
+      setStatus(tr("The window moved or closed, so scrolling cannot start"));
+      finishScrollCapture();
+      return;
+    }
+    QTimer::singleShot(250, this, capture);
+  } else {
+    QTimer::singleShot(100, this, capture);
+  }
+}
+
+void CaptureController::captureScrollFrame() {
+  if (m_scrollState != ScrollState::Capturing || m_scrollAwaitingPane)
+    return;
+  const QRect region = m_scrollRegion.toAlignedRect();
+  const QString geometry =
+      QStringLiteral("%1,%2 %3x%4")
+          .arg(region.x()).arg(region.y()).arg(region.width()).arg(region.height());
+  QString error;
+  const QImage frame = captureWithoutCursor(QStringLiteral("-g"), geometry, &error);
+  emit scrollFrameCaptured();
+  if (frame.isNull()) {
+    setStatus(error.isEmpty() ? tr("Cannot capture the scroll area") : error);
+    finishScrollCapture();
+    return;
+  }
+  const ScrollStitcher::Result result = m_scrollStitcher.append(frame);
+  if (qEnvironmentVariableIsSet("OMARCHY_SCROLL_DIAGNOSTICS"))
+    QTextStream(stderr) << "scroll frame result=" << int(result)
+                        << " input=" << m_scrollInputSent
+                        << " resume=" << m_scrollResumeCheck
+                        << " steps=" << m_scrollSteps
+                        << " height=" << scrollHeight() << '\n';
+  if (result == ScrollStitcher::Result::NoMatch) {
+    // Wait for smooth scrolling or lazy rendering without sending more input.
+    if ((m_scrollInputSent || m_scrollResumeCheck) &&
+        m_scrollNoMatchRetries++ < 2) {
+      m_scrollTimer.start(350);
+      return;
+    }
+    setStatus(tr("Frames could not be stitched reliably; kept what was captured"));
+    finishScrollCapture();
+    return;
+  }
+  if (result == ScrollStitcher::Result::TooLarge) {
+    setStatus(tr("The long image reached its maximum length; scrolling stopped"));
+    finishScrollCapture();
+    return;
+  }
+  if (result == ScrollStitcher::Result::Added) {
+    if (m_scrollInputSent && m_scrollStitcher.lastShift() > 0) {
+      // Learn how far this particular window moves for one wheel step.
+      // Keep the next jump well below the visible height so frames overlap.
+      const int suggested = qRound(
+          m_scrollSteps * m_scrollRegion.height() * 0.4 /
+          m_scrollStitcher.lastShift());
+      m_scrollSteps = std::clamp(suggested, 1,
+                                std::min(12, m_scrollSteps * 3));
+    }
+    m_scrollNeedsPane = false;
+    m_scrollUnchangedFrames = 0;
+    m_scrollMosaicImage = {};
+    ++m_scrollRevision;
+    emit scrollImageChanged();
+  } else if (!m_scrollResumeCheck) {
+    ++m_scrollUnchangedFrames;
+  }
+  m_scrollNoMatchRetries = 0;
+  if (m_scrollResumeCheck)
+    m_scrollResumeCheck = false;
+  if (m_scrollPauseRequested || m_scrollUnchangedFrames >= 2) {
+    if (m_scrollUnchangedFrames >= 2) {
+      m_scrollNeedsPane = true;
+      setStatus(tr("Reached the bottom or the window stopped responding; choose a scroll area to continue"));
+    }
+    finishScrollCapture();
+    return;
+  }
+  const int generation = m_scrollGeneration;
+  QTimer::singleShot(80, this, [this, generation] {
+    if (generation == m_scrollGeneration)
+      prepareScrollStep();
+  });
+}
+
+void CaptureController::prepareScrollStep() {
+  if (m_scrollState != ScrollState::Capturing || m_scrollPauseRequested ||
+      m_scrollAwaitingPane)
+    return;
+  emit scrollInputAboutToSend();
+  const int generation = m_scrollGeneration;
+  QTimer::singleShot(80, this, [this, generation] {
+    if (generation == m_scrollGeneration)
+      sendScrollStep();
+  });
+}
+
+void CaptureController::sendScrollStep() {
+  if (m_scrollState != ScrollState::Capturing || m_scrollPauseRequested ||
+      m_scrollAwaitingPane)
+    return;
+  if (!focusScrollWindow()) {
+    setStatus(tr("The window moved or closed; kept what was captured"));
+    finishScrollCapture();
+    return;
+  }
+  QRectF desktop = m_monitors.first().geometry;
+  for (const auto &monitor : m_monitors)
+    desktop = desktop.united(monitor.geometry);
+  QString error;
+  if (!m_virtualPointer->scrollAt(m_scrollPoint, desktop, m_scrollSteps,
+                                  &error)) {
+    setStatus(tr("Cannot scroll the window: %1").arg(error));
+    finishScrollCapture();
+    return;
+  }
+  m_scrollInputSent = true;
+  m_scrollInputTimer.start();
+  emit scrollInputSent();
+  m_scrollTimer.start(550);
+}
+
+void CaptureController::restoreScrollInputFocus() {
+  if (m_scrollState != ScrollState::Capturing || !m_virtualPointer)
+    return;
+  QString error;
+  if (!m_virtualPointer->refreshFocus(&error)) {
+    setStatus(error);
+    finishScrollCapture();
+  }
+}
+
+void CaptureController::finishScrollCapture() {
+  ++m_scrollGeneration;
+  m_scrollTimer.stop();
+  if (m_scrollStitcher.image().isNull()) {
+    setScrollState(ScrollState::Idle);
+    return;
+  }
+  const QSize size = m_scrollStitcher.image().size();
+  if (!m_scrollReviewInitialized) {
+    m_selected = true;
+    setSelection(QRectF(QPointF(0, 0), QSizeF(size)));
+    m_scrollReviewInitialized = true;
+  } else if (qAbs(m_selection.bottom() - m_scrollReviewedHeight) < 1) {
+    setSelection(QRectF(m_selection.topLeft(),
+                        QPointF(m_selection.right(), size.height())));
+  }
+  m_scrollReviewedHeight = size.height();
+  if (m_tool == QStringLiteral("mosaic") || !m_scrollMosaicImage.isNull() ||
+      std::any_of(m_annotations.cbegin(), m_annotations.cend(),
+                  [](const QVariant &value) {
+                    return value.toMap().value(QStringLiteral("type")) ==
+                           QStringLiteral("mosaic");
+                  }))
+    prepareScrollMosaic();
+  setScrollState(ScrollState::Reviewing);
+}
+
+void CaptureController::pauseScroll() {
+  if (qEnvironmentVariableIsSet("OMARCHY_SCROLL_DIAGNOSTICS"))
+    QTextStream(stderr) << "scroll pause requested state=" << scrollState() << '\n';
+  if (m_scrollState != ScrollState::Capturing || m_scrollPauseRequested)
+    return;
+  if (m_scrollAwaitingPane) {
+    m_scrollAwaitingPane = false;
+    emit scrollAwaitingPaneChanged();
+    finishScrollCapture();
+    return;
+  }
+  m_scrollPauseRequested = true;
+  emit scrollStoppingChanged();
+  ++m_scrollGeneration;
+  m_scrollTimer.stop();
+  // Stop input immediately, then capture the final settled position.
+  const int remaining = m_scrollInputSent
+      ? std::max(180, 550 - int(m_scrollInputTimer.elapsed())) : 180;
+  m_scrollTimer.start(remaining);
+}
+
+void CaptureController::resumeScroll() {
+  if (m_scrollState != ScrollState::Reviewing)
+    return;
+  setStatus({});
+  ++m_scrollGeneration;
+  m_scrollPauseRequested = false;
+  emit scrollStoppingChanged();
+  m_scrollResumeCheck = true;
+  m_scrollUnchangedFrames = 0;
+  m_scrollNoMatchRetries = 0;
+  m_scrollInputSent = false;
+  setScrollState(ScrollState::Capturing);
+  if (m_scrollNeedsPane) {
+    m_scrollAwaitingPane = true;
+    m_scrollPaneSelected = false;
+    emit scrollAwaitingPaneChanged();
+    setStatus(tr("Click the area to scroll, then click Continue scrolling"));
+  } else
+    m_scrollTimer.start(220);
+}
+
+void CaptureController::continueAfterPane() {
+  if (m_scrollState != ScrollState::Capturing || !m_scrollAwaitingPane ||
+      !m_scrollPaneSelected)
+    return;
+  m_scrollInputSent = false;
+  m_scrollAwaitingPane = false;
+  emit scrollAwaitingPaneChanged();
+  setStatus({});
+  m_scrollTimer.start(220);
+}
+
+void CaptureController::selectScrollPane(qreal x, qreal y) {
+  if (m_scrollState != ScrollState::Capturing || !m_scrollAwaitingPane ||
+      !m_scrollRegion.contains(QPointF(x, y)))
+    return;
+  m_scrollPoint = QPointF(x, y);
+  m_scrollPaneSelected = true;
+  emit scrollAwaitingPaneChanged();
+}
+
+void CaptureController::prepareScrollMosaic() {
+  const QImage &image = m_scrollStitcher.image();
+  if (image.isNull() || !m_scrollMosaicImage.isNull())
+    return;
+  const QImage coarse =
+      image.scaled(qMax(1, image.width() / 12),
+                   qMax(1, image.height() / 12),
+                   Qt::IgnoreAspectRatio, Qt::FastTransformation);
+  m_scrollMosaicImage = coarse.scaled(
+      image.size(), Qt::IgnoreAspectRatio, Qt::FastTransformation);
 }
 
 QPointF CaptureController::globalPoint(int screenIndex, qreal x,
                                        qreal y) const {
+  if (screenIndex == -1 && m_scrollState == ScrollState::Reviewing)
+    return QPointF(x, y);
   if (screenIndex < 0 || screenIndex >= m_monitors.size())
     return {};
   return m_monitors[screenIndex].geometry.topLeft() + QPointF(x, y);
@@ -445,6 +854,9 @@ void CaptureController::setTool(const QString &tool) {
     m_toolVariants.insert(group, tool);
     emit toolVariantsChanged();
   }
+  if (tool == QStringLiteral("mosaic") &&
+      m_scrollState == ScrollState::Reviewing)
+    prepareScrollMosaic();
   if (m_tool == tool)
     return;
   if (tool == QStringLiteral("text"))
@@ -512,9 +924,14 @@ void CaptureController::adjustSelectionEdge(int key, bool shrink) {
       m_selection.isEmpty() || m_monitors.isEmpty())
     return;
 
-  QRectF desktop = m_monitors.first().geometry;
-  for (const auto &monitor : m_monitors)
-    desktop = desktop.united(monitor.geometry);
+  QRectF desktop;
+  if (m_scrollState == ScrollState::Reviewing)
+    desktop = QRectF(QPointF(0, 0), m_scrollStitcher.image().size());
+  else {
+    desktop = m_monitors.first().geometry;
+    for (const auto &monitor : m_monitors)
+      desktop = desktop.united(monitor.geometry);
+  }
 
   qreal left = m_selection.left();
   qreal right = m_selection.right();
@@ -561,8 +978,17 @@ void CaptureController::pointerMove(int screenIndex, qreal x, qreal y) {
       setSelection(QRectF(m_press, point).normalized());
   } else if (m_drag == Drag::Move) {
     const QPointF delta = point - m_press;
-    setSelection(m_initialSelection.translated(delta));
-    if (!m_initialAnnotations.isEmpty()) {
+    QRectF next = m_initialSelection.translated(delta);
+    if (m_scrollState == ScrollState::Reviewing) {
+      const QRectF bounds(QPointF(0, 0), m_scrollStitcher.image().size());
+      next.moveLeft(std::clamp(next.left(), bounds.left(),
+                               bounds.right() - next.width()));
+      next.moveTop(std::clamp(next.top(), bounds.top(),
+                              bounds.bottom() - next.height()));
+    }
+    setSelection(next);
+    if (m_scrollState != ScrollState::Reviewing &&
+        !m_initialAnnotations.isEmpty()) {
       m_annotations.clear();
       for (const QVariant &item : m_initialAnnotations)
         m_annotations.append(translatedAnnotation(item.toMap(), delta));
@@ -579,6 +1005,12 @@ void CaptureController::pointerMove(int screenIndex, qreal x, qreal y) {
       top = std::min(point.y(), bottom - 2);
     if (m_resizeEdges & 8)
       bottom = std::max(point.y(), top + 2);
+    if (m_scrollState == ScrollState::Reviewing) {
+      left = std::clamp(left, qreal(0), qreal(m_scrollStitcher.image().width()));
+      right = std::clamp(right, qreal(0), qreal(m_scrollStitcher.image().width()));
+      top = std::clamp(top, qreal(0), qreal(m_scrollStitcher.image().height()));
+      bottom = std::clamp(bottom, qreal(0), qreal(m_scrollStitcher.image().height()));
+    }
     setSelection(QRectF(QPointF(left, top), QPointF(right, bottom)));
   } else if (m_drag == Drag::Draw) {
     const QPointF inside = limited(point, m_selection);
@@ -634,10 +1066,12 @@ void CaptureController::pointerPress(int screenIndex, qreal x, qreal y) {
     if (std::abs(point.y() - m_selection.bottom()) <= 7)
       m_resizeEdges |= 8;
     m_drag = m_resizeEdges ? Drag::Resize : Drag::Move;
-    if (m_drag == Drag::Move)
+    if (m_drag == Drag::Move && m_scrollState != ScrollState::Reviewing)
       m_initialAnnotations = m_annotations;
     return;
   }
+  if (m_scrollState == ScrollState::Reviewing)
+    return;
   if (!m_annotations.isEmpty()) {
     m_annotations.clear();
     emit annotationsChanged();
@@ -871,9 +1305,75 @@ QPainterPath CaptureController::mosaicPath(const QVariantMap &item) {
   return result;
 }
 
+void CaptureController::paintScrollPreview(QPainter &painter,
+                                           const QRectF &source,
+                                           const QRectF &target) const {
+  if (m_scrollStitcher.image().isNull() || source.isEmpty() || target.isEmpty())
+    return;
+  painter.save();
+  painter.setClipRect(target);
+  painter.translate(target.topLeft());
+  painter.scale(target.width() / source.width(),
+                target.height() / source.height());
+  painter.translate(-source.topLeft());
+  painter.setRenderHint(QPainter::SmoothPixmapTransform);
+  painter.drawImage(source, m_scrollStitcher.image(), source);
+  const auto paintMosaic = [&](const QVariantMap &item) {
+    if (item.value(QStringLiteral("type")) != QStringLiteral("mosaic"))
+      return;
+    const QPainterPath shape = mosaicPath(item);
+    if (shape.isEmpty() || !shape.boundingRect().intersects(source) ||
+        m_scrollMosaicImage.isNull())
+      return;
+    painter.save();
+    painter.setClipPath(shape, Qt::IntersectClip);
+    painter.drawImage(source, m_scrollMosaicImage, source);
+    painter.restore();
+  };
+  for (const QVariant &annotation : m_annotations)
+    paintMosaic(annotation.toMap());
+  paintMosaic(m_draft);
+  QPainterPath holes = spotlightHoles(m_annotations);
+  if (m_draft.value(QStringLiteral("type")) ==
+      QStringLiteral("spotlight"))
+    holes.addEllipse(QRectF(fromMap(m_draft.value(QStringLiteral("start"))),
+                            fromMap(m_draft.value(QStringLiteral("end"))))
+                         .normalized());
+  if (!holes.isEmpty()) {
+    QPainterPath outer;
+    outer.addRect(source);
+    painter.fillPath(outer.subtracted(holes), QColor(0, 0, 0, 150));
+  }
+  painter.setRenderHint(QPainter::Antialiasing);
+  for (const QVariant &annotation : m_annotations) {
+    const QVariantMap item = annotation.toMap();
+    const QString type = item.value(QStringLiteral("type")).toString();
+    if (type != QStringLiteral("mosaic") &&
+        type != QStringLiteral("spotlight"))
+      paintAnnotation(painter, item);
+  }
+  if (!m_draft.isEmpty() &&
+      m_draft.value(QStringLiteral("type")) != QStringLiteral("mosaic"))
+    paintAnnotation(painter, m_draft);
+  painter.restore();
+}
+
 QImage CaptureController::renderedImage() const {
   if (!m_selected || m_selection.isEmpty())
     return {};
+  if (m_scrollState == ScrollState::Reviewing) {
+    const QRect source = m_selection.toAlignedRect().intersected(
+        QRect(QPoint(0, 0), m_scrollStitcher.image().size()));
+    if (source.isEmpty())
+      return {};
+    QImage result(source.size(), QImage::Format_ARGB32_Premultiplied);
+    if (result.isNull())
+      return {};
+    result.fill(Qt::transparent);
+    QPainter painter(&result);
+    paintScrollPreview(painter, source, QRectF(QPointF(0, 0), source.size()));
+    return result;
+  }
   qreal scale = 1;
   for (const auto &monitor : m_monitors)
     scale = std::max(scale, monitor.image.width() / monitor.geometry.width());
@@ -985,55 +1485,6 @@ void CaptureController::copy() {
     copyBytes(png, QStringLiteral("image/png"), &error);
     return error;
   });
-}
-
-void CaptureController::ocr() {
-  const auto image = renderedImage();
-  if (image.isNull())
-    return;
-  exportInBackground([image] { return recognizeText(image); });
-}
-
-QString CaptureController::recognizeText(const QImage &image) {
-  QByteArray png;
-  QBuffer buffer(&png);
-  buffer.open(QIODevice::WriteOnly);
-  image.save(&buffer, "PNG");
-
-  const QString languages = QString::fromUtf8(run(
-      QStringLiteral("tesseract"), {QStringLiteral("--list-langs")}, nullptr));
-  const QStringList available = languages.split(QLatin1Char('\n'));
-  const QLocale locale;
-  QString preferred = QLocale::languageToCode(locale.language(), QLocale::ISO639Part3);
-  if (locale.language() == QLocale::Chinese)
-    preferred = locale.script() == QLocale::TraditionalHanScript
-                    ? QStringLiteral("chi_tra") : QStringLiteral("chi_sim");
-  else if (locale.language() == QLocale::NorwegianBokmal)
-    preferred = QStringLiteral("nor");
-  QStringList selected;
-  if (available.contains(preferred))
-    selected.append(preferred);
-  if (available.contains(QStringLiteral("eng")) && preferred != QStringLiteral("eng"))
-    selected.append(QStringLiteral("eng"));
-  const QString language = selected.isEmpty() ? QStringLiteral("eng")
-                                             : selected.join(QLatin1Char('+'));
-  QProcess process;
-  process.start(QStringLiteral("tesseract"),
-                {QStringLiteral("stdin"), QStringLiteral("stdout"),
-                 QStringLiteral("-l"), language});
-  if (!process.waitForStarted(3000))
-    return tr("Install tesseract to use OCR");
-  process.write(png);
-  process.closeWriteChannel();
-  if (!process.waitForFinished(30000) || process.exitCode() != 0)
-    return tr("Text recognition failed: %1")
-        .arg(QString::fromUtf8(process.readAllStandardError()).trimmed());
-  const QByteArray recognized = process.readAllStandardOutput().trimmed();
-  if (recognized.isEmpty())
-    return tr("No text recognized");
-  QString error;
-  copyBytes(recognized, QStringLiteral("text/plain"), &error);
-  return error;
 }
 
 void CaptureController::save() {

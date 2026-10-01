@@ -67,10 +67,11 @@ class Translations(unittest.TestCase):
         self.assertEqual(set(self.catalogs), LOCALES)
         with tempfile.TemporaryDirectory() as temp:
             reference = Path(temp) / "reference.ts"
+            # Scan every source so a newly translatable file cannot slip past.
+            sources = sorted([*(args.source / "src").glob("*.cpp"),
+                              *(args.source / "qml").glob("*.qml")])
             subprocess.run([
-                str(args.lupdate), str(args.source / "src/main.cpp"),
-                str(args.source / "src/capturecontroller.cpp"),
-                str(args.source / "qml/Overlay.qml"), "-locations", "none",
+                str(args.lupdate), *map(str, sources), "-locations", "none",
                 "-ts", str(reference),
             ], check=True, capture_output=True, text=True)
             sources = set(messages(reference))
@@ -88,18 +89,18 @@ class Translations(unittest.TestCase):
                     self.assertTrue(translation.text and translation.text.strip())
                     self.assertEqual(re.findall(r"%\d+", source),
                                      re.findall(r"%\d+", translation.text))
-                    for token in ("Qt", "wl-copy", "tesseract", "PNG", "OCR",
-                                  "Alt", "Enter", "Shift+Enter", "Shift", "1 px"):
+                    for token in ("Qt", "wl-copy", "PNG", "Alt", "Enter", "Shift+Enter",
+                                  "Shift", "Ctrl", "Esc", "1 px"):
                         if token in source:
                             self.assertIn(token, translation.text)
 
     def test_hebrew_direction_isolates(self):
         catalog = self.catalogs["he"]
-        selection = catalog[("Overlay", "Selection · Arrow keys expand, Shift+arrows shrink (1 px)")].text
+        selection = catalog[("AnnotationToolbar", "Selection · Arrow keys expand, Shift+arrows shrink (1 px)")].text
         # Without isolation the visible unit reverses to "px 1" in RTL text.
         self.assertEqual(selection.count("\u20661 px\u2069"), 1)
         self.assertIn("\u2066Shift\u2069", selection)
-        editor = catalog[("Overlay", "Enter: confirm · Shift+Enter: new line · Alt: confirm & return to previous tool")].text
+        editor = catalog[("AnnotationToolbar", "Enter: confirm · Shift+Enter: new line · Alt: confirm & return to previous tool")].text
         for key in ("Enter", "Shift+Enter", "Alt"):
             self.assertIn(f"\u2066{key}\u2069", editor)
         for translation in catalog.values():

@@ -8,17 +8,19 @@
 
 - 鼠标悬停时识别当前工作区的窗口及所在显示器，单击吸附到对应区域。
 - 拖动选择任意矩形，支持跨显示器；选中后可以拖动选区或拖动边缘调整大小。
-- 选区工具 V 显示八个方形调整点，四角和四边中点都可用较大的鼠标响应区域调整选区；方向键向对应方向扩展 1px，Shift+方向键向内收缩 1px，长按可连续调整；切换工具后调整点隐藏。
+- 选区工具 V 显示八个方形调整点，普通截图与长图共用 9×9 的白底蓝边方块，四角和四边中点都有 31×31 的鼠标响应区域。长图方块不随图片缩放，也不会被图片容器裁掉；方向键向对应方向扩展 1px，Shift+方向键向内收缩 1px，长按可连续调整；切换工具后调整点隐藏。
 - 矩形、椭圆、箭头、画笔、文字、矩形马赛克、直线、荧光笔、聚光灯、编号标记、圆角/实心图形及弯曲/双向箭头标注，支持撤销与重做。马赛克拖动时显示临时边框，松开后边框消失。
 - 矩形、圆形、箭头、画笔各占一个主按钮；直线归入箭头组，聚光灯归入圆形组。点击主按钮后在只显示图标的二级工具栏中选择样式；也可直接在画面空白处开始标注，二级工具栏会自动关闭。主按钮显示本组当前图形，键盘快捷键可恢复该样式。
 - 画笔会对鼠标采样点去抖，并用平滑的二次贝塞尔曲线连接；预览和导出使用相同的轨迹。
 - 文字编辑使用透明背景和虚线边框；每行垂直居中，支持 Shift+Enter 换行。
 - 工具栏最左侧可选择绘制颜色；可点选预设色，或拖动调色盘的色相条和颜色区域选择任意颜色。颜色自动保存，下次启动时恢复。新画的图形、画笔和文字及马赛克拖拽时的临时边框使用新颜色，已有标注保留原色。
 - 工具栏采用 QQ 截图风格的细线图标；调色盘顶部可切换深色或浅色工具栏，选择会保存。工具选中背景与快捷键、图标之间留有空隙。
-- 操作快捷键位于 QWERTY 键盘左手区域；鼠标悬停工具栏图标可查看功能说明。识字保留 F 快捷键，不在工具栏显示。
-- 复制 PNG 到 Wayland 剪贴板，或保存到图片目录。设置 `OMARCHY_SCREENSHOT_DIR` 可更改保存目录。
-- 多语言界面：工具提示、工具名称、主题名称和错误信息跟随系统语言；支持长文本换行和希伯来语右向左显示。
-- 可选 OCR：安装 `tesseract` 和相应的 `tesseract-data-*` 语言包后，将识别文本复制到剪贴板。优先使用当前界面语言；如果同时安装英语数据，会一并识别英语。未安装对应语言包时回退到英语。
+- 标注快捷键位于 QWERTY 键盘左手区域；滚动截图与继续截图使用 H，长图放大、缩小使用 =、-。工具栏按钮显示快捷键和图标，鼠标悬停可查看功能说明。
+- 普通截图和滚动长截图均不包含鼠标光标。可复制 PNG 到 Wayland 剪贴板，或保存到图片目录。设置 `OMARCHY_SCREENSHOT_DIR` 可更改保存目录。
+- 尚未标注时可点击工具栏的滚动截图按钮：一个窗口直接开始，多个窗口先选择目标，单击窗口开始，Esc 取消。软件只在该窗口与选区的交集内取图，使用虚拟滚轮分段滚动并自动拼接。固定页眉和页脚会尽量去重，无法可靠拼接时保留已有长图。
+- 滚动中不显示截图预览；在截图区域空白处单击即可停止，移动鼠标不会停止。完成后长图在屏幕内适配显示，高度不超过屏幕的 4/5；放大后，选区工具 V 下可左键拖动长图内部上下查看，拖动边框或八个调整点仍调整选区，标注工具仍用于绘制。也可滚轮平移、Ctrl+滚轮缩放、中键拖动，继续标注、复制与保存。长图工具栏提供“继续截图”，原有标注保留；若窗口未响应，先点击实际滚动区域，再点“继续滚动”。
+- 普通截图与长图共用工具栏样式、分组图标和调色盘；普通截图的滚动按钮位于编号标记右侧，长图的缩小、放大和“继续截图”依次位于编号标记与撤销之间。
+- 多语言界面：工具提示、工具名称、主题名称、操作提示和错误信息跟随系统语言；支持长文本换行和希伯来语右向左显示。
 - 处理负坐标、旋转显示器和不同缩放比例；导出时按各屏图像拼接。
 
 ## 界面语言
@@ -65,7 +67,7 @@ OMARCHY_SCREENSHOT_LANGUAGE=ja omarchy-screenshot
 
 ## 构建与运行
 
-在 Arch / Omarchy 上需要 `cmake`、`gcc`、`qt6-base`、`qt6-declarative`、`qt6-wayland`、`qt6-tools`、`layer-shell-qt`、`wayland`、`wayland-protocols`、`grim`、`wl-clipboard` 和 `hyprland`。程序通过 `ext-image-copy-capture-v1` 协议直接抓取显示器画面；合成器不支持该协议或显示器经过旋转时改用 `grim`。默认构建自动化测试还需要 `python`；只构建程序时可传入 `-DBUILD_TESTING=OFF`。
+在 Arch / Omarchy 上需要 `cmake`、`gcc`、`pkgconf`、`qt6-base`、`qt6-declarative`、`qt6-wayland`、`qt6-tools`、`layer-shell-qt`、`wayland`、`wayland-protocols`、`grim`、`wl-clipboard` 和 `hyprland`。程序通过 `ext-image-copy-capture-v1` 协议直接抓取显示器画面；合成器不支持该协议或显示器经过旋转时改用 `grim`。滚动截图使用 Hyprland 暴露的 wlr 虚拟指针协议。默认构建自动化测试还需要 `python`；只构建程序时可传入 `-DBUILD_TESTING=OFF`。
 
 可在 Omarchy 上从 AUR 安装：
 
@@ -73,7 +75,7 @@ OMARCHY_SCREENSHOT_LANGUAGE=ja omarchy-screenshot
 omarchy pkg aur add omarchy-screenshot
 ```
 
-AUR 软件包会从对应的 GitHub 版本标签下载源码、编译并安装 `omarchy-screenshot`。可选安装 `tesseract` 及对应的语言数据来使用 OCR，例如 `tesseract-data-chi_sim`（简体中文）、`tesseract-data-chi_tra`（繁体中文）、`tesseract-data-deu`（德语）和 `tesseract-data-eng`（英语）。
+AUR 软件包会从对应的 GitHub 版本标签下载源码、编译并安装 `omarchy-screenshot`。
 
 安装后，可在 `~/.config/hypr/bindings.lua` 中把 `Ctrl+Alt+A` 绑定为截图快捷键；如果已有同键绑定，先取消旧绑定：
 
@@ -90,11 +92,15 @@ cmake --build build -j
 ./build/omarchy-screenshot
 ```
 
-运行 `ctest --test-dir build --output-on-failure`，无需桌面会话即可检查所有翻译的完整性、占位符、内嵌加载、语言优先级／回退，以及 OCR 语言选择。
+运行 `ctest --test-dir build --output-on-failure`，无需桌面会话即可检查所有翻译的完整性、占位符、内嵌加载，以及语言优先级／回退。
 
 连接至少两块显示器时，可运行 `./build/omarchy-screenshot --self-test`，在内存中检查跨屏选区、撤销与重做及编号标记，不显示覆盖层或保存图片。
 
 可运行 `./build/omarchy-screenshot --ui-self-test --language he`，短暂打开覆盖层，模拟工具栏与调色盘操作、深浅主题切换、拖动矩形马赛克和画笔，检查设置保存、选中留白、预览、导出结果、文字输入和窄屏翻译排版，然后自动退出。自检使用临时设置目录，不会改动平时保存的颜色和主题。可设置 `OMARCHY_SCREENSHOT_TEST_ARTIFACT_DIR` 导出深浅主题的界面局部截图；截图不包含桌面捕获像素。
+
+滚动拼接和长图界面可分别运行 `./build/omarchy-screenshot --scroll-stitch-test` 与 `./build/omarchy-screenshot --scroll-ui-self-test` 检查。
+
+工具栏的离线交互检查可运行 `QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME= QT_QUICK_BACKEND=software /usr/lib/qt6/bin/qmltestrunner -input tests`，覆盖分组菜单、调色盘、主题一致性和按钮位置。
 
 也可执行 `cmake --install build --prefix ~/.local`，安装到 `~/.local/bin/omarchy-screenshot`。需要在 Hyprland Wayland 会话中运行。
 
@@ -107,8 +113,14 @@ cmake --build build -j
 | 操作 | 结果 |
 | --- | --- |
 | 悬停后单击 | 选中窗口或显示器 |
+| 未标注时按 H / 点击滚动截图图标 | 开始滚动截图；多个窗口时先选择目标 |
+| 滚动中单击截图区域空白处 | 停止并打开长图；仍可点击“继续截图”延长 |
+| 长图中按 H / 点击继续截图图标 | 继续向下截图，保留已有标注 |
+| 长图中按 = / - | 放大 / 缩小 |
+| 放大后的长图中，用 V 工具左键拖动内部空白区域 | 平移查看长图内容；边框和八个调整点仍用于调整选区 |
+| 长图中滚轮 / Ctrl+滚轮 / 中键拖动 | 平移 / 缩放 / 拖动画面 |
 | 拖动 | 自由选区；选中后可移动或调整选区 |
-| 在选区空白处双击 | 将当前截图复制到剪贴板并关闭界面 |
+| 在普通截图或长图的选区空白处双击 | 将当前选区和已有标注复制到剪贴板并关闭界面；长图按原始分辨率导出，不受预览缩放或滚动位置影响 |
 | V / T / G / B / W | 选区 / 文字 / 矩形马赛克 / 编号标记 / 直线 |
 | R / E / A / D | 激活上次选择的矩形 / 圆形 / 箭头（含直线） / 画笔（含荧光笔）样式；点击主按钮展开该组图标栏 |
 | Shift+B | 聚光灯 |
@@ -123,11 +135,10 @@ cmake --build build -j
 | X | 重做已撤销的标注 |
 | C | 复制截图并退出 |
 | S | 保存截图并退出 |
-| F | 识别选区文字并复制，然后退出 |
 | Esc / 右键 | 退出 |
 
 窗口识别用于选择屏幕上的几何区域，截图内容为当时显示在该区域内的像素。被其他窗口遮挡的部分仍会显示遮挡窗口；这一点与单独导出窗口缓冲区的功能不同。
 
 ## 许可证
 
-Copyright (C) 2026 Andy Stewart。本项目源码按 GNU 通用公共许可证第 3 版（`GPL-3.0-only`）发布，许可证全文见 [LICENSE](LICENSE)。
+Copyright (C) 2026 Andy Stewart。本项目源码按 GNU 通用公共许可证第 3 版（`GPL-3.0-only`）发布，许可证全文见 [LICENSE](LICENSE)。随项目提供的[虚拟指针协议定义](protocols/wlr-virtual-pointer-unstable-v1.xml)使用 MIT 许可证，许可证文本包含在该文件中。
