@@ -1481,20 +1481,26 @@ int main(int argc, char **argv) {
           if (!canvas)
             return;
           const QSizeF logicalSize(canvas->width(), canvas->height());
+          const QPoint strokePoint =
+              canvas->mapFromItem(views[0]->rootObject(), QPointF(200, 202))
+                  .toPoint();
+          const QPoint clearPoint =
+              canvas->mapFromItem(views[0]->rootObject(), QPointF(200, 208))
+                  .toPoint();
           auto grab = canvas->grabToImage();
           if (!grab)
             return;
           QObject::connect(
-              grab.get(), &QQuickItemGrabResult::ready, &app, [&, grab, logicalSize] {
+              grab.get(), &QQuickItemGrabResult::ready, &app,
+              [&, grab, logicalSize, strokePoint, clearPoint] {
                 const QImage image = selfTestLogicalImage(grab->image(), logicalSize);
-                const QColor stroke =
-                    image.width() > 200 && image.height() > 202
-                        ? image.pixelColor(200, 202)
-                        : QColor();
+                if (!image.rect().contains(strokePoint) ||
+                    !image.rect().contains(clearPoint))
+                  return;
+                const QColor stroke = image.pixelColor(strokePoint);
                 penPreviewVisible =
-                    image.width() > 200 && image.height() > 208 &&
                     stroke.alpha() > 0 && stroke.blue() > stroke.red() &&
-                    image.pixelColor(200, 208).alpha() == 0;
+                    image.pixelColor(clearPoint).alpha() == 0;
               });
         });
       });
