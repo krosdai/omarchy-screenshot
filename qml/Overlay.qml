@@ -119,7 +119,8 @@ Item {
         id: screenImage
         objectName: "screenCaptureImage"
         anchors.fill: parent
-        source: screenIndex >= 0 ? "image://captures/screen/" + screenIndex : ""
+        source: screenIndex >= 0 && captureController.imagesReady
+                ? "image://captures/screen/" + screenIndex : ""
         fillMode: Image.Stretch
         smooth: true
         cache: true
@@ -172,9 +173,9 @@ Item {
         anchors.fill: parent
         readonly property bool hasMosaic: draftPatch.active ||
             captureController.annotations.some(item => item.type === "mosaic")
-        readonly property string source: root.screenIndex >= 0
+        readonly property bool imageReady: captureController.imagesReady
+        readonly property string source: root.screenIndex >= 0 && captureController.imagesReady
                                          ? "image://captures/mosaic/" + root.screenIndex : ""
-        readonly property bool imageReady: source !== ""
         visible: captureController.selected && hasMosaic
 
         Item {

@@ -17,14 +17,18 @@
 
 #include "scrollstitcher.h"
 
+#include <future>
+
 class QScreen;
 class QPainter;
 class VirtualPointer;
+class QThread;
 
 struct CaptureMonitor {
   QString name;
   QRectF geometry;
   QImage image;
+  // One pixel per mosaic block; painting it unsmoothed at full size pixelates.
   QImage mosaicImage;
   QScreen *screen = nullptr;
   int id = -1;
@@ -56,12 +60,17 @@ class CaptureController final : public QObject {
   Q_PROPERTY(bool scrollPaneSelected READ scrollPaneSelected NOTIFY scrollAwaitingPaneChanged)
   Q_PROPERTY(bool scrollStopping READ scrollStopping NOTIFY scrollStoppingChanged)
   Q_PROPERTY(QRectF scrollRegion READ scrollRegion NOTIFY scrollStateChanged)
+  Q_PROPERTY(bool imagesReady READ imagesReady NOTIFY imagesReadyChanged)
 
 public:
   explicit CaptureController(QObject *parent = nullptr);
   ~CaptureController() override;
 
   bool initialize(QString *error);
+  // Split form of initialize(): the capture runs on a worker thread between
+  // the two calls so the caller can load the UI meanwhile.
+  bool startCapture(QString *error);
+  bool finishCapture(QString *error);
   const QVector<CaptureMonitor> &monitors() const { return m_monitors; }
   QRectF selection() const { return m_selection; }
   QRectF hovered() const { return m_hovered; }
@@ -86,6 +95,7 @@ public:
   const QImage &scrollImage() const { return m_scrollStitcher.image(); }
   const QImage &scrollMosaicImage() const { return m_scrollMosaicImage; }
   QRectF scrollRegion() const { return m_scrollRegion; }
+  bool imagesReady() const { return m_imagesReady; }
   QImage renderedImage() const;
   void paintScrollPreview(QPainter &painter, const QRectF &source,
                           const QRectF &target) const;
@@ -133,6 +143,7 @@ signals:
   void annotationsChanged();
   void draftChanged();
   void statusChanged();
+  void imagesReadyChanged();
   void done();
   void scrollStateChanged();
   void scrollImageChanged();
@@ -152,6 +163,11 @@ private:
     int monitorIndex = -1;
   };
   enum class Drag { None, Select, Move, Resize, Draw };
+  struct CaptureResult {
+    QList<QImage> images;
+    QList<QImage> mosaics;
+    QString error;
+  };
 
   QPointF globalPoint(int screenIndex, qreal x, qreal y) const;
   QRectF candidateAt(const QPointF &point) const;
@@ -168,6 +184,9 @@ private:
   void finishScrollCapture();
   bool focusScrollWindow();
   void prepareScrollMosaic();
+  void addWindowCandidates(const QByteArray &json);
+  static CaptureResult captureMonitors(const QStringList &names,
+                                       const QList<bool> &direct);
 
   QVector<CaptureMonitor> m_monitors;
   QVector<Candidate> m_candidates;
@@ -218,4 +237,7 @@ private:
   int m_scrollReviewedHeight = 0;
   int m_scrollRevision = 0;
   int m_scrollGeneration = 0;
+  std::future<CaptureResult> m_capture;
+  std::future<QByteArray> m_clients;
+  bool m_imagesReady = false;
 };

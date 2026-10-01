@@ -276,12 +276,19 @@ int main(int argc, char **argv) {
 
   CaptureController controller;
   QString error;
-  if (!controller.initialize(&error)) {
+  // Capturing continues on a worker thread while the overlay loads below.
+  if (!controller.startCapture(&error)) {
     qCritical().noquote() << error;
     return 1;
   }
 
   if (app.arguments().contains(QStringLiteral("--scroll-integration-test"))) {
+    // The fixture is found among window candidates, which arrive with the
+    // capture.
+    if (!controller.finishCapture(&error)) {
+      qCritical().noquote() << error;
+      return 1;
+    }
     if (!startScrollFixture(controller)) {
       QTextStream(stderr) << "Scroll fixture window is missing or cannot start\n";
       return 2;
@@ -355,6 +362,10 @@ int main(int argc, char **argv) {
   }
 
   if (app.arguments().contains(QStringLiteral("--self-test"))) {
+    if (!controller.finishCapture(&error)) {
+      qCritical().noquote() << error;
+      return 1;
+    }
     if (controller.monitors().size() < 2) {
       qCritical() << "Cross-monitor self-test needs two displays";
       return 2;
@@ -488,6 +499,7 @@ int main(int argc, char **argv) {
                           new CaptureImageProvider(&controller));
   QObject::connect(&controller, &CaptureController::done, &app,
                    &QCoreApplication::quit);
+  const bool uiTest = app.arguments().contains(QStringLiteral("--ui-self-test"));
 
   std::vector<std::unique_ptr<QQuickView>> views;
   for (int i = 0; i < controller.monitors().size(); ++i) {
@@ -510,8 +522,6 @@ int main(int argc, char **argv) {
         LayerShellQt::Window::AnchorRight);
     // Ignore the bar's reserved area: the frozen image uses the full output.
     layer->setExclusiveZone(-1);
-    const bool uiTest =
-        app.arguments().contains(QStringLiteral("--ui-self-test"));
     layer->setKeyboardInteractivity(
         uiTest ? (i == 0 ? LayerShellQt::Window::KeyboardInteractivityExclusive
                          : LayerShellQt::Window::KeyboardInteractivityNone)
@@ -524,6 +534,15 @@ int main(int argc, char **argv) {
       qCritical() << "Cannot load Overlay.qml for" << monitor.name;
       return 1;
     }
+    views.push_back(std::move(view));
+  }
+  if (!controller.finishCapture(&error)) {
+    qCritical().noquote() << error;
+    return 1;
+  }
+  for (int i = 0; i < controller.monitors().size(); ++i) {
+    const auto &monitor = controller.monitors()[i];
+    const auto &view = views[i];
     const auto *root = view->rootObject();
     const auto *image =
         root->findChild<QObject *>(QStringLiteral("screenCaptureImage"));
@@ -535,12 +554,9 @@ int main(int argc, char **argv) {
       return 1;
     }
     view->show();
-    views.push_back(std::move(view));
   }
   if (!views.empty())
-    (app.arguments().contains(QStringLiteral("--ui-self-test")) ? views.front()
-                                                                : views.back())
-        ->requestActivate();
+    (uiTest ? views.front() : views.back())->requestActivate();
 
   std::unique_ptr<QQuickView> scrollBar;
   std::unique_ptr<QQuickView> longView;
@@ -890,7 +906,7 @@ int main(int argc, char **argv) {
   bool editorBackgroundTransparent = false;
   bool exportedTextRows = false;
   bool doubleClickCopied = false;
-  if (app.arguments().contains(QStringLiteral("--ui-self-test"))) {
+  if (uiTest) {
     controller.pointerPress(0, 100, 100);
     controller.pointerMove(0, 900, 600);
     controller.pointerRelease(0, 900, 600);
