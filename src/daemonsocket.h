@@ -14,8 +14,8 @@
 std::string daemonSocketPath();
 
 // Asks a listening daemon (or the systemd socket holding its place) for a
-// capture. False means no one is listening and the caller should capture
-// itself.
+// capture and waits for it to accept. False means no daemon took the request
+// and the caller should capture itself.
 bool forwardCaptureRequest(const std::string &path);
 
 // The listening socket systemd passed in, or -1 when not socket-activated.
@@ -31,5 +31,6 @@ enum class ListenResult { Listening, AlreadyRunning, Failed };
 ListenResult listenForCaptureRequests(const std::string &path, int *fd,
                                       int *lock, std::string *error);
 
-// Accepts every queued connection and returns how many asked for a capture.
+// Accepts every queued connection, acknowledges each capture request, and
+// returns how many there were.
 int takeCaptureRequests(int listener);
