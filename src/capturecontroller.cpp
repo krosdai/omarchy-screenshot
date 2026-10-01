@@ -544,6 +544,13 @@ void CaptureController::prepareScrollStep() {
   if (m_scrollState != ScrollState::Capturing || m_scrollPauseRequested ||
       m_scrollAwaitingPane)
     return;
+  // Focus while clicks are still intercepted: the hyprctl round trip would
+  // otherwise widen the window in which a stop click reaches the app below.
+  if (!focusScrollWindow()) {
+    setStatus(QStringLiteral("窗口已移动或关闭，已保留截取的内容"));
+    finishScrollCapture();
+    return;
+  }
   emit scrollInputAboutToSend();
   const int generation = m_scrollGeneration;
   QTimer::singleShot(80, this, [this, generation] {
@@ -556,11 +563,6 @@ void CaptureController::sendScrollStep() {
   if (m_scrollState != ScrollState::Capturing || m_scrollPauseRequested ||
       m_scrollAwaitingPane)
     return;
-  if (!focusScrollWindow()) {
-    setStatus(QStringLiteral("窗口已移动或关闭，已保留截取的内容"));
-    finishScrollCapture();
-    return;
-  }
   QRectF desktop = m_monitors.first().geometry;
   for (const auto &monitor : m_monitors)
     desktop = desktop.united(monitor.geometry);
