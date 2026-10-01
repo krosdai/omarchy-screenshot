@@ -24,18 +24,24 @@ bool fillAddress(const std::string &path, sockaddr_un *address) {
   return true;
 }
 
+// Connects without waiting: a local connect either succeeds at once or, with
+// the listener's backlog full, fails with EAGAIN, which errno keeps. The
+// returned socket blocks again so callers can rely on their timeouts.
 int connectTo(const std::string &path) {
   sockaddr_un address;
   if (!fillAddress(path, &address))
     return -1;
-  const int fd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
+  const int fd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC | SOCK_NONBLOCK, 0);
   if (fd < 0)
     return -1;
   if (connect(fd, reinterpret_cast<const sockaddr *>(&address),
               sizeof address) != 0) {
+    const int failure = errno;
     close(fd);
+    errno = failure;
     return -1;
   }
+  fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) & ~O_NONBLOCK);
   return fd;
 }
 
@@ -72,8 +78,16 @@ bool forwardCaptureRequest(const std::string &path) {
   const timeval timeout{5, 0};
   setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof timeout);
   char reply[sizeof captureAccepted - 1];
+  ssize_t received = recv(fd, reply, sizeof reply, MSG_WAITALL);
+  if (received < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+    // Withdraw atomically: after shutdown() the daemon's answer fails, and
+    // one it sent just before is still read here, so exactly one side
+    // captures.
+    shutdown(fd, SHUT_RDWR);
+    received = recv(fd, reply, sizeof reply, MSG_DONTWAIT);
+  }
   const bool accepted =
-      recv(fd, reply, sizeof reply, MSG_WAITALL) == ssize_t(sizeof reply) &&
+      received == ssize_t(sizeof reply) &&
       std::memcmp(reply, captureAccepted, sizeof reply) == 0;
   close(fd);
   return accepted;
@@ -134,8 +148,10 @@ ListenResult listenForCaptureRequests(const std::string &path, int *fd,
   // systemd can hold the socket without a daemon behind it. This probe
   // sends nothing, so it never counts as a capture request.
   const int probe = connectTo(path);
-  if (probe >= 0) {
-    close(probe);
+  // A full backlog still means someone listens there.
+  if (probe >= 0 || errno == EAGAIN) {
+    if (probe >= 0)
+      close(probe);
     close(held);
     return ListenResult::AlreadyRunning;
   }

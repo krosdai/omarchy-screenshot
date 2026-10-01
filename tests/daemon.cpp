@@ -23,6 +23,8 @@
 #include <sys/un.h>
 #include <unistd.h>
 
+#include <vector>
+
 // forwardCaptureRequest() waits for the daemon's answer, so the client runs
 // on its own thread while the test plays the daemon.
 static std::future<bool> forwardLater(const std::string &path) {
@@ -169,6 +171,45 @@ private slots:
     close(other);
     close(stalled);
     close(held);
+  }
+
+  // A daemon stuck before accepting fills its backlog. New clients must fall
+  // back at once instead of blocking in connect(), and a starting daemon must
+  // still treat the busy socket as taken.
+  void fullBacklogFallsBackAndIsNotStolen() {
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const std::string path = dir.filePath(QStringLiteral("daemon.sock")).toStdString();
+    const int stuck = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
+    sockaddr_un address{};
+    address.sun_family = AF_UNIX;
+    std::strcpy(address.sun_path, path.c_str());
+    QCOMPARE(bind(stuck, reinterpret_cast<const sockaddr *>(&address), sizeof address), 0);
+    QCOMPARE(listen(stuck, 1), 0);
+    std::vector<int> queued;
+    for (int i = 0; i < 16; ++i) {
+      const int client = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC | SOCK_NONBLOCK, 0);
+      if (::connect(client, reinterpret_cast<const sockaddr *>(&address), sizeof address) != 0) {
+        close(client);
+        break;
+      }
+      queued.push_back(client);
+    }
+    QVERIFY(queued.size() < 16);
+
+    const auto started = std::chrono::steady_clock::now();
+    QVERIFY(!forwardCaptureRequest(path));
+    QVERIFY(std::chrono::steady_clock::now() - started < std::chrono::seconds(1));
+    int listener = -1;
+    int lock = -1;
+    std::string error;
+    QCOMPARE(listenForCaptureRequests(path, &listener, &lock, &error),
+             ListenResult::AlreadyRunning);
+    struct stat info;
+    QCOMPARE(stat(path.c_str(), &info), 0);
+    for (const int client : queued)
+      close(client);
+    close(stuck);
   }
 
   void replacesStaleSocketButNotOtherFiles() {
