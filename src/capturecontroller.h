@@ -40,6 +40,9 @@ class CaptureController final : public QObject {
   Q_PROPERTY(QVariantMap toolVariants READ toolVariants NOTIFY toolVariantsChanged)
   Q_PROPERTY(QString annotationColor READ annotationColor WRITE
                  setAnnotationColor NOTIFY annotationColorChanged)
+  // Screen pixels per image pixel in the long-image review, so selection
+  // hit areas stay a constant size on screen at every zoom level.
+  Q_PROPERTY(qreal reviewScale MEMBER m_reviewScale NOTIFY reviewScaleChanged)
   Q_PROPERTY(bool darkToolbar READ darkToolbar WRITE setDarkToolbar NOTIFY
                  darkToolbarChanged)
   Q_PROPERTY(
@@ -130,6 +133,7 @@ signals:
   void toolVariantsChanged();
   void annotationColorChanged();
   void darkToolbarChanged();
+  void reviewScaleChanged();
   void annotationsChanged();
   void draftChanged();
   void statusChanged();
@@ -188,6 +192,7 @@ private:
       {QStringLiteral("pen"), QStringLiteral("pen")}};
   QString m_annotationColor = QStringLiteral("#ff4b55");
   bool m_darkToolbar = false;
+  qreal m_reviewScale = 1;
   QTimer m_colorSaveTimer;
   bool m_colorDirty = false;
   QVariantList m_annotations;
