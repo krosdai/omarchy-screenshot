@@ -81,6 +81,32 @@ Canvas {
         }
 
         switch (action) {
+        case "resume":
+            strokePath(() => {
+                ctx.moveTo(7, 4)
+                ctx.lineTo(19, 12)
+                ctx.lineTo(7, 20)
+                ctx.closePath()
+            })
+            break
+        case "zoom_in":
+        case "zoom_out":
+            strokePath(() => {
+                ctx.arc(10, 10, 6.5, 0, Math.PI * 2)
+                ctx.moveTo(15, 15); ctx.lineTo(21, 21)
+                ctx.moveTo(6.5, 10); ctx.lineTo(13.5, 10)
+                if (action === "zoom_in") {
+                    ctx.moveTo(10, 6.5); ctx.lineTo(10, 13.5)
+                }
+            })
+            break
+        case "scroll":
+            strokePath(() => {
+                ctx.rect(5, 3, 14, 18)
+                ctx.moveTo(12, 7); ctx.lineTo(12, 16)
+                ctx.moveTo(8.5, 12.5); ctx.lineTo(12, 16); ctx.lineTo(15.5, 12.5)
+            })
+            break
         case "color":
             fillPath(() => {
                 ctx.moveTo(11.8, 2.7)
