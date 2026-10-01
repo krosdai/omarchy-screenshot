@@ -169,14 +169,13 @@ Item {
     }
 
     function handleShortcut(event) {
-        if (colorPanel.visible) {
-            if (event.key === Qt.Key_Q) {
-                colorPanel.visible = false
-                root.focusRequested()
-                event.accepted = true
-            }
+        if (colorPanel.visible && event.key === Qt.Key_Q) {
+            colorPanel.visible = false
+            root.focusRequested()
+            event.accepted = true
             return true
         }
+        const closeColorPanel = colorPanel.visible
         if (variantPanel.visible) {
             variantPanel.visible = false
         }
@@ -231,6 +230,7 @@ Item {
         else if (captureController.selected && event.key === Qt.Key_B &&
                  event.modifiers === Qt.NoModifier) captureController.tool = "marker"
         else return false
+        if (closeColorPanel) colorPanel.visible = false
         event.accepted = true
         return true
     }
