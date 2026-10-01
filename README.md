@@ -85,7 +85,7 @@ cmake --build build -j
 ./build/omarchy-screenshot
 ```
 
-Run `ctest --test-dir build --output-on-failure` to check translation completeness, placeholders, embedded catalog loading, and language precedence and fallback, along with scroll stitching and cursor-icon grabs and logical-pixel sampling at 1, 1.25, 1.5, and 2x scaling. These tests do not require a desktop session; the scaling tests use separate processes and software rendering and leave the desktop scale untouched. The cursor, mosaic, and pen preview checks in `--ui-self-test` also sample grabs at logical size, so it runs directly in a 2x Wayland session.
+Run `ctest --test-dir build --output-on-failure` to check translation completeness, placeholders, embedded catalog loading, and language precedence and fallback, along with scroll stitching, the resident daemon's socket handling and capture reset, and cursor-icon grabs and logical-pixel sampling at 1, 1.25, 1.5, and 2x scaling. These tests do not require a desktop session; the scaling tests use separate processes and software rendering and leave the desktop scale untouched. The cursor, mosaic, and pen preview checks in `--ui-self-test` also sample grabs at logical size, so it runs directly in a 2x Wayland session.
 
 With at least two monitors connected, run `./build/omarchy-screenshot --self-test` to check cross-monitor selection, undo and redo, and numbered markers in memory, without displaying overlays or saving images.
 
@@ -95,7 +95,37 @@ Run `./build/omarchy-screenshot --scroll-stitch-test` to check frame stitching, 
 
 To check toolbar interactions offline, including group menus, the palette, theme consistency, and button positions, run `QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME= QT_QUICK_BACKEND=software /usr/lib/qt6/bin/qmltestrunner -input tests`.
 
-To install locally, run `cmake --install build --prefix ~/.local`. The executable is installed at `~/.local/bin/omarchy-screenshot`. The app requires a Hyprland Wayland session.
+To install locally, run `cmake --install build --prefix ~/.local`. The executable is installed at `~/.local/bin/omarchy-screenshot`. To use resident mode from a local install, configure with `-DSYSTEMD_USER_UNIT_DIR=$HOME/.local/share/systemd/user` so systemd finds the units. The app requires a Hyprland Wayland session.
+
+### Resident mode
+
+A normal launch starts Qt, loads the overlay and sets up the GPU before it can show anything. Resident mode keeps that work done between captures: `omarchy-screenshot` hands the request to a running daemon and exits at once. On a 5K display, the overlay then appears in about 60–90 ms instead of about 230 ms.
+
+Resident mode is off by default: installing the package changes nothing, and `omarchy-screenshot` captures on its own as before. To turn it on, enable the systemd user socket the package installs; it starts the daemon on the first capture:
+
+```sh
+systemctl --user enable --now omarchy-screenshot.socket
+```
+
+The first capture after the daemon starts takes about as long as a normal launch. The daemon then stays ready and exits after 10 minutes without a capture, which returns all of its memory; the next capture starts it again. While it runs, it uses about 100 MB of memory plus about 320 MB of GPU memory on a 5K display, which integrated graphics take from system RAM.
+
+To change how long the daemon stays ready, run `systemctl --user edit omarchy-screenshot.service` and replace the command; `--idle-timeout 0` keeps it running:
+
+```ini
+[Service]
+ExecStart=
+ExecStart=/usr/bin/omarchy-screenshot --daemon --idle-timeout 1800
+```
+
+Without systemd, start `omarchy-screenshot --daemon` from your session's autostart instead. The key binding stays the same in every case: when no daemon is running, `omarchy-screenshot` captures on its own. Only a launch without options goes through the daemon; `--language` and the self-tests always run standalone, and the daemon keeps the language it started with.
+
+To turn resident mode off, run `systemctl --user disable --now omarchy-screenshot.socket`, which also stops a running daemon, or remove `omarchy-screenshot --daemon` from your autostart.
+
+Omarchy fades new overlay layers in by default, which delays the overlay by up to 400 ms in either mode. To show it immediately, add this rule to `~/.config/hypr/hyprland.lua`:
+
+```lua
+hl.layer_rule({ match = { namespace = "^omarchy-screenshot$" }, no_anim = true, animation = "none" })
+```
 
 ### AUR publishing
 
