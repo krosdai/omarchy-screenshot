@@ -19,6 +19,7 @@ Item {
     readonly property bool mosaicDraftBorderVisible: mosaicDraftBorder.visible
     readonly property int toolbarButtonCount: annotationToolbar.buttonCount
     readonly property bool toolbarTooltipVisible: annotationToolbar.toolbarTooltipVisible
+    readonly property string toolbarTooltipText: annotationToolbar.toolbarTooltipText
     readonly property string editorText: editor.visible ? textInput.text : ""
     readonly property int editorRows: editor.visible ? textInput.lineCount : 0
     readonly property real textLineHeight: textMetrics.lineSpacing
