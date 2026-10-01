@@ -383,8 +383,6 @@ void CaptureController::chooseScrollWindow(int index) {
     }
     m_scrollPoint = m_scrollRegion.center();
     m_scrollStitcher.reset();
-    // Undone marks belong to the regular screenshot, not the long image.
-    m_redoAnnotations.clear();
     setStatus({});
     m_scrollMosaicImage = {};
     m_scrollReviewInitialized = false;
@@ -600,6 +598,9 @@ void CaptureController::finishScrollCapture() {
   }
   const QSize size = m_scrollStitcher.image().size();
   if (!m_scrollReviewInitialized) {
+    // The long image replaces the canvas only now; a capture that fails
+    // before its first frame returns to the screenshot with redo intact.
+    m_redoAnnotations.clear();
     m_selected = true;
     setSelection(QRectF(QPointF(0, 0), QSizeF(size)));
     m_scrollReviewInitialized = true;
