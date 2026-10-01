@@ -354,15 +354,20 @@ Item {
         visible: captureController.status.length > 0
         anchors.horizontalCenter: parent.horizontalCenter
         y: 8
-        width: statusText.implicitWidth + 24
-        height: 30
+        width: Math.min(statusText.implicitWidth + 24, root.width - 16)
+        height: statusText.implicitHeight + 14
         radius: 5
         color: annotationToolbar.toolbarSurface
         border.color: annotationToolbar.panelBorder
         Text {
             id: statusText
             anchors.centerIn: parent
+            width: parent.width - 24
             text: captureController.status
+            textFormat: Text.PlainText
+            wrapMode: Text.Wrap
+            horizontalAlignment: Qt.application.layoutDirection === Qt.RightToLeft
+                                 ? Text.AlignRight : Text.AlignLeft
             color: annotationToolbar.toolbarInk
         }
     }
