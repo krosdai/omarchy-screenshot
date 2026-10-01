@@ -2,8 +2,6 @@
 
 English | [Simplified Chinese](README.zh.md)
 
-English is the primary language of this repository. Write code, comments, and primary documentation in English; keep localized documentation in separate files such as `README.zh.md`. Interface translations live in `translations/`.
-
 A Qt 6 screenshot and annotation tool for Hyprland and Omarchy. It captures each monitor before displaying a frozen overlay across all monitors. Selections use Hyprland's global coordinates, so you can drag from one screen to another.
 
 ## Features
