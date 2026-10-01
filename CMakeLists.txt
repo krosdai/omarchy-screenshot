@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 cmake_minimum_required(VERSION 3.21)
-project(omarchy_screenshot VERSION 0.1.6 LANGUAGES C CXX)
+project(omarchy_screenshot VERSION 0.1.8 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -11,10 +11,20 @@ set(CMAKE_AUTOMOC ON)
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Qml Quick Test LinguistTools)
 find_package(LayerShellQt REQUIRED)
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(WaylandClient REQUIRED IMPORTED_TARGET wayland-client)
-pkg_check_modules(WaylandProtocols REQUIRED wayland-protocols>=1.37)
+pkg_check_modules(WAYLAND_CLIENT REQUIRED IMPORTED_TARGET wayland-client)
+pkg_check_modules(WAYLAND_PROTOCOLS REQUIRED wayland-protocols>=1.37)
 pkg_get_variable(WAYLAND_PROTOCOLS_DIR wayland-protocols pkgdatadir)
-pkg_get_variable(WAYLAND_SCANNER wayland-scanner wayland_scanner)
+find_program(WAYLAND_SCANNER wayland-scanner REQUIRED)
+
+set(VIRTUAL_POINTER_XML ${CMAKE_CURRENT_SOURCE_DIR}/protocols/wlr-virtual-pointer-unstable-v1.xml)
+set(VIRTUAL_POINTER_HEADER ${CMAKE_CURRENT_BINARY_DIR}/wlr-virtual-pointer-client-protocol.h)
+set(VIRTUAL_POINTER_CODE ${CMAKE_CURRENT_BINARY_DIR}/wlr-virtual-pointer-protocol.c)
+add_custom_command(
+    OUTPUT ${VIRTUAL_POINTER_HEADER} ${VIRTUAL_POINTER_CODE}
+    COMMAND ${WAYLAND_SCANNER} client-header ${VIRTUAL_POINTER_XML} ${VIRTUAL_POINTER_HEADER}
+    COMMAND ${WAYLAND_SCANNER} private-code ${VIRTUAL_POINTER_XML} ${VIRTUAL_POINTER_CODE}
+    DEPENDS ${VIRTUAL_POINTER_XML}
+)
 qt_policy(SET QTP0001 NEW)
 qt_policy(SET QTP0004 NEW)
 
@@ -40,37 +50,21 @@ foreach(protocol IN LISTS capture_protocols)
     list(APPEND protocol_sources "${protocol_header}" "${protocol_code}")
 endforeach()
 
-# wayland-protocols does not ship wlroots' virtual pointer, so it lives in-tree.
-set(virtual_pointer_xml "${CMAKE_CURRENT_SOURCE_DIR}/protocols/wlr-virtual-pointer-unstable-v1.xml")
-set(virtual_pointer_header "${CMAKE_CURRENT_BINARY_DIR}/wlr-virtual-pointer-client-protocol.h")
-set(virtual_pointer_code "${CMAKE_CURRENT_BINARY_DIR}/wlr-virtual-pointer-protocol.c")
-add_custom_command(
-    OUTPUT "${virtual_pointer_header}" "${virtual_pointer_code}"
-    COMMAND "${WAYLAND_SCANNER}" client-header "${virtual_pointer_xml}" "${virtual_pointer_header}"
-    COMMAND "${WAYLAND_SCANNER}" private-code "${virtual_pointer_xml}" "${virtual_pointer_code}"
-    DEPENDS "${virtual_pointer_xml}"
-    VERBATIM
-)
-list(APPEND protocol_sources "${virtual_pointer_header}" "${virtual_pointer_code}")
-
-qt_add_library(screenshot-core STATIC
-    src/capturecontroller.cpp
-    src/capturecontroller.h
-    src/screencapture.cpp
-    src/screencapture.h
-    src/scrollstitcher.cpp
-    src/scrollstitcher.h
-    src/virtualpointer.cpp
-    src/virtualpointer.h
-    ${protocol_sources}
-)
-target_include_directories(screenshot-core PUBLIC src PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
-target_link_libraries(screenshot-core PUBLIC Qt6::Core Qt6::Gui PRIVATE PkgConfig::WaylandClient)
-
 qt_add_executable(omarchy-screenshot
     src/main.cpp
+    src/capturecontroller.cpp
+    src/capturecontroller.h
+    src/scrollstitcher.cpp
+    src/scrollstitcher.h
     src/longimageitem.cpp
     src/longimageitem.h
+    src/virtualpointer.cpp
+    src/virtualpointer.h
+    ${VIRTUAL_POINTER_CODE}
+    ${VIRTUAL_POINTER_HEADER}
+    src/screencapture.cpp
+    src/screencapture.h
+    ${protocol_sources}
 )
 
 set_source_files_properties(qml/Overlay.qml PROPERTIES QT_RESOURCE_ALIAS Overlay.qml)
@@ -86,8 +80,10 @@ qt_add_qml_module(omarchy-screenshot
 )
 
 target_link_libraries(omarchy-screenshot PRIVATE
-    screenshot-core Qt6::Qml Qt6::Quick Qt6::Test LayerShellQt::Interface
+    Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test LayerShellQt::Interface
+    PkgConfig::WAYLAND_CLIENT
 )
+target_include_directories(omarchy-screenshot PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 set(screenshot_locales
     az be bg hr cs da nl et fi fr ka de el he hu is ga it ja kk ky lo
@@ -98,8 +94,8 @@ foreach(locale IN LISTS screenshot_locales)
 endforeach()
 qt_add_translations(omarchy-screenshot
     TS_FILES ${screenshot_translations}
-    SOURCES src/main.cpp src/capturecontroller.cpp src/virtualpointer.cpp
-        qml/Overlay.qml qml/AnnotationToolbar.qml qml/LongOverlay.qml qml/ScrollCapture.qml
+    SOURCES src/main.cpp src/capturecontroller.cpp src/virtualpointer.cpp qml/Overlay.qml
+        qml/AnnotationToolbar.qml qml/LongOverlay.qml qml/ScrollCapture.qml
     LUPDATE_OPTIONS -no-obsolete -locations none
 )
 
@@ -119,3 +115,18 @@ if(BUILD_TESTING)
 endif()
 
 install(TARGETS omarchy-screenshot RUNTIME DESTINATION bin)
+
+include(CTest)
+if(BUILD_TESTING)
+    qt_add_executable(tst-preview-scaling tests/tst_preview_scaling.cpp)
+    target_include_directories(tst-preview-scaling PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(tst-preview-scaling PRIVATE Qt6::Quick Qt6::Test)
+    target_compile_definitions(tst-preview-scaling PRIVATE
+        PREVIEW_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/preview_scaling.qml")
+    foreach(scale IN ITEMS 1 1.25 1.5 2)
+        add_test(NAME preview-scaling-${scale} COMMAND tst-preview-scaling)
+        set_tests_properties(preview-scaling-${scale} PROPERTIES
+            ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORMTHEME=;QT_QUICK_BACKEND=software;QT_SCALE_FACTOR=${scale}"
+            TIMEOUT 15)
+    endforeach()
+endif()

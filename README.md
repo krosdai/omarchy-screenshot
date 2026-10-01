@@ -70,6 +70,8 @@ Translations use Qt Linguist's `.ts` format in `translations/`. The build compil
 
 On Arch Linux or Omarchy, you need `cmake`, `gcc`, `pkgconf`, `qt6-base`, `qt6-declarative`, `qt6-wayland`, `qt6-tools`, `layer-shell-qt`, `wayland`, `wayland-protocols`, `grim`, `wl-clipboard`, and `hyprland`. The app captures each display directly through the `ext-image-copy-capture-v1` protocol and falls back to `grim` when the compositor lacks the protocol or a display is rotated. Scrolling capture uses the wlr virtual pointer protocol that Hyprland exposes. Building the automated tests, which are enabled by default, also requires `python`. Pass `-DBUILD_TESTING=OFF` to build only the app.
 
+Both `x86_64` and `aarch64` (64-bit ARM) are supported. On ARM, the same build commands produce a native ARM binary, and `PKGBUILD` declares both architectures, so `makepkg --ignorearch` is not needed.
+
 To install from the AUR on Omarchy:
 
 ```sh
@@ -93,7 +95,7 @@ cmake --build build -j
 ./build/omarchy-screenshot
 ```
 
-Run `ctest --test-dir build --output-on-failure` to check translation completeness, placeholders, embedded catalog loading, and language precedence and fallback. These tests do not require a desktop session.
+Run `ctest --test-dir build --output-on-failure` to check translation completeness, placeholders, embedded catalog loading, and language precedence and fallback, along with scroll stitching and cursor-icon grabs and logical-pixel sampling at 1, 1.25, 1.5, and 2x scaling. These tests do not require a desktop session; the scaling tests use separate processes and software rendering and leave the desktop scale untouched. The cursor, mosaic, and pen preview checks in `--ui-self-test` also sample grabs at logical size, so it runs directly in a 2x Wayland session.
 
 With at least two monitors connected, run `./build/omarchy-screenshot --self-test` to check cross-monitor selection, undo and redo, and numbered markers in memory, without displaying overlays or saving images.
 

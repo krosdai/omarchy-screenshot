@@ -4,6 +4,7 @@
 #include "capturecontroller.h"
 #include "longimageitem.h"
 #include "virtualpointer.h"
+#include "selftestimage.h"
 
 #include <LayerShellQt/window.h>
 #include <QCommandLineParser>
@@ -141,15 +142,16 @@ int main(int argc, char **argv) {
 
   // Parse once before translation so even --help uses the requested language.
   QList<QCommandLineOption> options = {
-      {QStringLiteral("language"), QString(), QStringLiteral("locale")},
-      {QStringLiteral("self-test"), QString()},
-      {QStringLiteral("ui-self-test"), QString()},
-      {QStringLiteral("scroll-stitch-test"), QString()},
-      {QStringLiteral("scroll-integration-test"), QString()},
-      {QStringLiteral("scroll-ui-self-test"), QString()},
-      {QStringLiteral("scroll-ui-integration-test"), QString()}};
-  for (qsizetype i = 1; i < options.size(); ++i)
-    options[i].setFlags(QCommandLineOption::HiddenFromHelp);
+      {QStringLiteral("language"), QString(), QStringLiteral("locale")}};
+  for (const QString &test :
+       {QStringLiteral("self-test"), QStringLiteral("ui-self-test"),
+        QStringLiteral("scroll-stitch-test"),
+        QStringLiteral("scroll-ui-self-test"),
+        QStringLiteral("scroll-integration-test"),
+        QStringLiteral("scroll-ui-integration-test")}) {
+    options.append(QCommandLineOption(test));
+    options.last().setFlags(QCommandLineOption::HiddenFromHelp);
+  }
   QCommandLineParser languageParser;
   languageParser.addHelpOption();
   languageParser.addOptions(options);
@@ -820,7 +822,8 @@ int main(int argc, char **argv) {
     const auto *hint = scrollBar->rootObject()->findChild<QObject *>(
         QStringLiteral("scrollStopHint"));
     if (!hint || hint->property("text").toString() !=
-                     QCoreApplication::translate("ScrollCapture", "Click to stop capturing"))
+                     QCoreApplication::translate("ScrollCapture",
+                                                 "Click to stop capturing"))
       return fail(QStringLiteral("Missing click-to-stop hint"));
     for (auto *item : scrollBar->rootObject()->findChildren<QQuickItem *>())
       if (item->inherits("QQuickImage"))
@@ -1029,13 +1032,14 @@ int main(int argc, char **argv) {
       if (!cursorIcon)
         QTextStream(stdout) << "Cursor diagnostic: visual item missing\n";
       if (cursorIcon) {
+        const QSizeF logicalSize(cursorIcon->width(), cursorIcon->height());
         auto grab = cursorIcon->grabToImage();
         if (!grab)
           QTextStream(stdout) << "Cursor diagnostic: grab unavailable\n";
         if (grab)
           QObject::connect(
-              grab.get(), &QQuickItemGrabResult::ready, &app, [&, grab] {
-                const QImage image = grab->image();
+              grab.get(), &QQuickItemGrabResult::ready, &app, [&, grab, logicalSize] {
+                const QImage image = selfTestLogicalImage(grab->image(), logicalSize);
                 cursorIconRendered = image.width() >= 16 &&
                                      image.height() >= 20 &&
                                      image.pixelColor(2, 3).alpha() > 0 &&
@@ -1327,12 +1331,13 @@ int main(int argc, char **argv) {
               QStringLiteral("mosaicOverlay"));
           if (!overlay)
             return;
+          const QSizeF logicalSize(overlay->width(), overlay->height());
           auto grab = overlay->grabToImage();
           if (!grab)
             return;
           QObject::connect(
-              grab.get(), &QQuickItemGrabResult::ready, &app, [&, grab] {
-                const QImage image = grab->image();
+              grab.get(), &QQuickItemGrabResult::ready, &app, [&, grab, logicalSize] {
+                const QImage image = selfTestLogicalImage(grab->image(), logicalSize);
                 if (image.width() > 710 && image.height() > 500) {
                   mosaicPixelsVisible = image.pixelColor(475, 375).alpha() > 0;
                   mosaicMaskTransparent =
@@ -1475,20 +1480,27 @@ int main(int argc, char **argv) {
               QStringLiteral("marksCanvas"));
           if (!canvas)
             return;
+          const QSizeF logicalSize(canvas->width(), canvas->height());
+          const QPoint strokePoint =
+              canvas->mapFromItem(views[0]->rootObject(), QPointF(200, 202))
+                  .toPoint();
+          const QPoint clearPoint =
+              canvas->mapFromItem(views[0]->rootObject(), QPointF(200, 208))
+                  .toPoint();
           auto grab = canvas->grabToImage();
           if (!grab)
             return;
           QObject::connect(
-              grab.get(), &QQuickItemGrabResult::ready, &app, [&, grab] {
-                const QImage image = grab->image();
-                const QColor stroke =
-                    image.width() > 200 && image.height() > 202
-                        ? image.pixelColor(200, 202)
-                        : QColor();
+              grab.get(), &QQuickItemGrabResult::ready, &app,
+              [&, grab, logicalSize, strokePoint, clearPoint] {
+                const QImage image = selfTestLogicalImage(grab->image(), logicalSize);
+                if (!image.rect().contains(strokePoint) ||
+                    !image.rect().contains(clearPoint))
+                  return;
+                const QColor stroke = image.pixelColor(strokePoint);
                 penPreviewVisible =
-                    image.width() > 200 && image.height() > 208 &&
                     stroke.alpha() > 0 && stroke.blue() > stroke.red() &&
-                    image.pixelColor(200, 208).alpha() == 0;
+                    image.pixelColor(clearPoint).alpha() == 0;
               });
         });
       });
@@ -1802,17 +1814,17 @@ int main(int argc, char **argv) {
       auto *toolbar = root->findChild<QQuickItem *>(QStringLiteral("toolbar"));
       auto *tooltip = root->findChild<QQuickItem *>(QStringLiteral("toolbarTooltip"));
       auto *label = root->findChild<QQuickItem *>(QStringLiteral("tooltipLabel"));
-      // The tooltip state belongs to the toolbar; the overlay only mirrors it.
-      auto *annotationToolbar =
+      // The overlay only mirrors the toolbar's tooltip state, read-only.
+      auto *toolbarHost =
           root->findChild<QQuickItem *>(QStringLiteral("annotationToolbar"));
-      bool translationLayoutWorked = toolbar && tooltip && label && annotationToolbar;
+      bool translationLayoutWorked = toolbar && tooltip && label && toolbarHost;
       bool contextualTextHintWorked = false;
       if (translationLayoutWorked) {
-        annotationToolbar->setProperty("toolbarTooltipText", QCoreApplication::translate(
+        toolbarHost->setProperty("toolbarTooltipText", QCoreApplication::translate(
             "AnnotationToolbar", "Selection · Arrow keys expand, Shift+arrows shrink (1 px)"));
-        annotationToolbar->setProperty("toolbarTooltipX", 190);
-        annotationToolbar->setProperty("toolbarTooltipY", toolbar->y());
-        annotationToolbar->setProperty("toolbarTooltipVisible", true);
+        toolbarHost->setProperty("toolbarTooltipX", 190);
+        toolbarHost->setProperty("toolbarTooltipY", toolbar->y());
+        toolbarHost->setProperty("toolbarTooltipVisible", true);
         QTest::qWait(50);
         translationLayoutWorked = tooltip->isVisible() && tooltip->x() >= 0 &&
             tooltip->x() + tooltip->width() <= previewRoot->width() &&
@@ -1889,7 +1901,7 @@ int main(int argc, char **argv) {
         if (textEditor) {
           controller.setTool(QStringLiteral("pen"));
           controller.setTool(QStringLiteral("text"));
-          annotationToolbar->setProperty("toolbarTooltipVisible", false);
+          toolbarHost->setProperty("toolbarTooltipVisible", false);
           const int originalScreenIndex = root->property("screenIndex").toInt();
           for (const QPointF position : {QPointF(12, 20), QPointF(370, 350)}) {
             // Simulate editing on an output that does not own the toolbar.

@@ -4,8 +4,6 @@
 #include "virtualpointer.h"
 
 #include "wlr-virtual-pointer-client-protocol.h"
-
-#include <QCoreApplication>
 #include <algorithm>
 #include <chrono>
 #include <cstring>
@@ -63,7 +61,7 @@ bool VirtualPointer::queueMove(const QPointF &point, const QRectF &desktop,
                                QString *error) {
   if (!m_pointer || desktop.isEmpty()) {
     if (error)
-      *error = QCoreApplication::translate("VirtualPointer", "This compositor does not support a virtual pointer");
+      *error = tr("This compositor does not support a virtual pointer");
     return false;
   }
   const auto position = [](qreal value, qreal start, qreal length) {
@@ -84,7 +82,7 @@ bool VirtualPointer::moveTo(const QPointF &point, const QRectF &desktop,
     return false;
   if (wl_display_roundtrip(m_display) < 0) {
     if (error)
-      *error = QCoreApplication::translate("VirtualPointer", "Cannot position the virtual pointer");
+      *error = tr("Cannot position the virtual pointer");
     return false;
   }
   return true;
@@ -103,7 +101,7 @@ bool VirtualPointer::clickAt(const QPointF &point, const QRectF &desktop,
   zwlr_virtual_pointer_v1_frame(m_pointer);
   if (wl_display_roundtrip(m_display) < 0) {
     if (error)
-      *error = QCoreApplication::translate("VirtualPointer", "Cannot send a mouse click");
+      *error = tr("Cannot send a mouse click");
     return false;
   }
   return true;
@@ -121,7 +119,7 @@ bool VirtualPointer::refreshFocus(QString *error) {
   zwlr_virtual_pointer_v1_frame(m_pointer);
   if (wl_display_roundtrip(m_display) < 0) {
     if (error)
-      *error = QCoreApplication::translate("VirtualPointer", "Cannot restore mouse input to the capture area");
+      *error = tr("Cannot restore mouse input to the capture area");
     return false;
   }
   return true;
@@ -144,7 +142,7 @@ bool VirtualPointer::scrollAt(const QPointF &point, const QRectF &desktop,
   zwlr_virtual_pointer_v1_frame(m_pointer);
   if (wl_display_roundtrip(m_display) < 0) {
     if (error)
-      *error = QCoreApplication::translate("VirtualPointer", "Cannot send a scroll event");
+      *error = tr("Cannot send a scroll event");
     return false;
   }
   return true;

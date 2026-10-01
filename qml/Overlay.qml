@@ -674,9 +674,10 @@ Item {
     AnnotationToolbar {
         id: annotationToolbar
         objectName: "annotationToolbar"
+        editing: editor.visible
+        editorRect: Qt.rect(editor.x, editor.y, editor.width, editor.height)
         anchors.fill: parent
         z: 10
-        textEditor: editor
         toolbarVisible: captureController.selected && captureController.toolbarScreen === root.screenIndex
         selectionRect: Qt.rect(root.localX, root.localY,
                                captureController.selection.width, captureController.selection.height)
