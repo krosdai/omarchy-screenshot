@@ -61,3 +61,18 @@ target_link_libraries(omarchy-screenshot PRIVATE
 target_include_directories(omarchy-screenshot PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 install(TARGETS omarchy-screenshot RUNTIME DESTINATION bin)
+
+include(CTest)
+if(BUILD_TESTING)
+    qt_add_executable(tst-preview-scaling tests/tst_preview_scaling.cpp)
+    target_include_directories(tst-preview-scaling PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(tst-preview-scaling PRIVATE Qt6::Quick Qt6::Test)
+    target_compile_definitions(tst-preview-scaling PRIVATE
+        PREVIEW_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/preview_scaling.qml")
+    foreach(scale IN ITEMS 1 1.25 1.5 2)
+        add_test(NAME preview-scaling-${scale} COMMAND tst-preview-scaling)
+        set_tests_properties(preview-scaling-${scale} PROPERTIES
+            ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORMTHEME=;QT_QUICK_BACKEND=software;QT_SCALE_FACTOR=${scale}"
+            TIMEOUT 15)
+    endforeach()
+endif()

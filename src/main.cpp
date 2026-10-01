@@ -5,6 +5,7 @@
 #include "mosaicoverlay.h"
 #include "longimageitem.h"
 #include "virtualpointer.h"
+#include "selftestimage.h"
 
 #include <LayerShellQt/window.h>
 #include <QDir>
@@ -933,13 +934,14 @@ int main(int argc, char **argv) {
       if (!cursorIcon)
         QTextStream(stdout) << "Cursor diagnostic: visual item missing\n";
       if (cursorIcon) {
+        const QSizeF logicalSize(cursorIcon->width(), cursorIcon->height());
         auto grab = cursorIcon->grabToImage();
         if (!grab)
           QTextStream(stdout) << "Cursor diagnostic: grab unavailable\n";
         if (grab)
           QObject::connect(
-              grab.get(), &QQuickItemGrabResult::ready, &app, [&, grab] {
-                const QImage image = grab->image();
+              grab.get(), &QQuickItemGrabResult::ready, &app, [&, grab, logicalSize] {
+                const QImage image = selfTestLogicalImage(grab->image(), logicalSize);
                 cursorIconRendered = image.width() >= 16 &&
                                      image.height() >= 20 &&
                                      image.pixelColor(2, 3).alpha() > 0 &&
@@ -1231,12 +1233,13 @@ int main(int argc, char **argv) {
               QStringLiteral("mosaicOverlay"));
           if (!overlay)
             return;
+          const QSizeF logicalSize(overlay->width(), overlay->height());
           auto grab = overlay->grabToImage();
           if (!grab)
             return;
           QObject::connect(
-              grab.get(), &QQuickItemGrabResult::ready, &app, [&, grab] {
-                const QImage image = grab->image();
+              grab.get(), &QQuickItemGrabResult::ready, &app, [&, grab, logicalSize] {
+                const QImage image = selfTestLogicalImage(grab->image(), logicalSize);
                 if (image.width() > 710 && image.height() > 500) {
                   mosaicPixelsVisible = image.pixelColor(475, 375).alpha() > 0;
                   mosaicMaskTransparent =
@@ -1379,12 +1382,13 @@ int main(int argc, char **argv) {
               QStringLiteral("marksCanvas"));
           if (!canvas)
             return;
+          const QSizeF logicalSize(canvas->width(), canvas->height());
           auto grab = canvas->grabToImage();
           if (!grab)
             return;
           QObject::connect(
-              grab.get(), &QQuickItemGrabResult::ready, &app, [&, grab] {
-                const QImage image = grab->image();
+              grab.get(), &QQuickItemGrabResult::ready, &app, [&, grab, logicalSize] {
+                const QImage image = selfTestLogicalImage(grab->image(), logicalSize);
                 const QColor stroke =
                     image.width() > 200 && image.height() > 202
                         ? image.pixelColor(200, 202)
