@@ -3,19 +3,28 @@
 
 #include "capturecontroller.h"
 #include "mosaicoverlay.h"
+#include "longimageitem.h"
+#include "virtualpointer.h"
 
 #include <LayerShellQt/window.h>
 #include <QDir>
 #include <QFile>
 #include <QGuiApplication>
+#include <QElapsedTimer>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QKeyEvent>
 #include <QMouseEvent>
+#include <QPainter>
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QQuickImageProvider>
 #include <QQuickItem>
 #include <QQuickItemGrabResult>
 #include <QQuickView>
+#include <QRegion>
+#include <QProcess>
 #include <QSettings>
 #include <QTemporaryDir>
 #include <QTest>
@@ -23,6 +32,7 @@
 #include <QTimer>
 
 #include <functional>
+#include <cmath>
 #include <memory>
 #include <tuple>
 #include <vector>
@@ -35,7 +45,6 @@ public:
 
   QImage requestImage(const QString &id, QSize *size,
                       const QSize &requestedSize) override {
-    Q_UNUSED(requestedSize)
     const QStringList parts = id.split(QLatin1Char('/'));
     if (parts.size() != 2)
       return {};
@@ -43,9 +52,9 @@ public:
     const int index = parts[1].toInt(&valid);
     if (!valid || index < 0)
       return {};
+    const QImage *image = nullptr;
     if (index >= m_controller->monitors().size())
       return {};
-    const QImage *image = nullptr;
     if (parts[0] == QStringLiteral("screen"))
       image = &m_controller->monitors()[index].image;
     else if (parts[0] == QStringLiteral("mosaic"))
@@ -54,6 +63,9 @@ public:
       return {};
     if (size)
       *size = image->size();
+    if (requestedSize.isValid() && !image->isNull())
+      return image->scaled(requestedSize, Qt::KeepAspectRatio,
+                           Qt::SmoothTransformation);
     return *image;
   }
 
@@ -61,14 +73,202 @@ private:
   const CaptureController *m_controller;
 };
 
+static bool startScrollFixture(CaptureController &controller) {
+  QProcess clients;
+  clients.start(QStringLiteral("hyprctl"),
+                {QStringLiteral("-j"), QStringLiteral("clients")});
+  if (!clients.waitForFinished(3000))
+    return false;
+  QRectF window;
+  const auto entries =
+      QJsonDocument::fromJson(clients.readAllStandardOutput()).array();
+  for (const auto &entry : entries) {
+    const auto item = entry.toObject();
+    if (!item.value(QStringLiteral("title")).toString()
+             .startsWith(QStringLiteral("Omarchy Scroll Fixture")))
+      continue;
+    const auto at = item.value(QStringLiteral("at")).toArray();
+    const auto size = item.value(QStringLiteral("size")).toArray();
+    if (at.size() == 2 && size.size() == 2)
+      window = QRectF(at[0].toDouble(), at[1].toDouble(),
+                      size[0].toDouble(), size[1].toDouble());
+    break;
+  }
+  int screen = -1;
+  for (int i = 0; i < controller.monitors().size(); ++i)
+    if (controller.monitors()[i].geometry.contains(window.center()))
+      screen = i;
+  if (window.isEmpty() || screen < 0)
+    return false;
+  const QRectF target = window.adjusted(20, 55, -20, -20);
+  const QPointF origin = controller.monitors()[screen].geometry.topLeft();
+  controller.pointerPress(screen, target.left() - origin.x(),
+                          target.top() - origin.y());
+  controller.pointerMove(screen, target.right() - origin.x(),
+                         target.bottom() - origin.y());
+  controller.pointerRelease(screen, target.right() - origin.x(),
+                            target.bottom() - origin.y());
+  controller.startScroll();
+  if (controller.scrollState() == int(CaptureController::ScrollState::Choosing)) {
+    for (const QVariant &candidate : controller.scrollCandidates()) {
+      const auto item = candidate.toMap();
+      if (item.value(QStringLiteral("title")).toString()
+              .startsWith(QStringLiteral("Omarchy Scroll Fixture"))) {
+        controller.chooseScrollWindow(item.value(QStringLiteral("index")).toInt());
+        break;
+      }
+    }
+  }
+  return controller.scrollState() == int(CaptureController::ScrollState::Capturing);
+}
+
+static QQuickItem *findQuickItem(QQuickItem *root, const QString &name) {
+  if (root->objectName() == name)
+    return root;
+  for (auto *child : root->childItems())
+    if (auto *found = findQuickItem(child, name))
+      return found;
+  return nullptr;
+}
+
 int main(int argc, char **argv) {
   QGuiApplication app(argc, argv);
   app.setApplicationName(QStringLiteral("omarchy-screenshot"));
   app.setOrganizationName(QStringLiteral("Omarchy"));
 
+  if (app.arguments().contains(QStringLiteral("--scroll-stitch-test"))) {
+    ScrollStitcher stitcher;
+    auto frameAt = [](int offset) {
+      QImage image(240, 320, QImage::Format_RGB32);
+      for (int y = 0; y < image.height(); ++y)
+        for (int x = 0; x < image.width(); ++x) {
+          const int contentY = y + offset;
+          const QRgb color = y < 20 ? qRgb(25, 45, 65)
+                             : y >= 304 ? qRgb(80, 50, 25)
+                             : qRgb((contentY * 37 + x * 13) % 256,
+                                    (contentY * 19 + x * 7) % 256,
+                                    (contentY * 11 + x * 23) % 256);
+          image.setPixel(x, y, color);
+        }
+      return image;
+    };
+    const QImage first = frameAt(0);
+    const auto firstResult = stitcher.append(first);
+    const auto unchanged = stitcher.append(first);
+    const auto secondResult = stitcher.append(frameAt(96));
+    const int secondHeight = stitcher.image().height();
+    const auto thirdResult = stitcher.append(frameAt(192));
+    const int thirdHeight = stitcher.image().height();
+    if (firstResult != ScrollStitcher::Result::Added ||
+        unchanged != ScrollStitcher::Result::Unchanged ||
+        secondResult != ScrollStitcher::Result::Added ||
+        secondHeight != 416 ||
+        thirdResult != ScrollStitcher::Result::Added ||
+        thirdHeight != 512 ||
+        stitcher.image().pixel(80, 400) != frameAt(192).pixel(80, 208)) {
+      QTextStream(stderr) << "Scroll stitcher failed: "
+                          << int(firstResult) << "," << int(unchanged)
+                          << "," << int(secondResult) << "," << secondHeight
+                          << "," << int(thirdResult) << "," << thirdHeight
+                          << "\n";
+      return 2;
+    }
+    ScrollStitcher sideStitcher;
+    const auto sidebarFrame = [&](int offset) {
+      QImage image = frameAt(offset);
+      for (int y = 20; y < 304; ++y)
+        for (int x = 0; x < 24; ++x)
+          image.setPixel(x, y,
+                         qRgb((y * 7) % 256, (y * 11) % 256,
+                              (y * 17) % 256));
+      return image;
+    };
+    if (sideStitcher.append(sidebarFrame(0)) !=
+            ScrollStitcher::Result::Added ||
+        sideStitcher.append(sidebarFrame(96)) !=
+            ScrollStitcher::Result::Added ||
+        sideStitcher.image().pixel(8, 340) !=
+            sideStitcher.image().pixel(8, 350)) {
+      QTextStream(stderr) << "Scroll sidebar de-duplication failed\n";
+      return 2;
+    }
+    ScrollStitcher webStitcher;
+    const auto webFrame = [](int offset, int phase) {
+      QImage image(360, 520, QImage::Format_RGB32);
+      for (int y = 0; y < image.height(); ++y)
+        for (int x = 0; x < image.width(); ++x) {
+          const int contentY = y + offset;
+          const QRgb color = y < 90
+              ? qRgb((x + phase * 71) % 256, 35, 50)
+              : x < 78
+              ? qRgb(205, (y * 3) % 256, 210)
+              : qRgb((contentY * 37 + x * 13) % 256,
+                     (contentY * 19 + x * 7) % 256,
+                     (contentY * 11 + x * 23) % 256);
+          image.setPixel(x, y, color);
+        }
+      return image;
+    };
+    if (webStitcher.append(webFrame(0, 0)) !=
+            ScrollStitcher::Result::Added ||
+        webStitcher.append(webFrame(148, 1)) !=
+            ScrollStitcher::Result::Added ||
+        webStitcher.lastShift() != 148 ||
+        webStitcher.append(webFrame(148, 2)) !=
+            ScrollStitcher::Result::Unchanged ||
+        webStitcher.image().height() != 668) {
+      QTextStream(stderr) << "Scroll animated header/sidebar match failed\n";
+      return 2;
+    }
+    ScrollStitcher textStitcher;
+    const auto textRows = [](int offset) {
+      QImage image(240, 960, QImage::Format_RGB32);
+      image.fill(qRgb(240, 240, 240));
+      for (int y = 0; y < image.height(); ++y) {
+        const int contentY = y + offset;
+        if (contentY % 20 < 5 || contentY % 20 > 14)
+          continue;
+        for (int x = 0; x < image.width(); ++x) {
+          const int value = (contentY * 37 + (x / 6) * 71) % 210;
+          image.setPixel(x, y, x % 6 < 3 ? qRgb(value, value, value)
+                                        : qRgb(240, 240, 240));
+        }
+      }
+      return image;
+    };
+    if (textStitcher.append(textRows(0)) != ScrollStitcher::Result::Added ||
+        textStitcher.append(textRows(80)) != ScrollStitcher::Result::Added ||
+        textStitcher.lastShift() != 80 ||
+        textStitcher.append(textRows(80)) != ScrollStitcher::Result::Unchanged) {
+      QTextStream(stderr) << "Scroll regular text lines mistaken for unchanged content\n";
+      return 2;
+    }
+    ScrollStitcher hintStitcher;
+    const QImage cleanStart = webFrame(0, 0);
+    const auto frameWithHint = [&](int offset) {
+      QImage image = webFrame(offset, 1);
+      QPainter painter(&image);
+      painter.fillRect(QRect(178, 8, 174, 44), QColor("#26313d"));
+      return image;
+    };
+    if (hintStitcher.append(cleanStart) != ScrollStitcher::Result::Added ||
+        hintStitcher.append(frameWithHint(148)) != ScrollStitcher::Result::Added ||
+        hintStitcher.append(frameWithHint(296)) != ScrollStitcher::Result::Added ||
+        hintStitcher.image().height() != 816 ||
+        hintStitcher.image().pixel(200, 20) != cleanStart.pixel(200, 20) ||
+        hintStitcher.image().pixel(200, 800) != webFrame(296, 1).pixel(200, 504)) {
+      QTextStream(stderr) << "Scroll stop hint leaked into the long image\n";
+      return 2;
+    }
+    QTextStream(stdout) << "Scroll stitcher overlap, fixed bands, regular text and hint exclusion OK\n";
+    return 0;
+  }
+
   std::unique_ptr<QTemporaryDir> testSettings;
   if (app.arguments().contains(QStringLiteral("--self-test")) ||
-      app.arguments().contains(QStringLiteral("--ui-self-test"))) {
+      app.arguments().contains(QStringLiteral("--ui-self-test")) ||
+      app.arguments().contains(QStringLiteral("--scroll-ui-self-test")) ||
+      app.arguments().contains(QStringLiteral("--scroll-ui-integration-test"))) {
     testSettings = std::make_unique<QTemporaryDir>();
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,
@@ -80,6 +280,79 @@ int main(int argc, char **argv) {
   if (!controller.initialize(&error)) {
     qCritical().noquote() << error;
     return 1;
+  }
+
+  if (app.arguments().contains(QStringLiteral("--scroll-integration-test"))) {
+    if (!startScrollFixture(controller)) {
+      QTextStream(stderr) << "Scroll fixture window is missing or cannot start\n";
+      return 2;
+    }
+    const auto waitFor = [&](const std::function<bool()> &ready, int timeout = 10000) {
+      QElapsedTimer elapsed;
+      elapsed.start();
+      while (!ready() && elapsed.elapsed() < timeout)
+        QTest::qWait(30);
+      return ready();
+    };
+    if (!waitFor([&] {
+          return controller.scrollHeight() > 0 ||
+                 controller.scrollState() ==
+                     int(CaptureController::ScrollState::Reviewing);
+        })) {
+      qCritical() << "Fixture capture did not start" << controller.status();
+      return 2;
+    }
+    const int frameHeight = controller.scrollHeight();
+    if (!waitFor([&] {
+          return controller.scrollHeight() > frameHeight + 70 ||
+                 controller.scrollState() ==
+                     int(CaptureController::ScrollState::Reviewing);
+        }) ||
+        controller.scrollHeight() <= frameHeight + 70) {
+      qCritical() << "Fixture did not scroll" << controller.status()
+                  << controller.scrollHeight();
+      QTextStream(stderr) << "No growth: " << controller.scrollHeight()
+                          << " state " << controller.scrollState()
+                          << " status " << controller.status() << "\n";
+      return 2;
+    }
+    controller.pauseScroll();
+    if (!waitFor([&] { return controller.scrollState() ==
+                               int(CaptureController::ScrollState::Reviewing); })) {
+      qCritical() << "Fixture pause did not enter review" << controller.status();
+      return 2;
+    }
+    const int firstHeight = controller.scrollHeight();
+    controller.setTool(QStringLiteral("marker"));
+    controller.pointerPress(-1, 45, 45);
+    controller.pointerRelease(-1, 45, 45);
+    controller.resumeScroll();
+    if (!waitFor([&] {
+          return controller.scrollHeight() > firstHeight + 70 ||
+                 controller.scrollState() ==
+                     int(CaptureController::ScrollState::Reviewing);
+        }) ||
+        controller.scrollHeight() <= firstHeight + 70) {
+      qCritical() << "Fixture resume did not extend image"
+                  << controller.status() << controller.scrollHeight();
+      QTextStream(stderr) << "Resume failed: " << controller.scrollHeight()
+                          << " state " << controller.scrollState()
+                          << " status " << controller.status() << "\n";
+      return 2;
+    }
+    controller.pauseScroll();
+    if (!waitFor([&] { return controller.scrollState() ==
+                               int(CaptureController::ScrollState::Reviewing); }) ||
+        controller.annotations().size() != 1 ||
+        qAbs(controller.selection().bottom() - controller.scrollHeight()) > 1 ||
+        controller.renderedImage().isNull()) {
+      qCritical() << "Fixture review lost crop or annotations";
+      return 2;
+    }
+    QTextStream(stdout) << "Live scroll, resume, crop extension and annotations OK: "
+                        << firstHeight << " -> " << controller.scrollHeight()
+                        << " px\n";
+    return 0;
   }
 
   if (app.arguments().contains(QStringLiteral("--self-test"))) {
@@ -203,6 +476,8 @@ int main(int argc, char **argv) {
   }
 
   qmlRegisterType<MosaicOverlay>("ScreenshotInternals", 1, 0, "MosaicOverlay");
+  qmlRegisterType<LongImageItem>("ScreenshotInternals", 1, 0,
+                                 "LongImageItem");
   QQmlEngine engine;
   QObject::connect(&engine, &QQmlEngine::warnings, &app,
                    [](const QList<QQmlError> &warnings) {
@@ -269,6 +544,293 @@ int main(int argc, char **argv) {
                                                                 : views.back())
         ->requestActivate();
 
+  std::unique_ptr<QQuickView> scrollBar;
+  std::unique_ptr<QQuickView> longView;
+  auto scrollScreen = [&]() -> QScreen * {
+    for (const auto &monitor : controller.monitors())
+      if (monitor.geometry.contains(controller.scrollRegion().center()))
+        return monitor.screen;
+    return controller.monitors().first().screen;
+  };
+  auto scrollScreenRect = [&]() {
+    for (const auto &monitor : controller.monitors())
+      if (monitor.screen == scrollScreen())
+        return monitor.geometry;
+    return controller.monitors().first().geometry;
+  };
+  auto makeScrollView = [&](const QString &file) {
+    auto view = std::make_unique<QQuickView>(&engine, nullptr);
+    view->setResizeMode(QQuickView::SizeRootObjectToView);
+    view->setColor(Qt::transparent);
+    view->setFlags(Qt::FramelessWindowHint);
+    view->setScreen(scrollScreen());
+    auto *layer = LayerShellQt::Window::get(view.get());
+    layer->setScope(QStringLiteral("omarchy-screenshot"));
+    layer->setLayer(LayerShellQt::Window::LayerOverlay);
+    layer->setExclusiveZone(-1);
+    layer->setScreen(scrollScreen());
+    layer->setAnchors(
+        LayerShellQt::Window::Anchors(LayerShellQt::Window::AnchorTop) |
+        LayerShellQt::Window::AnchorBottom |
+        LayerShellQt::Window::AnchorLeft |
+        LayerShellQt::Window::AnchorRight);
+    const bool capturing = file == QStringLiteral("ScrollCapture.qml");
+    layer->setKeyboardInteractivity(
+        capturing ? LayerShellQt::Window::KeyboardInteractivityNone
+                  : LayerShellQt::Window::KeyboardInteractivityOnDemand);
+    if (capturing)
+      view->setInitialProperties(
+          {{QStringLiteral("screenRect"), scrollScreenRect()}});
+    view->setSource(QUrl(QStringLiteral("qrc:/qt/qml/OmarchyScreenshot/") +
+                         file));
+    if (view->status() != QQuickView::Ready)
+      qWarning() << "Cannot load" << file;
+    return view;
+  };
+  bool scrollInputPassThrough = false;
+  bool scrollInputFocusPending = false;
+  auto updateScrollInputMask = [&] {
+    if (!scrollBar || !scrollBar->rootObject())
+      return;
+    QRegion mask(scrollBar->rootObject()
+                     ->property("toolbarRect").toRectF().toAlignedRect());
+    if (!scrollInputPassThrough)
+      mask += controller.scrollRegion()
+                  .translated(-scrollScreenRect().topLeft()).toAlignedRect();
+    scrollBar->setMask(mask);
+    scrollBar->update();
+  };
+  QObject::connect(&controller, &CaptureController::scrollStateChanged, &app,
+                   [&] {
+    const auto state = controller.scrollState();
+    if (state == int(CaptureController::ScrollState::Capturing)) {
+      scrollInputPassThrough = false;
+      scrollInputFocusPending = true;
+      for (auto &view : views)
+        view->hide();
+      if (longView)
+        longView->hide();
+      if (!scrollBar) {
+        scrollBar = makeScrollView(QStringLiteral("ScrollCapture.qml"));
+        const auto resized = [&] {
+          QTimer::singleShot(0, &app, updateScrollInputMask);
+        };
+        QObject::connect(scrollBar.get(), &QWindow::widthChanged, &app, resized);
+        QObject::connect(scrollBar.get(), &QWindow::heightChanged, &app, resized);
+        QObject::connect(scrollBar.get(), &QQuickWindow::frameSwapped, &app, [&] {
+          if (scrollInputFocusPending && !scrollInputPassThrough) {
+            scrollInputFocusPending = false;
+            // A submitted frame can still wait on a compositor FIFO barrier.
+            // Allow its input region to become current before hit testing it.
+            QTimer::singleShot(30, &app, [&] {
+              if (!scrollInputPassThrough)
+                controller.restoreScrollInputFocus();
+            });
+          }
+        });
+      }
+      if (scrollBar->status() == QQuickView::Ready)
+        scrollBar->show();
+      updateScrollInputMask();
+    } else if (state == int(CaptureController::ScrollState::Reviewing)) {
+      if (scrollBar)
+        scrollBar->hide();
+      if (!longView)
+        longView = makeScrollView(QStringLiteral("LongOverlay.qml"));
+      if (longView->status() == QQuickView::Ready) {
+        longView->show();
+        longView->requestActivate();
+      }
+    } else {
+      if (scrollBar)
+        scrollBar->hide();
+      if (longView)
+        longView->hide();
+      for (auto &view : views)
+        view->show();
+    }
+  });
+  // Keep click interception active during capture. Only release the input
+  // region briefly while delivering the virtual wheel to the underlying app.
+  QObject::connect(&controller, &CaptureController::scrollInputAboutToSend,
+                   &app, [&] {
+    scrollInputPassThrough = true;
+    scrollInputFocusPending = false;
+    updateScrollInputMask();
+  });
+  QObject::connect(&controller, &CaptureController::scrollInputSent,
+                   &app, [&] {
+    scrollInputPassThrough = false;
+    scrollInputFocusPending = true;
+    updateScrollInputMask();
+  });
+  QObject::connect(&controller, &CaptureController::scrollAwaitingPaneChanged,
+                   &app, [&] { QTimer::singleShot(0, &app, updateScrollInputMask); });
+  if (app.arguments().contains(QStringLiteral("--scroll-ui-integration-test"))) {
+    const auto waitFor = [&](const std::function<bool()> &ready, int timeout = 10000) {
+      QElapsedTimer elapsed;
+      elapsed.start();
+      while (!ready() && elapsed.elapsed() < timeout)
+        QTest::qWait(20);
+      return ready();
+    };
+    const auto fail = [&](const QString &message) {
+      QTextStream(stderr) << message << ": " << controller.status() << '\n';
+      return 2;
+    };
+    if (!startScrollFixture(controller))
+      return fail(QStringLiteral("Missing scroll fixture"));
+    QRectF desktop = controller.monitors().first().geometry;
+    for (const auto &monitor : controller.monitors())
+      desktop = desktop.united(monitor.geometry);
+    VirtualPointer input;
+    const auto click = [&](const QPointF &point) {
+      if (!input.moveTo(point, desktop, &error))
+        return false;
+      // Allow compositor pointer focus to follow the warp before clicking.
+      QTest::qWait(40);
+      if (qEnvironmentVariableIsSet("OMARCHY_SCROLL_DIAGNOSTICS")) {
+        QProcess cursor;
+        cursor.start(QStringLiteral("hyprctl"),
+                     {QStringLiteral("-j"), QStringLiteral("cursorpos")});
+        cursor.waitForFinished(1000);
+        QTextStream(stderr) << "test click point=" << point.x() << ',' << point.y()
+                            << " cursor=" << cursor.readAllStandardOutput().trimmed()
+                            << " screen=" << scrollScreenRect().x() << ','
+                            << scrollScreenRect().y() << " surface="
+                            << scrollBar->geometry().x() << ',' << scrollBar->geometry().y()
+                            << ' ' << scrollBar->width() << 'x' << scrollBar->height()
+                            << '\n';
+      }
+      return input.clickAt(point, desktop, &error);
+    };
+    bool movementDelivered = true;
+    const auto movement = QObject::connect(
+        &controller, &CaptureController::scrollInputSent, &app, [&] {
+      movementDelivered &= input.moveTo(
+          controller.scrollRegion().topLeft() + QPointF(30, 30), desktop, &error);
+    });
+    if (!waitFor([&] { return controller.scrollHeight() > 0; }))
+      return fail(QStringLiteral("First frame was not captured"));
+    const int firstHeight = controller.scrollHeight();
+    if (!waitFor([&] {
+          return controller.scrollHeight() > firstHeight + 70 ||
+                 controller.scrollState() != int(CaptureController::ScrollState::Capturing);
+        }) || !movementDelivered ||
+        controller.scrollHeight() <= firstHeight + 70 ||
+        controller.scrollState() != int(CaptureController::ScrollState::Capturing))
+      return fail(QStringLiteral("Mouse movement interrupted scrolling"));
+    QObject::disconnect(movement);
+    const auto *hint = scrollBar->rootObject()->findChild<QObject *>(
+        QStringLiteral("scrollStopHint"));
+    if (!hint || hint->property("text").toString() !=
+                     QStringLiteral("点击鼠标停止截图"))
+      return fail(QStringLiteral("Missing click-to-stop hint"));
+    for (auto *item : scrollBar->rootObject()->findChildren<QQuickItem *>())
+      if (item->inherits("QQuickImage"))
+        return fail(QStringLiteral("Unexpected live screenshot preview"));
+    const QPointF stopLocal = controller.scrollRegion().center() - scrollScreenRect().topLeft();
+    const QImage liveUi = scrollBar->grabWindow();
+    if (liveUi.isNull() || liveUi.pixelColor(stopLocal.toPoint()).alpha() != 0)
+      return fail(QStringLiteral("Capture area is not transparent"));
+    const auto clickToStop = [&] {
+      // The click region must remain active even while visual UI is hidden for capture.
+      return waitFor([&] {
+               return scrollBar->rootObject()->property("frameHidden").toBool() &&
+                      scrollBar->mask().contains(stopLocal.toPoint());
+             }) &&
+             click(controller.scrollRegion().center()) &&
+             waitFor([&] { return controller.scrollStopping(); }, 500) &&
+             waitFor([&] {
+               return controller.scrollState() == int(CaptureController::ScrollState::Reviewing);
+             });
+    };
+    if (!clickToStop())
+      return fail(QStringLiteral("Click in capture area did not stop scrolling"));
+    QTest::qWait(150);
+    const auto *select = findQuickItem(longView->rootObject(),
+        QStringLiteral("longTool_select"));
+    const auto *selectHighlight = findQuickItem(longView->rootObject(),
+        QStringLiteral("longHighlight_select"));
+    const auto *label = findQuickItem(longView->rootObject(),
+        QStringLiteral("longLabel_select"));
+    const auto luminance = [](QColor color) {
+      const auto linear = [](double channel) {
+        return channel <= .04045 ? channel / 12.92
+                               : std::pow((channel + .055) / 1.055, 2.4);
+      };
+      return .2126 * linear(color.redF()) + .7152 * linear(color.greenF()) +
+             .0722 * linear(color.blueF());
+    };
+    if (!select || !selectHighlight || !label)
+      return fail(QStringLiteral("Missing long-image toolbar"));
+    for (bool dark : {false, true}) {
+      controller.setDarkToolbar(dark);
+      QTest::qWait(100);
+      const double foreground = luminance(label->property("color").value<QColor>());
+      const double background = luminance(selectHighlight->property("color").value<QColor>());
+      const double contrast = (std::max(foreground, background) + .05) /
+                              (std::min(foreground, background) + .05);
+      if (!select->property("selected").toBool() || contrast < 4.5)
+        return fail(QStringLiteral("Selected toolbar text has low contrast"));
+    }
+    const auto grabItem = [&](QQuickItem *item) {
+      if (!item)
+        return QImage();
+      const auto grab = item->grabToImage();
+      if (!grab || !waitFor([&] { return !grab->image().isNull(); }))
+        return QImage();
+      return grab->image();
+    };
+    for (const QString &action : {QStringLiteral("zoom_in"),
+                                  QStringLiteral("zoom_out"),
+                                  QStringLiteral("resume")}) {
+      const QString object = QStringLiteral("longGlyph_") + action;
+      const QImage glyph = grabItem(findQuickItem(longView->rootObject(), object));
+      int drawn = 0;
+      for (int y = 0; y < glyph.height(); ++y)
+        for (int x = 0; x < glyph.width(); ++x)
+          drawn += glyph.pixelColor(x, y).alpha() > 0;
+      if (glyph.isNull() || drawn < 15 || glyph.pixelColor(0, 0).alpha() != 0)
+        return fail(QStringLiteral("Missing or opaque toolbar icon: ") + action);
+    }
+    auto *toolbarItem = findQuickItem(longView->rootObject(),
+        QStringLiteral("longToolbar"));
+    grabItem(toolbarItem).save(QStringLiteral("/tmp/omarchy-scroll-tools-dark.png"));
+    controller.setDarkToolbar(false);
+    QTest::qWait(100);
+    grabItem(toolbarItem).save(QStringLiteral("/tmp/omarchy-scroll-tools-light.png"));
+    const int reviewedHeight = controller.scrollHeight();
+    controller.setTool(QStringLiteral("marker"));
+    controller.pointerPress(-1, 45, 45);
+    controller.pointerRelease(-1, 45, 45);
+    auto *resume = findQuickItem(longView->rootObject(),
+        QStringLiteral("longTool_resume"));
+    if (!resume)
+      return fail(QStringLiteral("Missing resume button"));
+    const QPointF resumePoint = resume->mapToItem(
+        longView->rootObject(), QPointF(resume->width() / 2, resume->height() / 2)) +
+        scrollScreenRect().topLeft();
+    if (!click(resumePoint) ||
+        !waitFor([&] { return controller.scrollHeight() > reviewedHeight + 30; }) ||
+        !clickToStop() || controller.annotations().size() != 1)
+      return fail(QStringLiteral("Resume, stop or annotation preservation failed"));
+    QTextStream(stdout) << "Mouse movement continues; real click stops; transparent capture UI; "
+                           "toolbar contrast and icons; resume keeps annotations OK\n";
+    return 0;
+  }
+  if (app.arguments().contains(QStringLiteral("--scroll-ui-self-test"))) {
+    scrollBar = makeScrollView(QStringLiteral("ScrollCapture.qml"));
+    longView = makeScrollView(QStringLiteral("LongOverlay.qml"));
+    if (scrollBar->status() != QQuickView::Ready ||
+        longView->status() != QQuickView::Ready)
+      return 1;
+    longView->show();
+    QTest::qWait(150);
+    QTextStream(stdout) << "Scroll capture and long preview QML ready\n";
+    return 0;
+  }
+
   auto sendMouse = [&](QEvent::Type type, const QPointF &local,
                        Qt::MouseButton button, Qt::MouseButtons buttons) {
     const QPointF global = controller.monitors()[0].geometry.topLeft() + local;
@@ -305,7 +867,6 @@ int main(int argc, char **argv) {
   bool annotationColorsKept = false;
   bool coloredTextExported = false;
   bool coloredPenExported = false;
-  bool ocrButtonRemoved = false;
   bool cursorIconRendered = false;
   bool handlesInitiallyVisible = false;
   bool handlesHiddenForMosaic = false;
@@ -338,14 +899,6 @@ int main(int argc, char **argv) {
     baseline = controller.renderedImage();
     QTimer::singleShot(100, &app, [&] {
       views[0]->requestActivate();
-      QVariant hasOcrButton;
-      QMetaObject::invokeMethod(views[0]->rootObject(), "toolbarHasAction",
-                                Q_RETURN_ARG(QVariant, hasOcrButton),
-                                Q_ARG(QVariant, QStringLiteral("ocr")));
-      ocrButtonRemoved =
-          views[0]->rootObject()->property("toolbarButtonCount").toInt() >=
-              11 &&
-          !hasOcrButton.toBool();
       auto displayedAction = [&](int index) {
         QVariant action;
         QMetaObject::invokeMethod(views[0]->rootObject(),
@@ -360,8 +913,9 @@ int main(int argc, char **argv) {
                                 Q_ARG(QVariant, QStringLiteral("cancel")));
       toolbarOrderWorked =
           displayedAction(7) == QStringLiteral("marker") &&
-          displayedAction(8) == QStringLiteral("undo") &&
-          displayedAction(9) == QStringLiteral("redo") &&
+          displayedAction(8) == QStringLiteral("scroll") &&
+          displayedAction(9) == QStringLiteral("undo") &&
+          displayedAction(10) == QStringLiteral("redo") &&
           !closeButton.toBool();
       handlesInitiallyVisible = visibleHandleCount() == 8;
       std::function<QQuickItem *(QQuickItem *, const QString &)>
@@ -1151,7 +1705,6 @@ int main(int argc, char **argv) {
                           << ", old/new colors: " << annotationColorsKept
                           << ", colored text export: " << coloredTextExported
                           << ", colored pen export: " << coloredPenExported
-                          << ", F icon removed: " << ocrButtonRemoved
                           << ", cursor icon: " << cursorIconRendered
                           << ", eight handles: " << handlesInitiallyVisible
                           << ", handles hidden: " << handlesHiddenForMosaic
@@ -1193,7 +1746,7 @@ int main(int argc, char **argv) {
                        colorPersistenceWorked && toolbarThemeWorked &&
                        toolbarPaddingWorked &&
                        annotationColorsKept && coloredTextExported &&
-                       coloredPenExported && ocrButtonRemoved &&
+                       coloredPenExported &&
                        cursorIconRendered && handlesInitiallyVisible &&
                        handlesHiddenForMosaic && handleResizeWorked &&
                        arrowResizeWorked && repeatingArrowResizeWorked &&

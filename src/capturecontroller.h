@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <QElapsedTimer>
 #include <QImage>
 #include <QObject>
 #include <QPainterPath>
@@ -12,9 +13,13 @@
 #include <QVariantList>
 #include <QVariantMap>
 #include <QVector>
+#include <memory>
+
+#include "scrollstitcher.h"
 
 class QScreen;
 class QPainter;
+class VirtualPointer;
 
 struct CaptureMonitor {
   QString name;
@@ -42,6 +47,15 @@ class CaptureController final : public QObject {
   Q_PROPERTY(QVariantMap draft READ draft NOTIFY draftChanged)
   Q_PROPERTY(int toolbarScreen READ toolbarScreen NOTIFY selectionChanged)
   Q_PROPERTY(QString status READ status NOTIFY statusChanged)
+  Q_PROPERTY(int scrollState READ scrollState NOTIFY scrollStateChanged)
+  Q_PROPERTY(QVariantList scrollCandidates READ scrollCandidates NOTIFY scrollStateChanged)
+  Q_PROPERTY(int scrollRevision READ scrollRevision NOTIFY scrollImageChanged)
+  Q_PROPERTY(int scrollHeight READ scrollHeight NOTIFY scrollImageChanged)
+  Q_PROPERTY(int scrollWidth READ scrollWidth NOTIFY scrollImageChanged)
+  Q_PROPERTY(bool scrollAwaitingPane READ scrollAwaitingPane NOTIFY scrollAwaitingPaneChanged)
+  Q_PROPERTY(bool scrollPaneSelected READ scrollPaneSelected NOTIFY scrollAwaitingPaneChanged)
+  Q_PROPERTY(bool scrollStopping READ scrollStopping NOTIFY scrollStoppingChanged)
+  Q_PROPERTY(QRectF scrollRegion READ scrollRegion NOTIFY scrollStateChanged)
 
 public:
   explicit CaptureController(QObject *parent = nullptr);
@@ -60,7 +74,21 @@ public:
   QVariantMap draft() const { return m_draft; }
   int toolbarScreen() const;
   QString status() const { return m_status; }
+  enum class ScrollState { Idle, Choosing, Capturing, Reviewing };
+  int scrollState() const { return int(m_scrollState); }
+  QVariantList scrollCandidates() const;
+  int scrollRevision() const { return m_scrollRevision; }
+  int scrollHeight() const { return m_scrollStitcher.image().height(); }
+  int scrollWidth() const { return m_scrollStitcher.image().width(); }
+  bool scrollAwaitingPane() const { return m_scrollAwaitingPane; }
+  bool scrollPaneSelected() const { return m_scrollPaneSelected; }
+  bool scrollStopping() const { return m_scrollPauseRequested; }
+  const QImage &scrollImage() const { return m_scrollStitcher.image(); }
+  const QImage &scrollMosaicImage() const { return m_scrollMosaicImage; }
+  QRectF scrollRegion() const { return m_scrollRegion; }
   QImage renderedImage() const;
+  void paintScrollPreview(QPainter &painter, const QRectF &source,
+                          const QRectF &target) const;
   static QPainterPath freehandPath(const QVariantList &points);
   static QPainterPath mosaicPath(const QVariantMap &item);
 
@@ -71,7 +99,6 @@ public:
   Q_INVOKABLE void undo();
   Q_INVOKABLE void redo();
   Q_INVOKABLE void copy();
-  Q_INVOKABLE void ocr();
   Q_INVOKABLE void save();
   Q_INVOKABLE void cancel();
   Q_INVOKABLE void setTool(const QString &tool);
@@ -86,6 +113,14 @@ public:
   Q_INVOKABLE void adjustSelectionEdge(int key, bool shrink);
   Q_INVOKABLE QVariantList
   smoothedFreehandPoints(const QVariantList &points) const;
+  Q_INVOKABLE void startScroll();
+  Q_INVOKABLE void chooseScrollWindow(int index);
+  Q_INVOKABLE void pauseScroll();
+  Q_INVOKABLE void resumeScroll();
+  Q_INVOKABLE void cancelScrollChoice();
+  Q_INVOKABLE void continueAfterPane();
+  Q_INVOKABLE void selectScrollPane(qreal x, qreal y);
+  void restoreScrollInputFocus();
 
 signals:
   void selectionChanged();
@@ -99,11 +134,22 @@ signals:
   void draftChanged();
   void statusChanged();
   void done();
+  void scrollStateChanged();
+  void scrollImageChanged();
+  void scrollFrameAboutToCapture();
+  void scrollFrameCaptured();
+  void scrollInputAboutToSend();
+  void scrollInputSent();
+  void scrollAwaitingPaneChanged();
+  void scrollStoppingChanged();
 
 private:
   struct Candidate {
     QRectF geometry;
     bool window = false;
+    QString address;
+    QString title;
+    int monitorIndex = -1;
   };
   enum class Drag { None, Select, Move, Resize, Draw };
 
@@ -114,6 +160,14 @@ private:
   void setStatus(const QString &message);
   void paintAnnotation(QPainter &painter, const QVariantMap &item) const;
   void appendAnnotation(const QVariantMap &item);
+  void setScrollState(ScrollState state);
+  void captureScrollFrame();
+  void prepareScrollFrame();
+  void prepareScrollStep();
+  void sendScrollStep();
+  void finishScrollCapture();
+  bool focusScrollWindow();
+  void prepareScrollMosaic();
 
   QVector<CaptureMonitor> m_monitors;
   QVector<Candidate> m_candidates;
@@ -141,4 +195,27 @@ private:
   QVariantList m_initialAnnotations;
   QVariantMap m_draft;
   QString m_status;
+  ScrollState m_scrollState = ScrollState::Idle;
+  ScrollStitcher m_scrollStitcher;
+  QImage m_scrollMosaicImage;
+  QRectF m_scrollRegion;
+  QPointF m_scrollPoint;
+  std::unique_ptr<VirtualPointer> m_virtualPointer;
+  QString m_scrollWindowAddress;
+  QRectF m_scrollWindowGeometry;
+  QTimer m_scrollTimer;
+  QElapsedTimer m_scrollInputTimer;
+  bool m_scrollPauseRequested = false;
+  bool m_scrollResumeCheck = false;
+  bool m_scrollNeedsPane = false;
+  bool m_scrollAwaitingPane = false;
+  bool m_scrollPaneSelected = false;
+  bool m_scrollInputSent = false;
+  bool m_scrollReviewInitialized = false;
+  int m_scrollUnchangedFrames = 0;
+  int m_scrollNoMatchRetries = 0;
+  int m_scrollSteps = 1;
+  int m_scrollReviewedHeight = 0;
+  int m_scrollRevision = 0;
+  int m_scrollGeneration = 0;
 };
