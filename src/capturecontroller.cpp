@@ -13,6 +13,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QLineF>
+#include <QLocale>
 #include <QPainter>
 #include <QPainterPath>
 #include <QProcess>
@@ -61,15 +62,15 @@ bool copyBytes(const QByteArray &bytes, const QString &mimeType,
                 {QStringLiteral("--type"), mimeType});
   if (!process.waitForStarted(3000)) {
     if (error)
-      *error =
-          QStringLiteral("无法启动 wl-copy：%1").arg(process.errorString());
+      *error = CaptureController::tr("Cannot start wl-copy: %1")
+                   .arg(process.errorString());
     return false;
   }
   process.write(bytes);
   process.closeWriteChannel();
   if (!process.waitForFinished(10000) || process.exitCode() != 0) {
     if (error)
-      *error = QStringLiteral("复制到剪贴板失败：%1")
+      *error = CaptureController::tr("Failed to copy to the clipboard: %1")
                    .arg(QString::fromUtf8(process.readAllStandardError()));
     return false;
   }
@@ -192,7 +193,7 @@ bool CaptureController::initialize(QString *error) {
   if (qEnvironmentVariable("XDG_SESSION_TYPE") != QStringLiteral("wayland") ||
       qEnvironmentVariableIsEmpty("HYPRLAND_INSTANCE_SIGNATURE")) {
     if (error)
-      *error = QStringLiteral("需要在 Hyprland Wayland 会话中运行。");
+      *error = tr("Run this application in a Hyprland Wayland session.");
     return false;
   }
 
@@ -203,7 +204,7 @@ bool CaptureController::initialize(QString *error) {
       &parseError);
   if (!monitorData.isArray() || monitorData.array().isEmpty()) {
     if (error && error->isEmpty())
-      *error = QStringLiteral("无法读取显示器信息：%1")
+      *error = tr("Cannot read monitor information: %1")
                    .arg(parseError.errorString());
     return false;
   }
@@ -227,13 +228,13 @@ bool CaptureController::initialize(QString *error) {
     }
     if (!monitor.screen) {
       if (error)
-        *error = QStringLiteral("Qt 找不到显示器 %1。").arg(monitor.name);
+        *error = tr("Qt cannot find monitor %1.").arg(monitor.name);
       return false;
     }
     const qreal scale = data.value(QStringLiteral("scale")).toDouble(1.0);
     if (scale <= 0) {
       if (error)
-        *error = QStringLiteral("显示器 %1 的缩放比例无效。").arg(monitor.name);
+        *error = tr("Invalid scale for monitor %1.").arg(monitor.name);
       return false;
     }
     qreal width = data.value(QStringLiteral("width")).toDouble() / scale;
@@ -248,7 +249,7 @@ bool CaptureController::initialize(QString *error) {
     monitor.image = captureWithoutCursor(QStringLiteral("-o"), monitor.name, error);
     if (monitor.image.isNull()) {
       if (error && error->isEmpty())
-        *error = QStringLiteral("无法截取显示器 %1。").arg(monitor.name);
+        *error = tr("Cannot capture monitor %1.").arg(monitor.name);
       return false;
     }
     const QImage coarse =
@@ -336,7 +337,7 @@ void CaptureController::startScroll() {
     return;
   const int count = scrollCandidates().size();
   if (!count) {
-    setStatus(QStringLiteral("选区内没有可截取的窗口"));
+    setStatus(tr("No window to capture in the selection"));
     return;
   }
   if (count == 1)
@@ -370,7 +371,7 @@ void CaptureController::chooseScrollWindow(int index) {
     m_scrollRegion = visible.intersected(
         m_monitors[candidate.monitorIndex].geometry);
     if (m_scrollRegion.width() < 64 || m_scrollRegion.height() < 64) {
-      setStatus(QStringLiteral("滚动区域太小"));
+      setStatus(tr("The scroll area is too small"));
       return;
     }
     m_scrollWindowAddress = candidate.address;
@@ -378,7 +379,7 @@ void CaptureController::chooseScrollWindow(int index) {
     if (!m_virtualPointer)
       m_virtualPointer = std::make_unique<VirtualPointer>();
     if (!m_virtualPointer->available()) {
-      setStatus(QStringLiteral("当前合成器不支持滚动截屏所需的虚拟滚轮"));
+      setStatus(tr("This compositor lacks the virtual pointer that scrolling capture needs"));
       return;
     }
     m_scrollPoint = m_scrollRegion.center();
@@ -456,7 +457,7 @@ void CaptureController::prepareScrollFrame() {
   // opacity or page content between frames and make overlap detection fail.
   if (!m_scrollInputSent) {
     if (!focusScrollWindow()) {
-      setStatus(QStringLiteral("窗口已移动或关闭，无法开始滚动"));
+      setStatus(tr("The window moved or closed, so scrolling cannot start"));
       finishScrollCapture();
       return;
     }
@@ -477,7 +478,7 @@ void CaptureController::captureScrollFrame() {
   const QImage frame = captureWithoutCursor(QStringLiteral("-g"), geometry, &error);
   emit scrollFrameCaptured();
   if (frame.isNull()) {
-    setStatus(error.isEmpty() ? QStringLiteral("无法截取滚动区域") : error);
+    setStatus(error.isEmpty() ? tr("Cannot capture the scroll area") : error);
     finishScrollCapture();
     return;
   }
@@ -495,12 +496,12 @@ void CaptureController::captureScrollFrame() {
       m_scrollTimer.start(350);
       return;
     }
-    setStatus(QStringLiteral("画面无法可靠拼接，已保留截取的内容"));
+    setStatus(tr("Frames could not be stitched reliably; kept what was captured"));
     finishScrollCapture();
     return;
   }
   if (result == ScrollStitcher::Result::TooLarge) {
-    setStatus(QStringLiteral("长图已达到安全长度，已停止滚动"));
+    setStatus(tr("The long image reached its maximum length; scrolling stopped"));
     finishScrollCapture();
     return;
   }
@@ -528,7 +529,7 @@ void CaptureController::captureScrollFrame() {
   if (m_scrollPauseRequested || m_scrollUnchangedFrames >= 2) {
     if (m_scrollUnchangedFrames >= 2) {
       m_scrollNeedsPane = true;
-      setStatus(QStringLiteral("已到底部或窗口未响应；如需继续，可选择滚动区域"));
+      setStatus(tr("Reached the bottom or the window stopped responding; choose a scroll area to continue"));
     }
     finishScrollCapture();
     return;
@@ -557,7 +558,7 @@ void CaptureController::sendScrollStep() {
       m_scrollAwaitingPane)
     return;
   if (!focusScrollWindow()) {
-    setStatus(QStringLiteral("窗口已移动或关闭，已保留截取的内容"));
+    setStatus(tr("The window moved or closed; kept what was captured"));
     finishScrollCapture();
     return;
   }
@@ -567,7 +568,7 @@ void CaptureController::sendScrollStep() {
   QString error;
   if (!m_virtualPointer->scrollAt(m_scrollPoint, desktop, m_scrollSteps,
                                   &error)) {
-    setStatus(QStringLiteral("无法滚动窗口：%1").arg(error));
+    setStatus(tr("Cannot scroll the window: %1").arg(error));
     finishScrollCapture();
     return;
   }
@@ -651,7 +652,7 @@ void CaptureController::resumeScroll() {
     m_scrollAwaitingPane = true;
     m_scrollPaneSelected = false;
     emit scrollAwaitingPaneChanged();
-    setStatus(QStringLiteral("点击窗口中需要滚动的区域，再点“继续”"));
+    setStatus(tr("Click the area to scroll, then click Continue scrolling"));
   } else
     m_scrollTimer.start(220);
 }
@@ -1399,7 +1400,7 @@ void CaptureController::save() {
   if (directory.isEmpty())
     directory = QDir::homePath() + QStringLiteral("/Pictures");
   if (!QDir().mkpath(directory)) {
-    setStatus(QStringLiteral("无法创建目录：%1").arg(directory));
+    setStatus(tr("Cannot create directory: %1").arg(directory));
     return;
   }
   const QString filename = QStringLiteral("screenshot-%1.png")
@@ -1407,7 +1408,7 @@ void CaptureController::save() {
                                    QStringLiteral("yyyy-MM-dd_HH-mm-ss-zzz")));
   const QString path = QDir(directory).filePath(filename);
   if (!image.save(path, "PNG")) {
-    setStatus(QStringLiteral("无法保存：%1").arg(path));
+    setStatus(tr("Cannot save: %1").arg(path));
     return;
   }
   QTextStream(stdout) << path << '\n';

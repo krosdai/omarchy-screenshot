@@ -107,7 +107,7 @@ TestCase {
         let standard = visualItem(normalToolbar, "tool_select")
         let scroll = visualItem(normalToolbar, "tool_scroll")
         compare(scroll.width, standard.width)
-        compare(visualItem(normalToolbar, "toolLabel_scroll").text, "H：")
+        compare(visualItem(normalToolbar, "toolLabel_scroll").text, "H:")
         normalToolbar.visible = false
         longToolbar.visible = true
         for (let action of [{name: "resume", key: "H"},
@@ -118,7 +118,7 @@ TestCase {
             let glyph = visualItem(longToolbar, "longGlyph_" + action.name)
             compare(button.width, standard.width)
             compare(button.height, standard.height)
-            compare(label.text, action.key + "：")
+            compare(label.text, action.key + ":")
             verify(label.visible)
             verify(glyph !== null)
         }
