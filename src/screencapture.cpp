@@ -289,6 +289,9 @@ QList<QImage> captureOutputs(const QStringList &names, int timeoutMs) {
         capture->transform != WL_OUTPUT_TRANSFORM_NORMAL)
       continue;
     // Hand the mapping to QImage so the pixels are never copied or converted.
+    // An output is opaque, so an ARGB8888 buffer's alpha is ignored just as
+    // grim's PPM output dropped it; honoring it could make a screenshot
+    // transparent wherever the compositor leaves alpha at zero.
     void *pixels = capture->pixels;
     const size_t size = capture->size;
     capture->pixels = MAP_FAILED;
