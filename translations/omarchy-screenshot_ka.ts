@@ -202,8 +202,8 @@
 <context>
     <name>LongOverlay</name>
     <message>
-        <source>Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
-        <translation>სანახავად გადაათრიეთ · დასაკოპირებლად ორჯერ დააწკაპუნეთ · გადასაადგილებლად დაატრიალეთ ბორბალი · Ctrl+ბორბალი მასშტაბირებისთვის</translation>
+        <source>%1% · Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
+        <translation>%1% · სანახავად გადაათრიეთ · დასაკოპირებლად ორჯერ დააწკაპუნეთ · გადასაადგილებლად დაატრიალეთ ბორბალი · Ctrl+ბორბალი მასშტაბირებისთვის</translation>
     </message>
 </context>
 <context>

@@ -202,8 +202,8 @@
 <context>
     <name>LongOverlay</name>
     <message>
-        <source>Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
-        <translation>拖动查看 · 双击复制 · 滚轮平移 · Ctrl+滚轮缩放</translation>
+        <source>%1% · Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
+        <translation>%1% · 拖动查看 · 双击复制 · 滚轮平移 · Ctrl+滚轮缩放</translation>
     </message>
 </context>
 <context>

@@ -202,8 +202,8 @@
 <context>
     <name>LongOverlay</name>
     <message>
-        <source>Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
-        <translation>Velciet, lai skatītu · Dubultklikšķis kopē · Ritenītis pārvieto · Ctrl+ritenītis maina mērogu</translation>
+        <source>%1% · Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
+        <translation>%1% · Velciet, lai skatītu · Dubultklikšķis kopē · Ritenītis pārvieto · Ctrl+ritenītis maina mērogu</translation>
     </message>
 </context>
 <context>

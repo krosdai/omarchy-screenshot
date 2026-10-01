@@ -202,8 +202,8 @@
 <context>
     <name>LongOverlay</name>
     <message>
-        <source>Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
-        <translation>גרירה לצפייה · לחיצה כפולה להעתקה · גלילה להזזה · ⁦Ctrl⁩+גלילה להגדלה והקטנה</translation>
+        <source>%1% · Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
+        <translation>⁦⁨%1⁩%⁩ · גרירה לצפייה · לחיצה כפולה להעתקה · גלילה להזזה · ⁦Ctrl⁩+גלילה להגדלה והקטנה</translation>
     </message>
 </context>
 <context>

@@ -202,8 +202,8 @@
 <context>
     <name>LongOverlay</name>
     <message>
-        <source>Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
-        <translation>ドラッグで表示 · ダブルクリックでコピー · スクロールで移動 · Ctrl+スクロールでズーム</translation>
+        <source>%1% · Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
+        <translation>%1% · ドラッグで表示 · ダブルクリックでコピー · スクロールで移動 · Ctrl+スクロールでズーム</translation>
     </message>
 </context>
 <context>

@@ -202,8 +202,8 @@
 <context>
     <name>LongOverlay</name>
     <message>
-        <source>Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
-        <translation>Vilkite – peržiūra · Dukart spustelėkite – kopijavimas · Ratukas – slinkimas · Ctrl+ratukas – mastelis</translation>
+        <source>%1% · Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
+        <translation>%1% · Vilkite – peržiūra · Dukart spustelėkite – kopijavimas · Ratukas – slinkimas · Ctrl+ratukas – mastelis</translation>
     </message>
 </context>
 <context>

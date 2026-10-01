@@ -329,8 +329,10 @@ Item {
         Text {
             id: info
             anchors.centerIn: parent
-            text: root.imageWidth + " × " + root.imageHeight + " · " + Math.round(root.zoom * 100) + "% · " +
-                  qsTr("Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom")
+            // The percentage is part of the message so locales can place the sign.
+            text: root.imageWidth + " × " + root.imageHeight + " · " +
+                  qsTr("%1% · Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom")
+                      .arg(Math.round(root.zoom * 100))
             font.pixelSize: 12
             color: "white"
         }

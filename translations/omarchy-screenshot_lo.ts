@@ -202,8 +202,8 @@
 <context>
     <name>LongOverlay</name>
     <message>
-        <source>Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
-        <translation>ລາກເພື່ອເບິ່ງ · ດັບເບິ້ນຄລິກເພື່ອສຳເນົາ · ໝຸນລໍ້ເພື່ອເລື່ອນ · Ctrl+ລໍ້ເພື່ອຊູມ</translation>
+        <source>%1% · Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
+        <translation>%1% · ລາກເພື່ອເບິ່ງ · ດັບເບິ້ນຄລິກເພື່ອສຳເນົາ · ໝຸນລໍ້ເພື່ອເລື່ອນ · Ctrl+ລໍ້ເພື່ອຊູມ</translation>
     </message>
 </context>
 <context>

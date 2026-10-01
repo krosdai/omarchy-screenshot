@@ -202,8 +202,8 @@
 <context>
     <name>LongOverlay</name>
     <message>
-        <source>Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
-        <translation>Lohista vaatamiseks · Topeltklõpsa kopeerimiseks · Keri nihutamiseks · Ctrl+keri suumimiseks</translation>
+        <source>%1% · Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
+        <translation>%1% · Lohista vaatamiseks · Topeltklõpsa kopeerimiseks · Keri nihutamiseks · Ctrl+keri suumimiseks</translation>
     </message>
 </context>
 <context>

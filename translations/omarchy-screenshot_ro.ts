@@ -202,8 +202,8 @@
 <context>
     <name>LongOverlay</name>
     <message>
-        <source>Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
-        <translation>Trageți pentru vizualizare · Dublu clic pentru copiere · Rotița pentru deplasare · Ctrl+rotița pentru zoom</translation>
+        <source>%1% · Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
+        <translation>%1% · Trageți pentru vizualizare · Dublu clic pentru copiere · Rotița pentru deplasare · Ctrl+rotița pentru zoom</translation>
     </message>
 </context>
 <context>

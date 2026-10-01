@@ -202,8 +202,8 @@
 <context>
     <name>LongOverlay</name>
     <message>
-        <source>Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
-        <translation>Барои дидан кашед · Барои нусхабардорӣ ду бор пахш кунед · Бо чархак ҳаракат диҳед · Ctrl+чархак барои миқёс</translation>
+        <source>%1% · Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
+        <translation>%1% · Барои дидан кашед · Барои нусхабардорӣ ду бор пахш кунед · Бо чархак ҳаракат диҳед · Ctrl+чархак барои миқёс</translation>
     </message>
 </context>
 <context>

@@ -202,8 +202,8 @@
 <context>
     <name>LongOverlay</name>
     <message>
-        <source>Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
-        <translation>Húzás: nézegetés · Dupla kattintás: másolás · Görgetés: mozgatás · Ctrl+görgetés: nagyítás</translation>
+        <source>%1% · Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
+        <translation>%1% · Húzás: nézegetés · Dupla kattintás: másolás · Görgetés: mozgatás · Ctrl+görgetés: nagyítás</translation>
     </message>
 </context>
 <context>

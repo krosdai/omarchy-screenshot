@@ -202,8 +202,8 @@
 <context>
     <name>LongOverlay</name>
     <message>
-        <source>Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
-        <translation>Dra for å se · Dobbeltklikk for å kopiere · Rull for å panorere · Ctrl+rull for å zoome</translation>
+        <source>%1% · Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
+        <translation>%1% · Dra for å se · Dobbeltklikk for å kopiere · Rull for å panorere · Ctrl+rull for å zoome</translation>
     </message>
 </context>
 <context>

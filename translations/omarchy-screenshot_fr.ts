@@ -202,8 +202,8 @@
 <context>
     <name>LongOverlay</name>
     <message>
-        <source>Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
-        <translation>Faites glisser pour parcourir · Double-cliquez pour copier · Molette pour déplacer · Ctrl+molette pour zoomer</translation>
+        <source>%1% · Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom</source>
+        <translation>%1% · Faites glisser pour parcourir · Double-cliquez pour copier · Molette pour déplacer · Ctrl+molette pour zoomer</translation>
     </message>
 </context>
 <context>
