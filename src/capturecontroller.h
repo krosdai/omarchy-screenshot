@@ -170,6 +170,7 @@ private:
   void prepareScrollStep();
   void sendScrollStep();
   void finishScrollCapture();
+  bool scrollWindowUnchanged();
   bool focusScrollWindow();
   void prepareScrollMosaic();
 

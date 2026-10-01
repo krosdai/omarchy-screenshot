@@ -406,11 +406,10 @@ void CaptureController::chooseScrollWindow(int index) {
   }
 }
 
-bool CaptureController::focusScrollWindow() {
+bool CaptureController::scrollWindowUnchanged() {
   const auto clients = QJsonDocument::fromJson(
       run(QStringLiteral("hyprctl"),
           {QStringLiteral("-j"), QStringLiteral("clients")}, nullptr));
-  bool found = false;
   for (const QJsonValue &entry : clients.array()) {
     const QJsonObject data = entry.toObject();
     if (data.value(QStringLiteral("address")).toString() !=
@@ -422,12 +421,13 @@ bool CaptureController::focusScrollWindow() {
       return false;
     const QRectF now(at[0].toDouble(), at[1].toDouble(), size[0].toDouble(),
                      size[1].toDouble());
-    if (now != m_scrollWindowGeometry)
-      return false;
-    found = true;
-    break;
+    return now == m_scrollWindowGeometry;
   }
-  if (!found)
+  return false;
+}
+
+bool CaptureController::focusScrollWindow() {
+  if (!scrollWindowUnchanged())
     return false;
   bool validAddress = false;
   const qulonglong address = m_scrollWindowAddress.toULongLong(&validAddress, 16);
@@ -563,6 +563,13 @@ void CaptureController::sendScrollStep() {
   if (m_scrollState != ScrollState::Capturing || m_scrollPauseRequested ||
       m_scrollAwaitingPane)
     return;
+  // The window may have moved or closed during the delay; never send the
+  // wheel to whatever now sits under the scroll point.
+  if (!scrollWindowUnchanged()) {
+    setStatus(QStringLiteral("窗口已移动或关闭，已保留截取的内容"));
+    finishScrollCapture();
+    return;
+  }
   QRectF desktop = m_monitors.first().geometry;
   for (const auto &monitor : m_monitors)
     desktop = desktop.united(monitor.geometry);
