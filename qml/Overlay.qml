@@ -90,6 +90,14 @@ Item {
 
     function toolbarHasAction(action) { return annotationToolbar.toolbarHasAction(action) }
 
+    // A resident process reuses this overlay; drop transient UI from the last capture.
+    function resetForCapture() {
+        editor.visible = false
+        textInput.text = ""
+        annotationToolbar.closePopups()
+        root.forceActiveFocus()
+    }
+
     function leaveTextTool() {
         if (captureController.tool !== "text") return
         if (editor.visible) editor.commitText()
@@ -120,7 +128,7 @@ Item {
         objectName: "screenCaptureImage"
         anchors.fill: parent
         source: screenIndex >= 0 && captureController.imagesReady
-                ? "image://captures/screen/" + screenIndex : ""
+                ? "image://captures/screen/" + screenIndex + "/" + captureController.captureGeneration : ""
         fillMode: Image.Stretch
         smooth: true
         cache: true
@@ -176,7 +184,8 @@ Item {
             captureController.annotations.some(item => item.type === "mosaic")
         readonly property bool imageReady: captureController.imagesReady
         readonly property string source: root.screenIndex >= 0 && captureController.imagesReady
-                                         ? "image://captures/mosaic/" + root.screenIndex : ""
+                                         ? "image://captures/mosaic/" + root.screenIndex + "/"
+                                           + captureController.captureGeneration : ""
         visible: captureController.selected && hasMosaic
 
         Item {

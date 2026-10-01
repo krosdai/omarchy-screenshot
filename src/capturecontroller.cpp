@@ -260,8 +260,68 @@ bool CaptureController::finishCapture(QString *error) {
     m_monitors[i].mosaicImage = result.mosaics[i];
   }
   m_imagesReady = true;
+  ++m_captureGeneration;
   emit imagesReadyChanged();
   return true;
+}
+
+QVariantMap CaptureController::defaultToolVariants() {
+  return {{QStringLiteral("rect"), QStringLiteral("rect")},
+          {QStringLiteral("ellipse"), QStringLiteral("ellipse")},
+          {QStringLiteral("arrow"), QStringLiteral("arrow")},
+          {QStringLiteral("pen"), QStringLiteral("pen")}};
+}
+
+void CaptureController::reset() {
+  cancelPointerAction();
+  // Stop scrolling capture first; the generation bump drops any frame or
+  // wheel step still queued for the old capture.
+  ++m_scrollGeneration;
+  m_scrollTimer.stop();
+  m_scrollStitcher.reset();
+  m_scrollMosaicImage = {};
+  m_scrollRegion = {};
+  m_scrollWindowAddress.clear();
+  m_scrollWindowGeometry = {};
+  m_scrollPauseRequested = false;
+  m_scrollResumeCheck = false;
+  m_scrollNeedsPane = false;
+  m_scrollAwaitingPane = false;
+  m_scrollPaneSelected = false;
+  m_scrollInputSent = false;
+  m_scrollReviewInitialized = false;
+  m_scrollReviewedHeight = 0;
+  m_scrollUnchangedFrames = 0;
+  m_scrollNoMatchRetries = 0;
+  m_scrollSteps = 1;
+  ++m_scrollRevision;
+  m_scrollState = ScrollState::Idle;
+  m_reviewScale = 1;
+  m_monitors.clear();
+  m_candidates.clear();
+  m_annotations.clear();
+  m_redoAnnotations.clear();
+  m_selected = false;
+  m_selection = {};
+  m_hovered = {};
+  m_status.clear();
+  m_imagesReady = false;
+  m_toolBeforeText = QStringLiteral("select");
+  m_tool = QStringLiteral("select");
+  m_toolVariants = defaultToolVariants();
+  emit scrollStateChanged();
+  emit scrollImageChanged();
+  emit scrollAwaitingPaneChanged();
+  emit scrollStoppingChanged();
+  emit reviewScaleChanged();
+  emit selectionChanged();
+  emit hoveredChanged();
+  emit selectedChanged();
+  emit toolChanged();
+  emit toolVariantsChanged();
+  emit annotationsChanged();
+  emit statusChanged();
+  emit imagesReadyChanged();
 }
 
 bool CaptureController::startCapture(QString *error) {
