@@ -7,8 +7,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
+#include <sys/file.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <sys/un.h>
 #include <unistd.h>
 
@@ -37,6 +39,8 @@ int connectTo(const std::string &path) {
   return fd;
 }
 
+constexpr char captureRequest[] = "capture\n";
+
 std::string systemError(const char *what) {
   return std::string(what) + ": " + std::strerror(errno);
 }
@@ -54,11 +58,10 @@ bool forwardCaptureRequest(const std::string &path) {
   const int fd = connectTo(path);
   if (fd < 0)
     return false;
-  static constexpr char request[] = "capture\n";
   const ssize_t written =
-      send(fd, request, sizeof request - 1, MSG_NOSIGNAL);
+      send(fd, captureRequest, sizeof captureRequest - 1, MSG_NOSIGNAL);
   close(fd);
-  return written == ssize_t(sizeof request - 1);
+  return written == ssize_t(sizeof captureRequest - 1);
 }
 
 int activatedSocket(pid_t self, const char *listenPid, const char *listenFds) {
@@ -90,16 +93,35 @@ int activatedSocket() {
 }
 
 ListenResult listenForCaptureRequests(const std::string &path, int *fd,
-                                      std::string *error) {
+                                      int *lock, std::string *error) {
   sockaddr_un address;
   if (!fillAddress(path, &address)) {
     if (error)
       *error = "XDG_RUNTIME_DIR is not set or too long";
     return ListenResult::Failed;
   }
+  // The lock decides which daemon owns the path, so two starting together
+  // can never both take it or remove each other's socket.
+  const std::string lockPath = path + ".lock";
+  const int held = open(lockPath.c_str(), O_RDWR | O_CREAT | O_CLOEXEC, 0600);
+  if (held < 0) {
+    if (error)
+      *error = systemError(lockPath.c_str());
+    return ListenResult::Failed;
+  }
+  if (flock(held, LOCK_EX | LOCK_NB) != 0) {
+    const bool busy = errno == EWOULDBLOCK;
+    if (error && !busy)
+      *error = systemError("flock");
+    close(held);
+    return busy ? ListenResult::AlreadyRunning : ListenResult::Failed;
+  }
+  // systemd can hold the socket without a daemon behind it. This probe
+  // sends nothing, so it never counts as a capture request.
   const int probe = connectTo(path);
   if (probe >= 0) {
     close(probe);
+    close(held);
     return ListenResult::AlreadyRunning;
   }
   // Nobody answered, so a socket here was left by a daemon that died.
@@ -108,6 +130,7 @@ ListenResult listenForCaptureRequests(const std::string &path, int *fd,
     if (!S_ISSOCK(existing.st_mode)) {
       if (error)
         *error = path + " exists and is not a socket";
+      close(held);
       return ListenResult::Failed;
     }
     unlink(path.c_str());
@@ -117,6 +140,7 @@ ListenResult listenForCaptureRequests(const std::string &path, int *fd,
   if (listener < 0) {
     if (error)
       *error = systemError("socket");
+    close(held);
     return ListenResult::Failed;
   }
   // Only this user may ask for captures of this user's screen.
@@ -129,8 +153,30 @@ ListenResult listenForCaptureRequests(const std::string &path, int *fd,
     if (error)
       *error = systemError(bound ? "listen" : "bind");
     close(listener);
+    close(held);
     return ListenResult::Failed;
   }
   *fd = listener;
+  *lock = held;
   return ListenResult::Listening;
+}
+
+int takeCaptureRequests(int listener) {
+  int requests = 0;
+  for (int client; (client = accept4(listener, nullptr, nullptr,
+                                     SOCK_CLOEXEC)) >= 0;) {
+    // A client writes its request right after connecting; a probe closes
+    // without writing, which reads as end of file.
+    // The timeout keeps a stalled client from blocking the daemon.
+    const timeval timeout{0, 100000};
+    setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof timeout);
+    char buffer[sizeof captureRequest - 1];
+    const bool request =
+        recv(client, buffer, sizeof buffer, MSG_WAITALL) ==
+            ssize_t(sizeof buffer) &&
+        std::memcmp(buffer, captureRequest, sizeof buffer) == 0;
+    close(client);
+    requests += request;
+  }
+  return requests;
 }

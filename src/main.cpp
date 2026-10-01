@@ -359,13 +359,16 @@ int main(int argc, char **argv) {
     return 1;
   }
   int listener = -1;
+  // Held until exit; it makes this process the socket's only owner.
+  int socketLock = -1;
   std::string ownedSocket;
   if (daemon) {
     listener = activatedSocket();
     if (listener < 0) {
       const std::string path = daemonSocketPath();
       std::string listenError;
-      switch (listenForCaptureRequests(path, &listener, &listenError)) {
+      switch (listenForCaptureRequests(path, &listener, &socketLock,
+                                       &listenError)) {
       case ListenResult::AlreadyRunning:
         QTextStream(stdout) << "A daemon is already listening on "
                             << QString::fromStdString(path) << '\n';
@@ -945,30 +948,26 @@ int main(int argc, char **argv) {
   };
   if (daemon) {
     QObject::connect(&idleTimer, &QTimer::timeout, &app, [&] {
-      if (!capturing())
+      if (capturing())
+        return;
+      // A request can queue just as the timer fires; serve it, not exit.
+      if (takeCaptureRequests(listener) > 0)
+        captureAndShow();
+      else
         QCoreApplication::quit();
     });
     QObject::connect(&controller, &CaptureController::done, &app, becomeIdle);
-    // Any connection is a request; draining them coalesces repeated presses.
-    auto takeRequests = [listener] {
-      bool requested = false;
-      for (int client; (client = accept4(listener, nullptr, nullptr,
-                                         SOCK_CLOEXEC)) >= 0;) {
-        close(client);
-        requested = true;
-      }
-      return requested;
-    };
+    // Draining every queued request coalesces repeated presses.
     requests = std::make_unique<QSocketNotifier>(listener, QSocketNotifier::Read);
     QObject::connect(requests.get(), &QSocketNotifier::activated, &app,
-                     [takeRequests, captureAndShow] {
-                       if (takeRequests())
+                     [listener, captureAndShow] {
+                       if (takeCaptureRequests(listener) > 0)
                          captureAndShow();
                      });
     // Socket activation starts the daemon for a request that is already
     // waiting; the capture taken while starting up is the one it asked for.
     pollfd pending{listener, POLLIN, 0};
-    if (poll(&pending, 1, 0) > 0 && takeRequests())
+    if (poll(&pending, 1, 0) > 0 && takeCaptureRequests(listener) > 0)
       showOverlay();
     else
       becomeIdle();

@@ -14,8 +14,10 @@
 #include <QTemporaryDir>
 #include <QTest>
 
+#include <cstring>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <sys/un.h>
 #include <unistd.h>
 
 class DaemonTest : public QObject {
@@ -45,25 +47,61 @@ private slots:
     QVERIFY(!forwardCaptureRequest(path));
 
     int listener = -1;
+    int lock = -1;
     std::string error;
-    QCOMPARE(listenForCaptureRequests(path, &listener, &error), ListenResult::Listening);
+    QCOMPARE(listenForCaptureRequests(path, &listener, &lock, &error),
+             ListenResult::Listening);
     struct stat info;
     QCOMPARE(stat(path.c_str(), &info), 0);
     QCOMPARE(info.st_mode & 0777, mode_t(0600));
 
     int second = -1;
-    QCOMPARE(listenForCaptureRequests(path, &second, &error), ListenResult::AlreadyRunning);
+    int secondLock = -1;
+    QCOMPARE(listenForCaptureRequests(path, &second, &secondLock, &error),
+             ListenResult::AlreadyRunning);
     QCOMPARE(second, -1);
+    QCOMPARE(secondLock, -1);
 
     QVERIFY(forwardCaptureRequest(path));
-    // The probe from the refused second daemon is queued ahead of the request.
-    int accepted = 0;
-    for (int client; (client = accept4(listener, nullptr, nullptr, SOCK_CLOEXEC)) >= 0;) {
-      close(client);
-      ++accepted;
-    }
-    QCOMPARE(accepted, 2);
+    QVERIFY(forwardCaptureRequest(path));
+    QCOMPARE(takeCaptureRequests(listener), 2);
+    QCOMPARE(takeCaptureRequests(listener), 0);
     close(listener);
+    close(lock);
+  }
+
+  // systemd can hold the socket with no daemon behind it; a daemon started
+  // by hand must leave it alone without its probe counting as a capture.
+  void probeOfAHeldSocketIsNoRequest() {
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const std::string path = dir.filePath(QStringLiteral("daemon.sock")).toStdString();
+    const int held = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC | SOCK_NONBLOCK, 0);
+    sockaddr_un address{};
+    address.sun_family = AF_UNIX;
+    std::strcpy(address.sun_path, path.c_str());
+    QCOMPARE(bind(held, reinterpret_cast<const sockaddr *>(&address), sizeof address), 0);
+    QCOMPARE(listen(held, 8), 0);
+
+    int listener = -1;
+    int lock = -1;
+    std::string error;
+    QCOMPARE(listenForCaptureRequests(path, &listener, &lock, &error),
+             ListenResult::AlreadyRunning);
+    QCOMPARE(takeCaptureRequests(held), 0);
+
+    // Neither a wrong message nor a client that stalls counts.
+    const int other = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
+    QCOMPARE(::connect(other, reinterpret_cast<const sockaddr *>(&address), sizeof address), 0);
+    QCOMPARE(send(other, "probe\n", 6, MSG_NOSIGNAL), ssize_t(6));
+    const int stalled = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
+    QCOMPARE(::connect(stalled, reinterpret_cast<const sockaddr *>(&address), sizeof address), 0);
+    QCOMPARE(send(stalled, "cap", 3, MSG_NOSIGNAL), ssize_t(3));
+    QVERIFY(forwardCaptureRequest(path));
+    QCOMPARE(takeCaptureRequests(held), 1);
+    close(other);
+    close(stalled);
+    close(held);
   }
 
   void replacesStaleSocketButNotOtherFiles() {
@@ -71,19 +109,26 @@ private slots:
     QVERIFY(dir.isValid());
     const std::string path = dir.filePath(QStringLiteral("daemon.sock")).toStdString();
     int listener = -1;
+    int lock = -1;
     std::string error;
-    QCOMPARE(listenForCaptureRequests(path, &listener, &error), ListenResult::Listening);
-    close(listener);  // A crashed daemon leaves its socket file behind.
-    QVERIFY(!forwardCaptureRequest(path));
-    QCOMPARE(listenForCaptureRequests(path, &listener, &error), ListenResult::Listening);
-    QVERIFY(forwardCaptureRequest(path));
+    QCOMPARE(listenForCaptureRequests(path, &listener, &lock, &error),
+             ListenResult::Listening);
+    // A crashed daemon leaves its socket file behind; the kernel drops its lock.
     close(listener);
+    close(lock);
+    QVERIFY(!forwardCaptureRequest(path));
+    QCOMPARE(listenForCaptureRequests(path, &listener, &lock, &error),
+             ListenResult::Listening);
+    QVERIFY(forwardCaptureRequest(path));
+    QCOMPARE(takeCaptureRequests(listener), 1);
+    close(listener);
+    close(lock);
 
     const QString other = dir.filePath(QStringLiteral("notes.txt"));
     QFile file(other);
     QVERIFY(file.open(QIODevice::WriteOnly) && file.write("keep") == 4);
     file.close();
-    QCOMPARE(listenForCaptureRequests(other.toStdString(), &listener, &error),
+    QCOMPARE(listenForCaptureRequests(other.toStdString(), &listener, &lock, &error),
              ListenResult::Failed);
     QVERIFY(QFile::exists(other));
   }
