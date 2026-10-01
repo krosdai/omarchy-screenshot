@@ -94,7 +94,7 @@ cmake --build build -j
 
 工具栏的离线交互检查可运行 `QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME= QT_QUICK_BACKEND=software /usr/lib/qt6/bin/qmltestrunner -input tests`，覆盖分组菜单、调色盘、主题一致性和按钮位置。
 
-也可执行 `cmake --install build --prefix ~/.local`，安装到 `~/.local/bin/omarchy-screenshot`。本地安装后如需使用常驻模式，配置时加上 `-DSYSTEMD_USER_UNIT_DIR=$HOME/.local/share/systemd/user`，让 systemd 找到对应单元。需要在 Hyprland Wayland 会话中运行。
+也可执行 `cmake --install build --prefix ~/.local`，安装到 `~/.local/bin/omarchy-screenshot`。本地安装后如需使用常驻模式，应改为在配置时指定安装前缀，因为 service 会在配置阶段记录可执行文件路径：`cmake -B build -DCMAKE_INSTALL_PREFIX=$HOME/.local -DSYSTEMD_USER_UNIT_DIR=$HOME/.local/share/systemd/user`，再运行 `cmake --install build`。需要在 Hyprland Wayland 会话中运行。
 
 ### 常驻模式
 
