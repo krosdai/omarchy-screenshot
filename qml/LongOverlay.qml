@@ -43,11 +43,12 @@ Item {
         const crop = captureController.selection
         const right = crop.x + crop.width
         const bottom = crop.y + crop.height
-        // Match the controller's border tolerance in image coordinates.
-        return p.x >= crop.x - 7 && p.x <= right + 7 &&
-               p.y >= crop.y - 7 && p.y <= bottom + 7 &&
-               (Math.abs(p.x - crop.x) <= 7 || Math.abs(p.x - right) <= 7 ||
-                Math.abs(p.y - crop.y) <= 7 || Math.abs(p.y - bottom) <= 7)
+        // Match the controller's 7 px screen-space border tolerance.
+        const edge = 7 / imageScale
+        return p.x >= crop.x - edge && p.x <= right + edge &&
+               p.y >= crop.y - edge && p.y <= bottom + edge &&
+               (Math.abs(p.x - crop.x) <= edge || Math.abs(p.x - right) <= edge ||
+                Math.abs(p.y - crop.y) <= edge || Math.abs(p.y - bottom) <= edge)
     }
     function beginPan(x, y) {
         movingImage = true
@@ -107,6 +108,12 @@ Item {
             captureController.restoreToolBeforeText()
         } else { annotationToolbar.handleShortcut(event); return }
         event.accepted = true
+    }
+
+    Binding {
+        target: captureController
+        property: "reviewScale"
+        value: root.imageScale
     }
 
     Rectangle { anchors.fill: parent; color: "#db111820" }
