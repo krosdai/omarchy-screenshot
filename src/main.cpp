@@ -336,6 +336,12 @@ int main(int argc, char **argv) {
   }
 
   if (app.arguments().contains(QStringLiteral("--scroll-integration-test"))) {
+    // The fixture is found among window candidates, which arrive with the
+    // capture.
+    if (!controller.finishCapture(&error)) {
+      qCritical().noquote() << error;
+      return 1;
+    }
     if (!startScrollFixture(controller)) {
       QTextStream(stderr) << "Scroll fixture window is missing or cannot start\n";
       return 2;
