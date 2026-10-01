@@ -329,8 +329,9 @@ Item {
         Text {
             id: info
             anchors.centerIn: parent
-            text: root.imageWidth + " × " + root.imageHeight +
-                  " · " + Math.round(root.zoom * 100) + "% · 拖动查看 · 双击复制 · 滚轮平移 · Ctrl+滚轮缩放"
+            text: root.imageWidth + " × " + root.imageHeight + " · " +
+                  qsTr("%1% · Drag to view · Double-click to copy · Scroll to pan · Ctrl+scroll to zoom")
+                      .arg(Math.round(root.zoom * 100))
             font.pixelSize: 12
             color: "white"
         }
@@ -352,15 +353,20 @@ Item {
         visible: captureController.status.length > 0
         anchors.horizontalCenter: parent.horizontalCenter
         y: 8
-        width: statusText.implicitWidth + 24
-        height: 30
+        width: Math.min(statusText.implicitWidth + 24, root.width - 16)
+        height: statusText.implicitHeight + 14
         radius: 5
         color: annotationToolbar.toolbarSurface
         border.color: annotationToolbar.panelBorder
         Text {
             id: statusText
             anchors.centerIn: parent
+            width: parent.width - 24
             text: captureController.status
+            textFormat: Text.PlainText
+            wrapMode: Text.Wrap
+            horizontalAlignment: Qt.application.layoutDirection === Qt.RightToLeft
+                                 ? Text.AlignRight : Text.AlignLeft
             color: annotationToolbar.toolbarInk
         }
     }

@@ -22,25 +22,25 @@ Item {
     signal zoomRequested(real factor)
 
     readonly property var actions: [
-        {key: "V", action: "select", hint: "选区：拖动方块调整边框；方向键扩展 1px，Shift+方向键收缩 1px"},
-        {key: "R", action: "rect_group", hint: "矩形组：点击选择矩形、圆角矩形或实心矩形"},
-        {key: "E", action: "ellipse_group", hint: "圆形组：点击选择椭圆、实心椭圆或聚光灯"},
-        {key: "A", action: "arrow_group", hint: "箭头组：点击选择箭头、弯曲箭头、双向弯曲箭头或直线"},
-        {key: "D", action: "pen_group", hint: "画笔组：点击选择画笔或荧光笔"},
-        {key: "T", action: "text", hint: "文字：单击输入，Shift+Enter 换行；按 Alt 确认文字并返回上一个工具"},
-        {key: "G", action: "mosaic", hint: "马赛克：拖动选择矩形区域"},
-        {key: "B", action: "marker", hint: "编号标记：单击放置自动编号"}
+        {key: "V", action: "select", hint: qsTr("Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px")},
+        {key: "R", action: "rect_group", hint: qsTr("Rectangles: choose an outline, rounded or filled rectangle")},
+        {key: "E", action: "ellipse_group", hint: qsTr("Ellipses: choose an outline, filled ellipse or spotlight")},
+        {key: "A", action: "arrow_group", hint: qsTr("Arrows: choose a straight, curved, double-headed arrow or line")},
+        {key: "D", action: "pen_group", hint: qsTr("Drawing: choose a pen or highlighter")},
+        {key: "T", action: "text", hint: qsTr("Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool")},
+        {key: "G", action: "mosaic", hint: qsTr("Mosaic: drag to select a rectangular area")},
+        {key: "B", action: "marker", hint: qsTr("Numbered marker: click to place the next number")}
     ].concat(longImage ? [
-        {key: "-", action: "zoom_out", hint: "缩小长图（-）"},
-        {key: "=", action: "zoom_in", hint: "放大长图（=）"},
-        {key: "H", action: "resume", hint: "继续截图（H）：继续向下截图，保留已有标注"}
+        {key: "-", action: "zoom_out", hint: qsTr("Zoom out of the long image (-)")},
+        {key: "=", action: "zoom_in", hint: qsTr("Zoom in on the long image (=)")},
+        {key: "H", action: "resume", hint: qsTr("Resume (H): keep capturing downward and keep existing annotations")}
     ] : [
-        {key: "H", action: "scroll", hint: "滚动截图（H）：自动滚动并拼接长图"}
+        {key: "H", action: "scroll", hint: qsTr("Scrolling capture (H): scroll automatically and stitch a long image")}
     ]).concat([
-        {key: "Z", action: "undo", hint: "撤销：移除上一项标注"},
-        {key: "X", action: "redo", hint: "重做：恢复刚撤销的标注"},
-        {key: "C", action: "copy", hint: "复制：将截图复制到剪贴板"},
-        {key: "S", action: "save", hint: "保存：将截图保存为 PNG"}
+        {key: "Z", action: "undo", hint: qsTr("Undo: remove the last annotation")},
+        {key: "X", action: "redo", hint: qsTr("Redo: restore the undone annotation")},
+        {key: "C", action: "copy", hint: qsTr("Copy: copy the screenshot to the clipboard")},
+        {key: "S", action: "save", hint: qsTr("Save: save the screenshot as PNG")}
     ])
     readonly property real contentWidth: 64 + actions.reduce(
         (total, action) => total + (buttonWidth(action) > 0 ? buttonWidth(action) + 2 : 0), 0)
@@ -68,21 +68,21 @@ Item {
     function toolGroupOptions(group) {
         switch (group) {
         case "rect": return [
-            {action: "rect", label: "矩形"},
-            {action: "roundrect", label: "圆角矩形"},
-            {action: "fillrect", label: "实心矩形"}]
+            {action: "rect", label: qsTr("Rectangle")},
+            {action: "roundrect", label: qsTr("Rounded rectangle")},
+            {action: "fillrect", label: qsTr("Filled rectangle")}]
         case "ellipse": return [
-            {action: "ellipse", label: "椭圆"},
-            {action: "fillellipse", label: "实心椭圆"},
-            {action: "spotlight", label: "聚光灯"}]
+            {action: "ellipse", label: qsTr("Ellipse")},
+            {action: "fillellipse", label: qsTr("Filled ellipse")},
+            {action: "spotlight", label: qsTr("Spotlight")}]
         case "arrow": return [
-            {action: "arrow", label: "箭头"},
-            {action: "curvedarrow", label: "弯曲箭头"},
-            {action: "doublearrow", label: "双向弯曲箭头"},
-            {action: "line", label: "直线"}]
+            {action: "arrow", label: qsTr("Arrow")},
+            {action: "curvedarrow", label: qsTr("Curved arrow")},
+            {action: "doublearrow", label: qsTr("Double-headed curved arrow")},
+            {action: "line", label: qsTr("Line")}]
         case "pen": return [
-            {action: "pen", label: "画笔"},
-            {action: "highlighter", label: "荧光笔"}]
+            {action: "pen", label: qsTr("Pen")},
+            {action: "highlighter", label: qsTr("Highlighter")}]
         }
         return []
     }
@@ -273,7 +273,7 @@ Item {
                     anchors.centerIn: parent
                     spacing: 2
                     Text {
-                        text: "Q："
+                        text: "Q:"
                         width: 25
                         height: 20
                         color: root.toolbarInk
@@ -291,7 +291,7 @@ Item {
                     id: colorButtonMouse
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered: root.showToolbarTooltip("颜色：点击预设色或拖动调色盘", colorButtonMouse)
+                    onEntered: root.showToolbarTooltip(qsTr("Color: choose a preset or drag the palette"), colorButtonMouse)
                     onExited: root.hideToolbarTooltip()
                     onClicked: {
                         root.hideToolbarTooltip()
@@ -331,7 +331,7 @@ Item {
                         spacing: 2
                         Text {
                             objectName: (root.longImage ? "longLabel_" : "toolLabel_") + modelData.action
-                            text: modelData.key.length > 0 ? modelData.key + "：" : ""
+                            text: modelData.key.length > 0 ? modelData.key + ":" : ""
                             visible: modelData.key.length > 0
                             width: visible ? 25 : 0
                             height: 20
@@ -531,8 +531,8 @@ Item {
                     Repeater {
                         id: themeRepeater
                         model: [
-                            {action: "theme_light", dark: false, hint: "浅色工具栏"},
-                            {action: "theme_dark", dark: true, hint: "深色工具栏"}
+                            {action: "theme_light", dark: false, hint: qsTr("Light toolbar")},
+                            {action: "theme_dark", dark: true, hint: qsTr("Dark toolbar")}
                         ]
                         delegate: Rectangle {
                             required property var modelData
@@ -710,9 +710,10 @@ Item {
 
     Rectangle {
         id: toolbarTooltip
+        objectName: "toolbarTooltip"
         visible: root.toolbarTooltipVisible && toolbar.visible
         z: 30
-        width: tooltipLabel.implicitWidth + 20
+        width: Math.min(tooltipLabel.implicitWidth + 20, root.width - 16)
         height: tooltipLabel.implicitHeight + 12
         x: Math.max(8, Math.min(root.toolbarTooltipX - width / 2,
                                 root.width - width - 8))
@@ -724,8 +725,14 @@ Item {
         border.color: "#748090"
         Text {
             id: tooltipLabel
+            objectName: "tooltipLabel"
             anchors.centerIn: parent
+            width: parent.width - 20
             text: root.toolbarTooltipText
+            textFormat: Text.PlainText
+            wrapMode: Text.Wrap
+            horizontalAlignment: Qt.application.layoutDirection === Qt.RightToLeft
+                                 ? Text.AlignRight : Text.AlignLeft
             color: "white"
             font.pixelSize: 13
         }

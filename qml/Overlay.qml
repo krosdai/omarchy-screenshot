@@ -132,6 +132,7 @@ Item {
     Rectangle { x: root.holeRight; y: root.holeTop; width: root.width - x; height: root.holeBottom - y; color: "#85000000" }
 
     Rectangle {
+        objectName: "selectionBorder"
         visible: root.activeRect.width > 0 && root.activeRect.height > 0
         x: root.localX
         y: root.localY
@@ -527,6 +528,7 @@ Item {
     }
 
     Rectangle {
+        objectName: "selectionDimensions"
         visible: root.activeRect.width > 0 && root.activeRect.height > 0
         x: Math.max(8, Math.min(root.localX, root.width - width - 8))
         y: Math.max(8, Math.min(root.localY - height - 5, root.height - height - 8))
@@ -545,6 +547,7 @@ Item {
 
     AnnotationToolbar {
         id: annotationToolbar
+        objectName: "annotationToolbar"
         anchors.fill: parent
         z: 10
         toolbarVisible: captureController.selected && captureController.toolbarScreen === root.screenIndex
@@ -555,18 +558,25 @@ Item {
     }
 
     Rectangle {
+        objectName: "statusPanel"
         visible: captureController.status.length > 0
         z: 20
         anchors.horizontalCenter: parent.horizontalCenter
         y: 8
-        width: statusText.contentWidth + 24
-        height: 32
+        width: Math.min(statusText.implicitWidth + 24, root.width - 16)
+        height: statusText.implicitHeight + 16
         radius: 5
         color: "#db9d2735"
         Text {
             id: statusText
+            objectName: "statusText"
             anchors.centerIn: parent
+            width: parent.width - 24
             text: captureController.status
+            textFormat: Text.PlainText
+            wrapMode: Text.Wrap
+            horizontalAlignment: Qt.application.layoutDirection === Qt.RightToLeft
+                                 ? Text.AlignRight : Text.AlignLeft
             color: "white"
         }
     }
@@ -622,7 +632,7 @@ Item {
                             id: windowTitle
                             visible: scrollWindow.width >= 160 && scrollWindow.height >= 76
                             width: parent.width
-                            text: scrollWindow.modelData.title || "窗口 " + (scrollWindow.modelData.index + 1)
+                            text: scrollWindow.modelData.title || qsTr("Window %1").arg(scrollWindow.modelData.index + 1)
                             horizontalAlignment: Text.AlignHCenter
                             elide: Text.ElideRight
                             color: annotationToolbar.toolbarInk
@@ -631,7 +641,7 @@ Item {
                         Text {
                             id: windowAction
                             width: parent.width
-                            text: scrollWindow.width >= 160 ? "点击开始长截图" : "点击"
+                            text: scrollWindow.width >= 160 ? qsTr("Click to start scrolling capture") : qsTr("Click")
                             horizontalAlignment: Text.AlignHCenter
                             color: annotationToolbar.toolbarInk
                             font.pixelSize: 13
@@ -666,7 +676,7 @@ Item {
                 spacing: 5
                 Text {
                     id: hintTitle
-                    text: "点击一个窗口，开始长截图"
+                    text: qsTr("Click a window to start scrolling capture")
                     color: annotationToolbar.toolbarInk
                     font.pixelSize: 15
                     font.bold: true
@@ -674,7 +684,7 @@ Item {
                 Text {
                     id: hintDetail
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "选区包含多个窗口 · Esc 取消"
+                    text: qsTr("The selection contains several windows · Esc to cancel")
                     color: annotationToolbar.toolbarInk
                     font.pixelSize: 12
                 }

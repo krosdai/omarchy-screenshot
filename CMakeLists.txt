@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Qml Quick Test)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Qml Quick Test LinguistTools)
 find_package(LayerShellQt REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(WAYLAND_CLIENT REQUIRED IMPORTED_TARGET wayland-client)
@@ -59,5 +59,30 @@ target_link_libraries(omarchy-screenshot PRIVATE
     PkgConfig::WAYLAND_CLIENT
 )
 target_include_directories(omarchy-screenshot PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+set(screenshot_locales
+    az be bg hr cs da nl et fi fr ka de el he hu is ga it ja kk ky lo
+    lv lt mk nb pl pt_PT pt_BR ro ru sr sk sl es sv tg tr uk zh_CN zh_TW
+)
+foreach(locale IN LISTS screenshot_locales)
+    list(APPEND screenshot_translations "translations/omarchy-screenshot_${locale}.ts")
+endforeach()
+qt_add_translations(omarchy-screenshot
+    TS_FILES ${screenshot_translations}
+    SOURCES src/main.cpp src/capturecontroller.cpp src/virtualpointer.cpp qml/Overlay.qml
+        qml/AnnotationToolbar.qml qml/LongOverlay.qml qml/ScrollCapture.qml
+    LUPDATE_OPTIONS -no-obsolete -locations none
+)
+
+include(CTest)
+if(BUILD_TESTING)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    add_test(NAME translations
+        COMMAND Python3::Interpreter "${CMAKE_CURRENT_SOURCE_DIR}/tests/translations.py"
+            --app $<TARGET_FILE:omarchy-screenshot>
+            --lupdate $<TARGET_FILE:Qt6::lupdate>
+            --source "${CMAKE_CURRENT_SOURCE_DIR}"
+    )
+endif()
 
 install(TARGETS omarchy-screenshot RUNTIME DESTINATION bin)

@@ -94,8 +94,8 @@ Item {
             Text {
                 objectName: "scrollStopHint"
                 text: captureController.scrollAwaitingPane
-                      ? "点击需要滚动的区域" : captureController.scrollStopping
-                      ? "正在生成长图…" : "点击鼠标停止截图"
+                      ? qsTr("Click the area to scroll") : captureController.scrollStopping
+                      ? qsTr("Creating long image…") : qsTr("Click to stop capturing")
                 color: root.ink
                 font.pixelSize: 13
                 anchors.verticalCenter: parent.verticalCenter
@@ -115,7 +115,7 @@ Item {
                         action: "resume"
                         darkMode: captureController.darkToolbar
                     }
-                    Text { text: "继续滚动"; color: root.ink; font.pixelSize: 12 }
+                    Text { text: qsTr("Continue scrolling"); color: root.ink; font.pixelSize: 12 }
                 }
                 MouseArea {
                     anchors.fill: parent
