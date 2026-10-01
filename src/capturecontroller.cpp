@@ -459,6 +459,8 @@ void CaptureController::chooseScrollWindow(int index) {
     }
     m_scrollPoint = m_scrollRegion.center();
     m_scrollStitcher.reset();
+    // Undone marks belong to the regular screenshot, not the long image.
+    m_redoAnnotations.clear();
     setStatus({});
     m_scrollMosaicImage = {};
     m_scrollReviewInitialized = false;
