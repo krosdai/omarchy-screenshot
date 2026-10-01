@@ -105,7 +105,7 @@ Run `./build/omarchy-screenshot --scroll-stitch-test` to check frame stitching, 
 
 To check toolbar interactions offline, including group menus, the palette, theme consistency, and button positions, run `QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME= QT_QUICK_BACKEND=software /usr/lib/qt6/bin/qmltestrunner -input tests`.
 
-To install locally, run `cmake --install build --prefix ~/.local`. The executable is installed at `~/.local/bin/omarchy-screenshot`. To use resident mode from a local install, configure with `-DSYSTEMD_USER_UNIT_DIR=$HOME/.local/share/systemd/user` so systemd finds the units. The app requires a Hyprland Wayland session.
+To install locally, run `cmake --install build --prefix ~/.local`. The executable is installed at `~/.local/bin/omarchy-screenshot`. To use resident mode from a local install, set the prefix when configuring instead, since the service records the executable's path then: `cmake -B build -DCMAKE_INSTALL_PREFIX=$HOME/.local -DSYSTEMD_USER_UNIT_DIR=$HOME/.local/share/systemd/user`, followed by `cmake --install build`. The app requires a Hyprland Wayland session.
 
 ### Resident mode
 
