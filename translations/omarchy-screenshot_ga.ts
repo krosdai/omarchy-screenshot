@@ -4,72 +4,68 @@
     <context>
         <name>AnnotationToolbar</name>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Roghnú: tarraing na hanlaí chun an méid a athrú; méadaíonn na heochracha saighde faoi 1 px, laghdaíonn Shift+eochracha saighde faoi 1 px</translation>
-        </message>
-        <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Dronuilleoga: roghnaigh dronuilleog imlíneach, dronuilleog le coirnéil chruinne nó dronuilleog líonta</translation>
-        </message>
-        <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Éilipsí: roghnaigh éilips imlíneach, éilips líonta nó spotsolas</translation>
-        </message>
-        <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Saigheada: roghnaigh saighead dhíreach, chuartha, dhá cheann nó líne</translation>
-        </message>
-        <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Líníocht: roghnaigh peann nó aibhsitheoir</translation>
-        </message>
-        <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Téacs: cliceáil chun clóscríobh, Shift+Enter le haghaidh líne nua; deimhníonn Alt agus filleann sé ar an uirlis roimhe seo</translation>
-        </message>
-        <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mósáic: tarraing chun limistéar dronuilleogach a roghnú</translation>
-        </message>
-        <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Marcóir uimhrithe: cliceáil chun an chéad uimhir eile a chur</translation>
-        </message>
-        <message>
-            <source>Zoom out of the long image (-)</source>
-            <translation>Zúmáil amach ar an íomhá fhada (-)</translation>
-        </message>
-        <message>
-            <source>Zoom in on the long image (=)</source>
-            <translation>Zúmáil isteach ar an íomhá fhada (=)</translation>
-        </message>
-        <message>
-            <source>Resume (H): keep capturing downward and keep existing annotations</source>
-            <translation>Atosaigh (H): lean den ghabháil síos agus coinnigh na nótaí atá ann cheana</translation>
-        </message>
-        <message>
-            <source>Scrolling capture (H): scroll automatically and stitch a long image</source>
-            <translation>Gabháil le scrollú (H): scrollaigh go huathoibríoch agus fuaigh íomhá fhada le chéile</translation>
-        </message>
-        <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Cealaigh: bain an nóta deireanach</translation>
-        </message>
-        <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Athdhéan: cuir an nóta a cealaíodh ar ais</translation>
-        </message>
-        <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Cóipeáil: cóipeáil an seat scáileáin chuig an ngearrthaisce</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Sábháil: sábháil an seat scáileáin mar PNG</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Roghnú · Méadaíonn na saigheadeochracha, laghdaíonn Shift+saigheadeochracha (1 px)</translation>
         </message>
         <message>
             <source>Rectangle</source>
             <translation>Dronuilleog</translation>
+        </message>
+        <message>
+            <source>Ellipse</source>
+            <translation>Éilips</translation>
+        </message>
+        <message>
+            <source>Arrow</source>
+            <translation>Saighead</translation>
+        </message>
+        <message>
+            <source>Pen</source>
+            <translation>Peann</translation>
+        </message>
+        <message>
+            <source>Text · Click to type</source>
+            <translation>Téacs · Cliceáil chun clóscríobh</translation>
+        </message>
+        <message>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mósáic · Tarraing chun ábhar a cheilt</translation>
+        </message>
+        <message>
+            <source>Number · Click to add</source>
+            <translation>Uimhir · Cliceáil chun cur leis</translation>
+        </message>
+        <message>
+            <source>Zoom out</source>
+            <translation>Zúmáil amach</translation>
+        </message>
+        <message>
+            <source>Zoom in</source>
+            <translation>Zúmáil isteach</translation>
+        </message>
+        <message>
+            <source>Continue capture · Keeps annotations</source>
+            <translation>Lean leis an seat · Coinnítear na nótaí</translation>
+        </message>
+        <message>
+            <source>Scrolling capture</source>
+            <translation>Seat scrollaithe</translation>
+        </message>
+        <message>
+            <source>Undo</source>
+            <translation>Cealaigh</translation>
+        </message>
+        <message>
+            <source>Redo</source>
+            <translation>Athdhéan</translation>
+        </message>
+        <message>
+            <source>Copy screenshot</source>
+            <translation>Cóipeáil an seat scáileáin</translation>
+        </message>
+        <message>
+            <source>Save PNG</source>
+            <translation>Sábháil PNG</translation>
         </message>
         <message>
             <source>Rounded rectangle</source>
@@ -80,20 +76,12 @@
             <translation>Dronuilleog líonta</translation>
         </message>
         <message>
-            <source>Ellipse</source>
-            <translation>Éilips</translation>
-        </message>
-        <message>
             <source>Filled ellipse</source>
             <translation>Éilips líonta</translation>
         </message>
         <message>
             <source>Spotlight</source>
             <translation>Spotsolas</translation>
-        </message>
-        <message>
-            <source>Arrow</source>
-            <translation>Saighead</translation>
         </message>
         <message>
             <source>Curved arrow</source>
@@ -108,24 +96,24 @@
             <translation>Líne</translation>
         </message>
         <message>
-            <source>Pen</source>
-            <translation>Peann</translation>
-        </message>
-        <message>
             <source>Highlighter</source>
             <translation>Aibhsitheoir</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Dath: roghnaigh dath réamhshocraithe nó tarraing ar an bpailéad</translation>
+            <source>Color</source>
+            <translation>Dath</translation>
         </message>
         <message>
-            <source>Light toolbar</source>
-            <translation>Barra uirlisí geal</translation>
+            <source>Light</source>
+            <translation>Geal</translation>
         </message>
         <message>
-            <source>Dark toolbar</source>
-            <translation>Barra uirlisí dorcha</translation>
+            <source>Dark</source>
+            <translation>Dorcha</translation>
+        </message>
+        <message>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: deimhnigh · Shift+Enter: líne nua · Alt: deimhnigh agus fill ar an uirlis roimhe seo</translation>
         </message>
     </context>
     <context>

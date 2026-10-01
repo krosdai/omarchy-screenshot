@@ -4,72 +4,68 @@
     <context>
         <name>AnnotationToolbar</name>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Pasirinkimas: vilkite rankenėles dydžiui keisti; rodyklių klavišai padidina 1 px, Shift+rodyklių klavišai sumažina 1 px</translation>
-        </message>
-        <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Stačiakampiai: pasirinkite kontūrinį, suapvalintą arba užpildytą stačiakampį</translation>
-        </message>
-        <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Elipsės: pasirinkite kontūrinę elipsę, užpildytą elipsę arba išryškinimą</translation>
-        </message>
-        <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Rodyklės: pasirinkite tiesią, lenktą, dvikryptę rodyklę arba liniją</translation>
-        </message>
-        <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Piešimas: pasirinkite rašiklį arba žymeklį</translation>
-        </message>
-        <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Tekstas: spustelėkite norėdami rašyti, Shift+Enter naujai eilutei; Alt patvirtina ir grąžina į ankstesnį įrankį</translation>
-        </message>
-        <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mozaika: vilkite norėdami pasirinkti stačiakampę sritį</translation>
-        </message>
-        <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Numeruota žyma: spustelėkite norėdami įterpti kitą numerį</translation>
-        </message>
-        <message>
-            <source>Zoom out of the long image (-)</source>
-            <translation>Tolinti ilgą vaizdą (-)</translation>
-        </message>
-        <message>
-            <source>Zoom in on the long image (=)</source>
-            <translation>Artinti ilgą vaizdą (=)</translation>
-        </message>
-        <message>
-            <source>Resume (H): keep capturing downward and keep existing annotations</source>
-            <translation>Tęsti (H): toliau fiksuoti žemyn ir išlaikyti esamas anotacijas</translation>
-        </message>
-        <message>
-            <source>Scrolling capture (H): scroll automatically and stitch a long image</source>
-            <translation>Fiksavimas slenkant (H): automatiškai slinkti ir sujungti ilgą vaizdą</translation>
-        </message>
-        <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Atšaukti: pašalinti paskutinę anotaciją</translation>
-        </message>
-        <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Grąžinti: atkurti atšauktą anotaciją</translation>
-        </message>
-        <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Kopijuoti: kopijuoti ekrano kopiją į iškarpinę</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Įrašyti: įrašyti ekrano kopiją PNG formatu</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Pasirinkimas · Rodyklių klavišai didina, Shift+rodyklės mažina (1 px)</translation>
         </message>
         <message>
             <source>Rectangle</source>
             <translation>Stačiakampis</translation>
+        </message>
+        <message>
+            <source>Ellipse</source>
+            <translation>Elipsė</translation>
+        </message>
+        <message>
+            <source>Arrow</source>
+            <translation>Rodyklė</translation>
+        </message>
+        <message>
+            <source>Pen</source>
+            <translation>Rašiklis</translation>
+        </message>
+        <message>
+            <source>Text · Click to type</source>
+            <translation>Tekstas · Spustelėkite ir rašykite</translation>
+        </message>
+        <message>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mozaika · Vilkite turiniui paslėpti</translation>
+        </message>
+        <message>
+            <source>Number · Click to add</source>
+            <translation>Numeris · Spustelėkite ir pridėkite</translation>
+        </message>
+        <message>
+            <source>Zoom out</source>
+            <translation>Mažinti</translation>
+        </message>
+        <message>
+            <source>Zoom in</source>
+            <translation>Didinti</translation>
+        </message>
+        <message>
+            <source>Continue capture · Keeps annotations</source>
+            <translation>Tęsti fiksavimą · Anotacijos išliks</translation>
+        </message>
+        <message>
+            <source>Scrolling capture</source>
+            <translation>Fiksavimas su slinkimu</translation>
+        </message>
+        <message>
+            <source>Undo</source>
+            <translation>Atšaukti</translation>
+        </message>
+        <message>
+            <source>Redo</source>
+            <translation>Grąžinti</translation>
+        </message>
+        <message>
+            <source>Copy screenshot</source>
+            <translation>Kopijuoti ekrano kopiją</translation>
+        </message>
+        <message>
+            <source>Save PNG</source>
+            <translation>Įrašyti PNG</translation>
         </message>
         <message>
             <source>Rounded rectangle</source>
@@ -80,20 +76,12 @@
             <translation>Užpildytas stačiakampis</translation>
         </message>
         <message>
-            <source>Ellipse</source>
-            <translation>Elipsė</translation>
-        </message>
-        <message>
             <source>Filled ellipse</source>
             <translation>Užpildyta elipsė</translation>
         </message>
         <message>
             <source>Spotlight</source>
             <translation>Išryškinimas</translation>
-        </message>
-        <message>
-            <source>Arrow</source>
-            <translation>Rodyklė</translation>
         </message>
         <message>
             <source>Curved arrow</source>
@@ -108,24 +96,24 @@
             <translation>Linija</translation>
         </message>
         <message>
-            <source>Pen</source>
-            <translation>Rašiklis</translation>
-        </message>
-        <message>
             <source>Highlighter</source>
             <translation>Žymeklis</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Spalva: pasirinkite iš anksto nustatytą spalvą arba vilkite paletėje</translation>
+            <source>Color</source>
+            <translation>Spalva</translation>
         </message>
         <message>
-            <source>Light toolbar</source>
-            <translation>Šviesi įrankių juosta</translation>
+            <source>Light</source>
+            <translation>Šviesi</translation>
         </message>
         <message>
-            <source>Dark toolbar</source>
-            <translation>Tamsi įrankių juosta</translation>
+            <source>Dark</source>
+            <translation>Tamsi</translation>
+        </message>
+        <message>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: patvirtinti · Shift+Enter: nauja eilutė · Alt: patvirtinti ir grįžti prie ankstesnio įrankio</translation>
         </message>
     </context>
     <context>

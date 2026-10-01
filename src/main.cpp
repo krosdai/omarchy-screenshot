@@ -1500,8 +1500,9 @@ int main(int argc, char **argv) {
             views[0]->rootObject()->property("toolbarTooltipText").toString();
         hoverDescriptionWorked =
             mosaicTooltip == QCoreApplication::translate(
-                "AnnotationToolbar", "Mosaic: drag to select a rectangular area") &&
-            textTooltip.contains(QStringLiteral("Alt"));
+                "AnnotationToolbar", "Mosaic · Drag to redact") &&
+            textTooltip == QCoreApplication::translate(
+                "AnnotationToolbar", "Text · Click to type");
         if (!hoverDescriptionWorked)
           QTextStream(stdout) << "Tooltip diagnostic: text=" << textTooltip
                               << " mosaic=" << mosaicTooltip << "\n";
@@ -1763,9 +1764,10 @@ int main(int argc, char **argv) {
       auto *toolbarHost =
           root->findChild<QQuickItem *>(QStringLiteral("annotationToolbar"));
       bool translationLayoutWorked = toolbar && tooltip && label && toolbarHost;
+      bool contextualTextHintWorked = false;
       if (translationLayoutWorked) {
         toolbarHost->setProperty("toolbarTooltipText", QCoreApplication::translate(
-            "AnnotationToolbar", "Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px"));
+            "AnnotationToolbar", "Selection · Arrow keys expand, Shift+arrows shrink (1 px)"));
         toolbarHost->setProperty("toolbarTooltipX", 190);
         toolbarHost->setProperty("toolbarTooltipY", toolbar->y());
         toolbarHost->setProperty("toolbarTooltipVisible", true);
@@ -1838,6 +1840,60 @@ int main(int argc, char **argv) {
                 QDir(artifacts).filePath(uiLocale.name() + QStringLiteral("-status.png")));
           }
         }
+
+        // The editing hint must replace hover text, wrap at the edges and disappear
+        // on both confirmation paths. Enter stays in text mode; Alt returns to pen.
+        contextualTextHintWorked = textEditor != nullptr;
+        if (textEditor) {
+          controller.setTool(QStringLiteral("pen"));
+          controller.setTool(QStringLiteral("text"));
+          toolbarHost->setProperty("toolbarTooltipVisible", false);
+          const int originalScreenIndex = root->property("screenIndex").toInt();
+          for (const QPointF position : {QPointF(12, 20), QPointF(370, 350)}) {
+            // Simulate editing on an output that does not own the toolbar.
+            previewRoot->setProperty("screenIndex", position.x() == 12 ? originalScreenIndex : -1);
+            previewRoot->setProperty("textX", position.x());
+            previewRoot->setProperty("textY", position.y());
+            textEditor->setVisible(true);
+            QTest::qWait(50);
+            contextualTextHintWorked &= tooltip->isVisible() &&
+                toolbar->isVisible() == (position.x() == 12) &&
+                label->property("text").toString() == QCoreApplication::translate(
+                    "AnnotationToolbar", "Enter: confirm · Shift+Enter: new line · Alt: confirm & return to previous tool") &&
+                tooltip->x() >= 8 && tooltip->x() + tooltip->width() <= previewRoot->width() - 8 &&
+                tooltip->y() >= 8 && tooltip->y() + tooltip->height() <= previewRoot->height() - 8 &&
+                label->property("contentWidth").toReal() <= label->width() + 1 &&
+                !QRectF(tooltip->position(), tooltip->size()).intersects(
+                    QRectF(textEditor->position(), textEditor->size()));
+            if (!artifacts.isEmpty() && position.x() == 370) {
+              auto grab = previewRoot->grabToImage();
+              QSignalSpy ready(grab.get(), &QQuickItemGrabResult::ready);
+              if (ready.wait(1000)) {
+                const qreal scale = grab->image().width() / previewRoot->width();
+                const QRectF crop = QRectF(tooltip->position(), tooltip->size()).united(
+                    QRectF(textEditor->position(), textEditor->size())).adjusted(-6, -6, 6, 6);
+                contextualTextHintWorked &= grab->image().copy(
+                    QRectF(crop.topLeft() * scale, crop.size() * scale).toAlignedRect()).save(
+                        QDir(artifacts).filePath(uiLocale.name() + QStringLiteral("-editing.png")));
+              } else {
+                contextualTextHintWorked = false;
+              }
+            }
+          }
+          previewRoot->setProperty("screenIndex", originalScreenIndex);
+          auto *input = root->findChild<QQuickItem *>(QStringLiteral("textEditorInput"));
+          input->forceActiveFocus();
+          QKeyEvent enter(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier);
+          QCoreApplication::sendEvent(views[0].get(), &enter);
+          contextualTextHintWorked &= !textEditor->isVisible() && !tooltip->isVisible() &&
+              controller.tool() == QStringLiteral("text");
+          textEditor->setVisible(true);
+          input->forceActiveFocus();
+          QKeyEvent alt(QEvent::KeyPress, Qt::Key_Alt, Qt::AltModifier);
+          QCoreApplication::sendEvent(views[0].get(), &alt);
+          contextualTextHintWorked &= !textEditor->isVisible() && !tooltip->isVisible() &&
+              controller.tool() == QStringLiteral("pen");
+        }
       }
       QTextStream(stdout) << "Mosaic preview: " << mosaicVisible
                           << ", toolbar: " << toolbarWorked
@@ -1884,7 +1940,8 @@ int main(int argc, char **argv) {
                           << ", editor focused: " << editorFocused
                           << ", captures ready: " << capturesReady
                           << ", double-click copy: " << doubleClickCopied
-                          << ", translation layout: " << translationLayoutWorked << "\n";
+                          << ", translation layout: " << translationLayoutWorked
+                          << ", contextual text hint: " << contextualTextHintWorked << "\n";
       app.exit(mosaicVisible && toolbarWorked && toolbarOrderWorked &&
                        groupedToolbarWorked && redoShortcutWorked &&
                        escapeCloses &&
@@ -1907,7 +1964,7 @@ int main(int argc, char **argv) {
                        editorBorderDashed && editorBackgroundTransparent &&
                        previewRowsCentered && exportedTextRows &&
                        editorFocused && capturesReady && doubleClickCopied &&
-                       translationLayoutWorked
+                       translationLayoutWorked && contextualTextHintWorked
                    ? 0
                    : 2);
     });

@@ -17,30 +17,33 @@ Item {
     property real toolbarTooltipX: 0
     property real toolbarTooltipY: 0
     property bool toolbarTooltipVisible: false
+    // While text is being edited the tooltip shows editing keys beside it.
+    property bool editing: false
+    property rect editorRect: Qt.rect(0, 0, 0, 0)
     signal commitRequested()
     signal focusRequested()
     signal zoomRequested(real factor)
 
     readonly property var actions: [
-        {key: "V", action: "select", hint: qsTr("Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px")},
-        {key: "R", action: "rect_group", hint: qsTr("Rectangles: choose an outline, rounded or filled rectangle")},
-        {key: "E", action: "ellipse_group", hint: qsTr("Ellipses: choose an outline, filled ellipse or spotlight")},
-        {key: "A", action: "arrow_group", hint: qsTr("Arrows: choose a straight, curved, double-headed arrow or line")},
-        {key: "D", action: "pen_group", hint: qsTr("Drawing: choose a pen or highlighter")},
-        {key: "T", action: "text", hint: qsTr("Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool")},
-        {key: "G", action: "mosaic", hint: qsTr("Mosaic: drag to select a rectangular area")},
-        {key: "B", action: "marker", hint: qsTr("Numbered marker: click to place the next number")}
+        {key: "V", action: "select", hint: qsTr("Selection · Arrow keys expand, Shift+arrows shrink (1 px)")},
+        {key: "R", action: "rect_group", hint: qsTr("Rectangle")},
+        {key: "E", action: "ellipse_group", hint: qsTr("Ellipse")},
+        {key: "A", action: "arrow_group", hint: qsTr("Arrow")},
+        {key: "D", action: "pen_group", hint: qsTr("Pen")},
+        {key: "T", action: "text", hint: qsTr("Text · Click to type")},
+        {key: "G", action: "mosaic", hint: qsTr("Mosaic · Drag to redact")},
+        {key: "B", action: "marker", hint: qsTr("Number · Click to add")}
     ].concat(longImage ? [
-        {key: "-", action: "zoom_out", hint: qsTr("Zoom out of the long image (-)")},
-        {key: "=", action: "zoom_in", hint: qsTr("Zoom in on the long image (=)")},
-        {key: "H", action: "resume", hint: qsTr("Resume (H): keep capturing downward and keep existing annotations")}
+        {key: "-", action: "zoom_out", hint: qsTr("Zoom out")},
+        {key: "=", action: "zoom_in", hint: qsTr("Zoom in")},
+        {key: "H", action: "resume", hint: qsTr("Continue capture · Keeps annotations")}
     ] : [
-        {key: "H", action: "scroll", hint: qsTr("Scrolling capture (H): scroll automatically and stitch a long image")}
+        {key: "H", action: "scroll", hint: qsTr("Scrolling capture")}
     ]).concat([
-        {key: "Z", action: "undo", hint: qsTr("Undo: remove the last annotation")},
-        {key: "X", action: "redo", hint: qsTr("Redo: restore the undone annotation")},
-        {key: "C", action: "copy", hint: qsTr("Copy: copy the screenshot to the clipboard")},
-        {key: "S", action: "save", hint: qsTr("Save: save the screenshot as PNG")}
+        {key: "Z", action: "undo", hint: qsTr("Undo")},
+        {key: "X", action: "redo", hint: qsTr("Redo")},
+        {key: "C", action: "copy", hint: qsTr("Copy screenshot")},
+        {key: "S", action: "save", hint: qsTr("Save PNG")}
     ])
     readonly property real contentWidth: 64 + actions.reduce(
         (total, action) => total + (buttonWidth(action) > 0 ? buttonWidth(action) + 2 : 0), 0)
@@ -291,7 +294,7 @@ Item {
                     id: colorButtonMouse
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered: root.showToolbarTooltip(qsTr("Color: choose a preset or drag the palette"), colorButtonMouse)
+                    onEntered: root.showToolbarTooltip(qsTr("Color"), colorButtonMouse)
                     onExited: root.hideToolbarTooltip()
                     onClicked: {
                         root.hideToolbarTooltip()
@@ -531,8 +534,8 @@ Item {
                     Repeater {
                         id: themeRepeater
                         model: [
-                            {action: "theme_light", dark: false, hint: qsTr("Light toolbar")},
-                            {action: "theme_dark", dark: true, hint: qsTr("Dark toolbar")}
+                            {action: "theme_light", dark: false, hint: qsTr("Light")},
+                            {action: "theme_dark", dark: true, hint: qsTr("Dark")}
                         ]
                         delegate: Rectangle {
                             required property var modelData
@@ -711,15 +714,17 @@ Item {
     Rectangle {
         id: toolbarTooltip
         objectName: "toolbarTooltip"
-        visible: root.toolbarTooltipVisible && toolbar.visible
+        visible: (root.toolbarTooltipVisible && toolbar.visible) || root.editing
         z: 30
         width: Math.min(tooltipLabel.implicitWidth + 20, root.width - 16)
         height: tooltipLabel.implicitHeight + 12
-        x: Math.max(8, Math.min(root.toolbarTooltipX - width / 2,
+        readonly property real anchorX: root.editing ? root.editorRect.x + root.editorRect.width / 2 : root.toolbarTooltipX
+        readonly property real anchorY: root.editing ? root.editorRect.y : root.toolbarTooltipY
+        x: Math.max(8, Math.min(anchorX - width / 2,
                                 root.width - width - 8))
-        y: root.toolbarTooltipY - height - 8 >= 8
-           ? root.toolbarTooltipY - height - 8
-           : root.toolbarTooltipY + 40
+        y: anchorY - height - 8 >= 8
+           ? anchorY - height - 8
+           : anchorY + (root.editing ? root.editorRect.height + 8 : 40)
         radius: 5
         color: "#f0202734"
         border.color: "#748090"
@@ -728,7 +733,9 @@ Item {
             objectName: "tooltipLabel"
             anchors.centerIn: parent
             width: parent.width - 20
-            text: root.toolbarTooltipText
+            text: root.editing
+                  ? qsTr("Enter: confirm · Shift+Enter: new line · Alt: confirm & return to previous tool")
+                  : root.toolbarTooltipText
             textFormat: Text.PlainText
             wrapMode: Text.Wrap
             horizontalAlignment: Qt.application.layoutDirection === Qt.RightToLeft

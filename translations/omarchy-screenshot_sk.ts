@@ -4,72 +4,68 @@
     <context>
         <name>AnnotationToolbar</name>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Výber: ťahaním úchytov zmeňte veľkosť; klávesy so šípkami zväčšujú o 1 px, Shift+klávesy so šípkami zmenšujú o 1 px</translation>
-        </message>
-        <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Obdĺžniky: vyberte obrysový, zaoblený alebo vyplnený obdĺžnik</translation>
-        </message>
-        <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Elipsy: vyberte obrysovú elipsu, vyplnenú elipsu alebo zvýraznenie oblasti</translation>
-        </message>
-        <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Šípky: vyberte rovnú, zakrivenú, obojsmernú šípku alebo čiaru</translation>
-        </message>
-        <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Kreslenie: vyberte pero alebo zvýrazňovač</translation>
-        </message>
-        <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Text: kliknutím začnite písať, Shift+Enter vloží nový riadok; Alt potvrdí a vráti sa k predchádzajúcemu nástroju</translation>
-        </message>
-        <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mozaika: ťahaním vyberte obdĺžnikovú oblasť</translation>
-        </message>
-        <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Číslovaná značka: kliknutím umiestnite ďalšie číslo</translation>
-        </message>
-        <message>
-            <source>Zoom out of the long image (-)</source>
-            <translation>Oddialiť dlhý obrázok (-)</translation>
-        </message>
-        <message>
-            <source>Zoom in on the long image (=)</source>
-            <translation>Priblížiť dlhý obrázok (=)</translation>
-        </message>
-        <message>
-            <source>Resume (H): keep capturing downward and keep existing annotations</source>
-            <translation>Pokračovať (H): snímať ďalej smerom nadol a zachovať existujúce anotácie</translation>
-        </message>
-        <message>
-            <source>Scrolling capture (H): scroll automatically and stitch a long image</source>
-            <translation>Snímka s posúvaním (H): automaticky posúvať a zostaviť dlhý obrázok</translation>
-        </message>
-        <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Späť: odstrániť poslednú anotáciu</translation>
-        </message>
-        <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Znova: obnoviť vrátenú anotáciu</translation>
-        </message>
-        <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Kopírovať: skopírovať snímku obrazovky do schránky</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Uložiť: uložiť snímku obrazovky ako PNG</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Výber · Šípky zväčšujú, Shift+šípky zmenšujú (1 px)</translation>
         </message>
         <message>
             <source>Rectangle</source>
             <translation>Obdĺžnik</translation>
+        </message>
+        <message>
+            <source>Ellipse</source>
+            <translation>Elipsa</translation>
+        </message>
+        <message>
+            <source>Arrow</source>
+            <translation>Šípka</translation>
+        </message>
+        <message>
+            <source>Pen</source>
+            <translation>Pero</translation>
+        </message>
+        <message>
+            <source>Text · Click to type</source>
+            <translation>Text · Kliknutím začnite písať</translation>
+        </message>
+        <message>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mozaika · Ťahaním skryte obsah</translation>
+        </message>
+        <message>
+            <source>Number · Click to add</source>
+            <translation>Číslo · Kliknutím pridajte</translation>
+        </message>
+        <message>
+            <source>Zoom out</source>
+            <translation>Oddialiť</translation>
+        </message>
+        <message>
+            <source>Zoom in</source>
+            <translation>Priblížiť</translation>
+        </message>
+        <message>
+            <source>Continue capture · Keeps annotations</source>
+            <translation>Pokračovať v snímaní · Zachová anotácie</translation>
+        </message>
+        <message>
+            <source>Scrolling capture</source>
+            <translation>Snímanie s posúvaním</translation>
+        </message>
+        <message>
+            <source>Undo</source>
+            <translation>Späť</translation>
+        </message>
+        <message>
+            <source>Redo</source>
+            <translation>Znova</translation>
+        </message>
+        <message>
+            <source>Copy screenshot</source>
+            <translation>Kopírovať snímku obrazovky</translation>
+        </message>
+        <message>
+            <source>Save PNG</source>
+            <translation>Uložiť PNG</translation>
         </message>
         <message>
             <source>Rounded rectangle</source>
@@ -80,20 +76,12 @@
             <translation>Vyplnený obdĺžnik</translation>
         </message>
         <message>
-            <source>Ellipse</source>
-            <translation>Elipsa</translation>
-        </message>
-        <message>
             <source>Filled ellipse</source>
             <translation>Vyplnená elipsa</translation>
         </message>
         <message>
             <source>Spotlight</source>
             <translation>Zvýraznenie oblasti</translation>
-        </message>
-        <message>
-            <source>Arrow</source>
-            <translation>Šípka</translation>
         </message>
         <message>
             <source>Curved arrow</source>
@@ -108,24 +96,24 @@
             <translation>Čiara</translation>
         </message>
         <message>
-            <source>Pen</source>
-            <translation>Pero</translation>
-        </message>
-        <message>
             <source>Highlighter</source>
             <translation>Zvýrazňovač</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Farba: vyberte prednastavenú farbu alebo ťahajte po palete</translation>
+            <source>Color</source>
+            <translation>Farba</translation>
         </message>
         <message>
-            <source>Light toolbar</source>
-            <translation>Svetlá lišta nástrojov</translation>
+            <source>Light</source>
+            <translation>Svetlé</translation>
         </message>
         <message>
-            <source>Dark toolbar</source>
-            <translation>Tmavá lišta nástrojov</translation>
+            <source>Dark</source>
+            <translation>Tmavé</translation>
+        </message>
+        <message>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: potvrdiť · Shift+Enter: nový riadok · Alt: potvrdiť a vrátiť sa k predchádzajúcemu nástroju</translation>
         </message>
     </context>
     <context>

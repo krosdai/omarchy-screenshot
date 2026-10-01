@@ -4,72 +4,68 @@
     <context>
         <name>AnnotationToolbar</name>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Выделение: перетаскивайте маркеры для изменения размера; клавиши со стрелками увеличивают на 1 px, Shift+клавиши со стрелками уменьшают на 1 px</translation>
-        </message>
-        <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Прямоугольники: выберите контурный, скруглённый или закрашенный прямоугольник</translation>
-        </message>
-        <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Эллипсы: выберите контурный эллипс, закрашенный эллипс или подсветку</translation>
-        </message>
-        <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Стрелки: выберите прямую, изогнутую, двустороннюю стрелку или линию</translation>
-        </message>
-        <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Рисование: выберите перо или маркер</translation>
-        </message>
-        <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Текст: щёлкните для ввода, Shift+Enter — новая строка; Alt подтверждает ввод и возвращает к предыдущему инструменту</translation>
-        </message>
-        <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Мозаика: перетащите указатель, чтобы выделить прямоугольную область</translation>
-        </message>
-        <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Нумерованная метка: щёлкните, чтобы разместить следующий номер</translation>
-        </message>
-        <message>
-            <source>Zoom out of the long image (-)</source>
-            <translation>Уменьшить масштаб длинного изображения (-)</translation>
-        </message>
-        <message>
-            <source>Zoom in on the long image (=)</source>
-            <translation>Увеличить масштаб длинного изображения (=)</translation>
-        </message>
-        <message>
-            <source>Resume (H): keep capturing downward and keep existing annotations</source>
-            <translation>Продолжить (H): снимать дальше вниз, сохранив существующие аннотации</translation>
-        </message>
-        <message>
-            <source>Scrolling capture (H): scroll automatically and stitch a long image</source>
-            <translation>Снимок с прокруткой (H): автоматически прокрутить и склеить длинное изображение</translation>
-        </message>
-        <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Отменить: удалить последнюю аннотацию</translation>
-        </message>
-        <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Повторить: восстановить отменённую аннотацию</translation>
-        </message>
-        <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Копировать: скопировать снимок экрана в буфер обмена</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Сохранить: сохранить снимок экрана в формате PNG</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Выделение · Стрелки расширяют, Shift+стрелки сужают (1 px)</translation>
         </message>
         <message>
             <source>Rectangle</source>
             <translation>Прямоугольник</translation>
+        </message>
+        <message>
+            <source>Ellipse</source>
+            <translation>Эллипс</translation>
+        </message>
+        <message>
+            <source>Arrow</source>
+            <translation>Стрелка</translation>
+        </message>
+        <message>
+            <source>Pen</source>
+            <translation>Перо</translation>
+        </message>
+        <message>
+            <source>Text · Click to type</source>
+            <translation>Текст · Щёлкните для ввода</translation>
+        </message>
+        <message>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Мозаика · Потяните, чтобы скрыть</translation>
+        </message>
+        <message>
+            <source>Number · Click to add</source>
+            <translation>Номер · Щёлкните для добавления</translation>
+        </message>
+        <message>
+            <source>Zoom out</source>
+            <translation>Уменьшить</translation>
+        </message>
+        <message>
+            <source>Zoom in</source>
+            <translation>Увеличить</translation>
+        </message>
+        <message>
+            <source>Continue capture · Keeps annotations</source>
+            <translation>Продолжить съёмку · Аннотации сохранятся</translation>
+        </message>
+        <message>
+            <source>Scrolling capture</source>
+            <translation>Снимок с прокруткой</translation>
+        </message>
+        <message>
+            <source>Undo</source>
+            <translation>Отменить</translation>
+        </message>
+        <message>
+            <source>Redo</source>
+            <translation>Повторить</translation>
+        </message>
+        <message>
+            <source>Copy screenshot</source>
+            <translation>Копировать снимок экрана</translation>
+        </message>
+        <message>
+            <source>Save PNG</source>
+            <translation>Сохранить PNG</translation>
         </message>
         <message>
             <source>Rounded rectangle</source>
@@ -80,20 +76,12 @@
             <translation>Закрашенный прямоугольник</translation>
         </message>
         <message>
-            <source>Ellipse</source>
-            <translation>Эллипс</translation>
-        </message>
-        <message>
             <source>Filled ellipse</source>
             <translation>Закрашенный эллипс</translation>
         </message>
         <message>
             <source>Spotlight</source>
             <translation>Подсветка</translation>
-        </message>
-        <message>
-            <source>Arrow</source>
-            <translation>Стрелка</translation>
         </message>
         <message>
             <source>Curved arrow</source>
@@ -108,24 +96,24 @@
             <translation>Линия</translation>
         </message>
         <message>
-            <source>Pen</source>
-            <translation>Перо</translation>
-        </message>
-        <message>
             <source>Highlighter</source>
             <translation>Маркер</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Цвет: выберите готовый цвет или перетащите указатель по палитре</translation>
+            <source>Color</source>
+            <translation>Цвет</translation>
         </message>
         <message>
-            <source>Light toolbar</source>
-            <translation>Светлая панель инструментов</translation>
+            <source>Light</source>
+            <translation>Светлая</translation>
         </message>
         <message>
-            <source>Dark toolbar</source>
-            <translation>Тёмная панель инструментов</translation>
+            <source>Dark</source>
+            <translation>Тёмная</translation>
+        </message>
+        <message>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: подтвердить · Shift+Enter: новая строка · Alt: подтвердить и вернуться к предыдущему инструменту</translation>
         </message>
     </context>
     <context>

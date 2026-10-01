@@ -4,72 +4,68 @@
     <context>
         <name>AnnotationToolbar</name>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Selecție: trageți mânerele pentru redimensionare; tastele săgeți măresc cu 1 px, Shift+tastele săgeți micșorează cu 1 px</translation>
-        </message>
-        <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Dreptunghiuri: alegeți un dreptunghi cu contur, rotunjit sau umplut</translation>
-        </message>
-        <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Elipse: alegeți o elipsă cu contur, o elipsă umplută sau evidențierea</translation>
-        </message>
-        <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Săgeți: alegeți o săgeată dreaptă, curbată, cu două capete sau o linie</translation>
-        </message>
-        <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Desen: alegeți un stilou sau un marker</translation>
-        </message>
-        <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Text: faceți clic pentru a scrie, Shift+Enter pentru un rând nou; Alt confirmă și revine la instrumentul anterior</translation>
-        </message>
-        <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mozaic: trageți pentru a selecta o zonă dreptunghiulară</translation>
-        </message>
-        <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Marcaj numerotat: faceți clic pentru a plasa următorul număr</translation>
-        </message>
-        <message>
-            <source>Zoom out of the long image (-)</source>
-            <translation>Micșorare imagine lungă (-)</translation>
-        </message>
-        <message>
-            <source>Zoom in on the long image (=)</source>
-            <translation>Mărire imagine lungă (=)</translation>
-        </message>
-        <message>
-            <source>Resume (H): keep capturing downward and keep existing annotations</source>
-            <translation>Reluare (H): continuați captura în jos și păstrați adnotările existente</translation>
-        </message>
-        <message>
-            <source>Scrolling capture (H): scroll automatically and stitch a long image</source>
-            <translation>Captură cu derulare (H): derulați automat și îmbinați totul într-o imagine lungă</translation>
-        </message>
-        <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Anulare: eliminați ultima adnotare</translation>
-        </message>
-        <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Refacere: restabiliți adnotarea anulată</translation>
-        </message>
-        <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Copiere: copiați captura de ecran în clipboard</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Salvare: salvați captura de ecran ca PNG</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Selecție · Săgețile măresc, Shift+săgeți micșorează (1 px)</translation>
         </message>
         <message>
             <source>Rectangle</source>
             <translation>Dreptunghi</translation>
+        </message>
+        <message>
+            <source>Ellipse</source>
+            <translation>Elipsă</translation>
+        </message>
+        <message>
+            <source>Arrow</source>
+            <translation>Săgeată</translation>
+        </message>
+        <message>
+            <source>Pen</source>
+            <translation>Stilou</translation>
+        </message>
+        <message>
+            <source>Text · Click to type</source>
+            <translation>Text · Clic pentru a scrie</translation>
+        </message>
+        <message>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mozaic · Trageți pentru a ascunde conținutul</translation>
+        </message>
+        <message>
+            <source>Number · Click to add</source>
+            <translation>Număr · Clic pentru a adăuga</translation>
+        </message>
+        <message>
+            <source>Zoom out</source>
+            <translation>Micșorare</translation>
+        </message>
+        <message>
+            <source>Zoom in</source>
+            <translation>Mărire</translation>
+        </message>
+        <message>
+            <source>Continue capture · Keeps annotations</source>
+            <translation>Continuați captura · Păstrează adnotările</translation>
+        </message>
+        <message>
+            <source>Scrolling capture</source>
+            <translation>Captură cu derulare</translation>
+        </message>
+        <message>
+            <source>Undo</source>
+            <translation>Anulare</translation>
+        </message>
+        <message>
+            <source>Redo</source>
+            <translation>Refacere</translation>
+        </message>
+        <message>
+            <source>Copy screenshot</source>
+            <translation>Copiați captura de ecran</translation>
+        </message>
+        <message>
+            <source>Save PNG</source>
+            <translation>Salvați PNG</translation>
         </message>
         <message>
             <source>Rounded rectangle</source>
@@ -80,20 +76,12 @@
             <translation>Dreptunghi umplut</translation>
         </message>
         <message>
-            <source>Ellipse</source>
-            <translation>Elipsă</translation>
-        </message>
-        <message>
             <source>Filled ellipse</source>
             <translation>Elipsă umplută</translation>
         </message>
         <message>
             <source>Spotlight</source>
             <translation>Evidențiere</translation>
-        </message>
-        <message>
-            <source>Arrow</source>
-            <translation>Săgeată</translation>
         </message>
         <message>
             <source>Curved arrow</source>
@@ -108,24 +96,24 @@
             <translation>Linie</translation>
         </message>
         <message>
-            <source>Pen</source>
-            <translation>Stilou</translation>
-        </message>
-        <message>
             <source>Highlighter</source>
             <translation>Marker</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Culoare: alegeți o culoare predefinită sau trageți pe paletă</translation>
+            <source>Color</source>
+            <translation>Culoare</translation>
         </message>
         <message>
-            <source>Light toolbar</source>
-            <translation>Bară de instrumente deschisă la culoare</translation>
+            <source>Light</source>
+            <translation>Deschis</translation>
         </message>
         <message>
-            <source>Dark toolbar</source>
-            <translation>Bară de instrumente închisă la culoare</translation>
+            <source>Dark</source>
+            <translation>Închis</translation>
+        </message>
+        <message>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: confirmare · Shift+Enter: rând nou · Alt: confirmare și revenire la instrumentul anterior</translation>
         </message>
     </context>
     <context>

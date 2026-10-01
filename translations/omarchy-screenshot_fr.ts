@@ -4,72 +4,68 @@
     <context>
         <name>AnnotationToolbar</name>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Sélection : faites glisser les poignées pour redimensionner ; les touches fléchées agrandissent de 1 px, Shift+touches fléchées réduisent de 1 px</translation>
-        </message>
-        <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Rectangles : choisissez un rectangle avec contour, arrondi ou plein</translation>
-        </message>
-        <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Ellipses : choisissez une ellipse avec contour, une ellipse pleine ou une mise en lumière</translation>
-        </message>
-        <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Flèches : choisissez une flèche droite, courbe, à deux pointes ou une ligne</translation>
-        </message>
-        <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Dessin : choisissez un stylo ou un surligneur</translation>
-        </message>
-        <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Texte : cliquez pour saisir, Shift+Enter pour une nouvelle ligne ; Alt confirme et revient à l’outil précédent</translation>
-        </message>
-        <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mosaïque : faites glisser pour sélectionner une zone rectangulaire</translation>
-        </message>
-        <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Repère numéroté : cliquez pour placer le numéro suivant</translation>
-        </message>
-        <message>
-            <source>Zoom out of the long image (-)</source>
-            <translation>Zoom arrière sur l’image longue (-)</translation>
-        </message>
-        <message>
-            <source>Zoom in on the long image (=)</source>
-            <translation>Zoom avant sur l’image longue (=)</translation>
-        </message>
-        <message>
-            <source>Resume (H): keep capturing downward and keep existing annotations</source>
-            <translation>Reprendre (H) : poursuivez la capture vers le bas en conservant les annotations existantes</translation>
-        </message>
-        <message>
-            <source>Scrolling capture (H): scroll automatically and stitch a long image</source>
-            <translation>Capture par défilement (H) : faites défiler automatiquement et assemblez une image longue</translation>
-        </message>
-        <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Annuler : supprimez la dernière annotation</translation>
-        </message>
-        <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Rétablir : restaurez l’annotation annulée</translation>
-        </message>
-        <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Copier : copiez la capture d’écran dans le presse-papiers</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Enregistrer : enregistrez la capture d’écran au format PNG</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Sélection · Les flèches agrandissent, Shift+flèches réduisent (1 px)</translation>
         </message>
         <message>
             <source>Rectangle</source>
             <translation>Rectangle</translation>
+        </message>
+        <message>
+            <source>Ellipse</source>
+            <translation>Ellipse</translation>
+        </message>
+        <message>
+            <source>Arrow</source>
+            <translation>Flèche</translation>
+        </message>
+        <message>
+            <source>Pen</source>
+            <translation>Stylo</translation>
+        </message>
+        <message>
+            <source>Text · Click to type</source>
+            <translation>Texte · Cliquez pour saisir</translation>
+        </message>
+        <message>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mosaïque · Faites glisser pour masquer</translation>
+        </message>
+        <message>
+            <source>Number · Click to add</source>
+            <translation>Numéro · Cliquez pour ajouter</translation>
+        </message>
+        <message>
+            <source>Zoom out</source>
+            <translation>Zoom arrière</translation>
+        </message>
+        <message>
+            <source>Zoom in</source>
+            <translation>Zoom avant</translation>
+        </message>
+        <message>
+            <source>Continue capture · Keeps annotations</source>
+            <translation>Poursuivre la capture · Annotations conservées</translation>
+        </message>
+        <message>
+            <source>Scrolling capture</source>
+            <translation>Capture défilante</translation>
+        </message>
+        <message>
+            <source>Undo</source>
+            <translation>Annuler</translation>
+        </message>
+        <message>
+            <source>Redo</source>
+            <translation>Rétablir</translation>
+        </message>
+        <message>
+            <source>Copy screenshot</source>
+            <translation>Copier la capture d’écran</translation>
+        </message>
+        <message>
+            <source>Save PNG</source>
+            <translation>Enregistrer en PNG</translation>
         </message>
         <message>
             <source>Rounded rectangle</source>
@@ -80,20 +76,12 @@
             <translation>Rectangle plein</translation>
         </message>
         <message>
-            <source>Ellipse</source>
-            <translation>Ellipse</translation>
-        </message>
-        <message>
             <source>Filled ellipse</source>
             <translation>Ellipse pleine</translation>
         </message>
         <message>
             <source>Spotlight</source>
             <translation>Mise en lumière</translation>
-        </message>
-        <message>
-            <source>Arrow</source>
-            <translation>Flèche</translation>
         </message>
         <message>
             <source>Curved arrow</source>
@@ -108,24 +96,24 @@
             <translation>Ligne</translation>
         </message>
         <message>
-            <source>Pen</source>
-            <translation>Stylo</translation>
-        </message>
-        <message>
             <source>Highlighter</source>
             <translation>Surligneur</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Couleur : choisissez une couleur prédéfinie ou faites glisser sur la palette</translation>
+            <source>Color</source>
+            <translation>Couleur</translation>
         </message>
         <message>
-            <source>Light toolbar</source>
-            <translation>Barre d’outils claire</translation>
+            <source>Light</source>
+            <translation>Clair</translation>
         </message>
         <message>
-            <source>Dark toolbar</source>
-            <translation>Barre d’outils sombre</translation>
+            <source>Dark</source>
+            <translation>Sombre</translation>
+        </message>
+        <message>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter : confirmer · Shift+Enter : nouvelle ligne · Alt : confirmer et revenir à l’outil précédent</translation>
         </message>
     </context>
     <context>

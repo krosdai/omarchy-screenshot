@@ -4,72 +4,68 @@
     <context>
         <name>AnnotationToolbar</name>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Тандоо: өлчөмүн өзгөртүү үчүн туткаларды сүйрөңүз; жебе баскычтары 1 px чоңойтот, Shift+жебе баскычтары 1 px кичирейтет</translation>
-        </message>
-        <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Тик бурчтуктар: контурлуу, бурчтары тегеректелген же боёлгон тик бурчтукту тандаңыз</translation>
-        </message>
-        <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Эллипстер: контурлуу эллипсти, боёлгон эллипсти же бөлүп көрсөтүүнү тандаңыз</translation>
-        </message>
-        <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Жебелер: түз, ийри, эки учтуу жебени же сызыкты тандаңыз</translation>
-        </message>
-        <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Сүрөт тартуу: калемди же маркерди тандаңыз</translation>
-        </message>
-        <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Текст: жазуу үчүн чыкылдатыңыз, жаңы сап үчүн Shift+Enter; Alt ырастап, мурунку куралга кайтарат</translation>
-        </message>
-        <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Мозаика: тик бурчтуу аймакты тандоо үчүн сүйрөңүз</translation>
-        </message>
-        <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Номерленген белги: кийинки номерди коюу үчүн чыкылдатыңыз</translation>
-        </message>
-        <message>
-            <source>Zoom out of the long image (-)</source>
-            <translation>Узун сүрөттү кичирейтүү (-)</translation>
-        </message>
-        <message>
-            <source>Zoom in on the long image (=)</source>
-            <translation>Узун сүрөттү чоңойтуу (=)</translation>
-        </message>
-        <message>
-            <source>Resume (H): keep capturing downward and keep existing annotations</source>
-            <translation>Улантуу (H): бар аннотацияларды сактап, ылдый карай тартууну улантуу</translation>
-        </message>
-        <message>
-            <source>Scrolling capture (H): scroll automatically and stitch a long image</source>
-            <translation>Сыдырып тартуу (H): автоматтык түрдө сыдырып, узун сүрөткө бириктирүү</translation>
-        </message>
-        <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Жокко чыгаруу: акыркы аннотацияны алып салуу</translation>
-        </message>
-        <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Кайталоо: жокко чыгарылган аннотацияны калыбына келтирүү</translation>
-        </message>
-        <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Көчүрүү: экран сүрөтүн алмашуу буферине көчүрүү</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Сактоо: экран сүрөтүн PNG түрүндө сактоо</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Тандоо · Жебелер чоңойтот, Shift+жебелер кичирейтет (1 px)</translation>
         </message>
         <message>
             <source>Rectangle</source>
             <translation>Тик бурчтук</translation>
+        </message>
+        <message>
+            <source>Ellipse</source>
+            <translation>Эллипс</translation>
+        </message>
+        <message>
+            <source>Arrow</source>
+            <translation>Жебе</translation>
+        </message>
+        <message>
+            <source>Pen</source>
+            <translation>Калем</translation>
+        </message>
+        <message>
+            <source>Text · Click to type</source>
+            <translation>Текст · Жазуу үчүн чыкылдатыңыз</translation>
+        </message>
+        <message>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Мозаика · Жашыруу үчүн сүйрөңүз</translation>
+        </message>
+        <message>
+            <source>Number · Click to add</source>
+            <translation>Номер · Кошуу үчүн чыкылдатыңыз</translation>
+        </message>
+        <message>
+            <source>Zoom out</source>
+            <translation>Кичирейтүү</translation>
+        </message>
+        <message>
+            <source>Zoom in</source>
+            <translation>Чоңойтуу</translation>
+        </message>
+        <message>
+            <source>Continue capture · Keeps annotations</source>
+            <translation>Тартууну улантуу · Белгилер сакталат</translation>
+        </message>
+        <message>
+            <source>Scrolling capture</source>
+            <translation>Жылдырып тартуу</translation>
+        </message>
+        <message>
+            <source>Undo</source>
+            <translation>Жокко чыгаруу</translation>
+        </message>
+        <message>
+            <source>Redo</source>
+            <translation>Кайталоо</translation>
+        </message>
+        <message>
+            <source>Copy screenshot</source>
+            <translation>Экран сүрөтүн көчүрүү</translation>
+        </message>
+        <message>
+            <source>Save PNG</source>
+            <translation>PNG сактоо</translation>
         </message>
         <message>
             <source>Rounded rectangle</source>
@@ -80,20 +76,12 @@
             <translation>Боёлгон тик бурчтук</translation>
         </message>
         <message>
-            <source>Ellipse</source>
-            <translation>Эллипс</translation>
-        </message>
-        <message>
             <source>Filled ellipse</source>
             <translation>Боёлгон эллипс</translation>
         </message>
         <message>
             <source>Spotlight</source>
             <translation>Бөлүп көрсөтүү</translation>
-        </message>
-        <message>
-            <source>Arrow</source>
-            <translation>Жебе</translation>
         </message>
         <message>
             <source>Curved arrow</source>
@@ -108,24 +96,24 @@
             <translation>Сызык</translation>
         </message>
         <message>
-            <source>Pen</source>
-            <translation>Калем</translation>
-        </message>
-        <message>
             <source>Highlighter</source>
             <translation>Маркер</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Түс: даяр түстү тандаңыз же палитрада сүйрөңүз</translation>
+            <source>Color</source>
+            <translation>Түс</translation>
         </message>
         <message>
-            <source>Light toolbar</source>
-            <translation>Ачык куралдар тилкеси</translation>
+            <source>Light</source>
+            <translation>Ачык</translation>
         </message>
         <message>
-            <source>Dark toolbar</source>
-            <translation>Караңгы куралдар тилкеси</translation>
+            <source>Dark</source>
+            <translation>Караңгы</translation>
+        </message>
+        <message>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: ырастоо · Shift+Enter: жаңы сап · Alt: ырастоо жана мурунку куралга кайтуу</translation>
         </message>
     </context>
     <context>

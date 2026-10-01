@@ -4,72 +4,68 @@
     <context>
         <name>AnnotationToolbar</name>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Zaznaczenie: przeciągnij uchwyty, aby zmienić rozmiar; klawisze strzałek powiększają o 1 px, Shift+klawisze strzałek zmniejszają o 1 px</translation>
-        </message>
-        <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Prostokąty: wybierz prostokąt z obrysem, zaokrąglony lub wypełniony</translation>
-        </message>
-        <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Elipsy: wybierz elipsę z obrysem, wypełnioną elipsę lub podświetlenie</translation>
-        </message>
-        <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Strzałki: wybierz prostą, zakrzywioną, dwukierunkową strzałkę lub linię</translation>
-        </message>
-        <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Rysowanie: wybierz pióro lub zakreślacz</translation>
-        </message>
-        <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Tekst: kliknij, aby pisać, Shift+Enter wstawia nowy wiersz; Alt zatwierdza i wraca do poprzedniego narzędzia</translation>
-        </message>
-        <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mozaika: przeciągnij, aby zaznaczyć prostokątny obszar</translation>
-        </message>
-        <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Znacznik numerowany: kliknij, aby umieścić kolejny numer</translation>
-        </message>
-        <message>
-            <source>Zoom out of the long image (-)</source>
-            <translation>Pomniejsz długi obraz (-)</translation>
-        </message>
-        <message>
-            <source>Zoom in on the long image (=)</source>
-            <translation>Powiększ długi obraz (=)</translation>
-        </message>
-        <message>
-            <source>Resume (H): keep capturing downward and keep existing annotations</source>
-            <translation>Wznów (H): kontynuuj przechwytywanie w dół i zachowaj istniejące adnotacje</translation>
-        </message>
-        <message>
-            <source>Scrolling capture (H): scroll automatically and stitch a long image</source>
-            <translation>Zrzut z przewijaniem (H): przewijaj automatycznie i sklejaj długi obraz</translation>
-        </message>
-        <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Cofnij: usuń ostatnią adnotację</translation>
-        </message>
-        <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Ponów: przywróć cofniętą adnotację</translation>
-        </message>
-        <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Kopiuj: skopiuj zrzut ekranu do schowka</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Zapisz: zapisz zrzut ekranu jako PNG</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Zaznaczenie · Strzałki powiększają, Shift+strzałki zmniejszają (1 px)</translation>
         </message>
         <message>
             <source>Rectangle</source>
             <translation>Prostokąt</translation>
+        </message>
+        <message>
+            <source>Ellipse</source>
+            <translation>Elipsa</translation>
+        </message>
+        <message>
+            <source>Arrow</source>
+            <translation>Strzałka</translation>
+        </message>
+        <message>
+            <source>Pen</source>
+            <translation>Pióro</translation>
+        </message>
+        <message>
+            <source>Text · Click to type</source>
+            <translation>Tekst · Kliknij, aby pisać</translation>
+        </message>
+        <message>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mozaika · Przeciągnij, aby ukryć treść</translation>
+        </message>
+        <message>
+            <source>Number · Click to add</source>
+            <translation>Numer · Kliknij, aby dodać</translation>
+        </message>
+        <message>
+            <source>Zoom out</source>
+            <translation>Pomniejsz</translation>
+        </message>
+        <message>
+            <source>Zoom in</source>
+            <translation>Powiększ</translation>
+        </message>
+        <message>
+            <source>Continue capture · Keeps annotations</source>
+            <translation>Kontynuuj zrzut · Adnotacje pozostaną</translation>
+        </message>
+        <message>
+            <source>Scrolling capture</source>
+            <translation>Zrzut z przewijaniem</translation>
+        </message>
+        <message>
+            <source>Undo</source>
+            <translation>Cofnij</translation>
+        </message>
+        <message>
+            <source>Redo</source>
+            <translation>Ponów</translation>
+        </message>
+        <message>
+            <source>Copy screenshot</source>
+            <translation>Kopiuj zrzut ekranu</translation>
+        </message>
+        <message>
+            <source>Save PNG</source>
+            <translation>Zapisz PNG</translation>
         </message>
         <message>
             <source>Rounded rectangle</source>
@@ -80,20 +76,12 @@
             <translation>Wypełniony prostokąt</translation>
         </message>
         <message>
-            <source>Ellipse</source>
-            <translation>Elipsa</translation>
-        </message>
-        <message>
             <source>Filled ellipse</source>
             <translation>Wypełniona elipsa</translation>
         </message>
         <message>
             <source>Spotlight</source>
             <translation>Podświetlenie</translation>
-        </message>
-        <message>
-            <source>Arrow</source>
-            <translation>Strzałka</translation>
         </message>
         <message>
             <source>Curved arrow</source>
@@ -108,24 +96,24 @@
             <translation>Linia</translation>
         </message>
         <message>
-            <source>Pen</source>
-            <translation>Pióro</translation>
-        </message>
-        <message>
             <source>Highlighter</source>
             <translation>Zakreślacz</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Kolor: wybierz gotowy kolor lub przeciągnij po palecie</translation>
+            <source>Color</source>
+            <translation>Kolor</translation>
         </message>
         <message>
-            <source>Light toolbar</source>
-            <translation>Jasny pasek narzędzi</translation>
+            <source>Light</source>
+            <translation>Jasny</translation>
         </message>
         <message>
-            <source>Dark toolbar</source>
-            <translation>Ciemny pasek narzędzi</translation>
+            <source>Dark</source>
+            <translation>Ciemny</translation>
+        </message>
+        <message>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: zatwierdź · Shift+Enter: nowy wiersz · Alt: zatwierdź i wróć do poprzedniego narzędzia</translation>
         </message>
     </context>
     <context>

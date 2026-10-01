@@ -4,72 +4,68 @@
     <context>
         <name>AnnotationToolbar</name>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>בחירה: יש לגרור את הידיות לשינוי הגודל; מקשי החצים מרחיבים ב־⁦1 px⁩, מקשי החצים בשילוב ⁦Shift⁩ מצמצמים ב־⁦1 px⁩</translation>
-        </message>
-        <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>מלבנים: יש לבחור מלבן עם קו מתאר, מעוגל או מלא</translation>
-        </message>
-        <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>אליפסות: יש לבחור אליפסה עם קו מתאר, אליפסה מלאה או זרקור</translation>
-        </message>
-        <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>חצים: יש לבחור חץ ישר, מעוקל, דו־ראשי או קו</translation>
-        </message>
-        <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>ציור: יש לבחור עט או מדגש</translation>
-        </message>
-        <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>טקסט: יש ללחוץ כדי להקליד, ⁦Shift+Enter⁩ לשורה חדשה; ⁦Alt⁩ מאשר ומחזיר לכלי הקודם</translation>
-        </message>
-        <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>פסיפס: יש לגרור כדי לבחור אזור מלבני</translation>
-        </message>
-        <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>סמן ממוספר: יש ללחוץ כדי למקם את המספר הבא</translation>
-        </message>
-        <message>
-            <source>Zoom out of the long image (-)</source>
-            <translation>הקטנת התצוגה של התמונה הארוכה ⁦(-)⁩</translation>
-        </message>
-        <message>
-            <source>Zoom in on the long image (=)</source>
-            <translation>הגדלת התצוגה של התמונה הארוכה ⁦(=)⁩</translation>
-        </message>
-        <message>
-            <source>Resume (H): keep capturing downward and keep existing annotations</source>
-            <translation>המשך ⁦(H)⁩: המשך הצילום כלפי מטה ושמירה על ההערות הקיימות</translation>
-        </message>
-        <message>
-            <source>Scrolling capture (H): scroll automatically and stitch a long image</source>
-            <translation>צילום בגלילה ⁦(H)⁩: גלילה אוטומטית וחיבור לתמונה ארוכה</translation>
-        </message>
-        <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>ביטול: הסרת ההערה האחרונה</translation>
-        </message>
-        <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>ביצוע מחדש: שחזור ההערה שבוטלה</translation>
-        </message>
-        <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>העתקה: העתקת צילום המסך ללוח</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>שמירה: שמירת צילום המסך בתור PNG</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>בחירה · חצים מרחיבים, ⁦Shift⁩+חצים מצמצמים (⁦1 px⁩)</translation>
         </message>
         <message>
             <source>Rectangle</source>
             <translation>מלבן</translation>
+        </message>
+        <message>
+            <source>Ellipse</source>
+            <translation>אליפסה</translation>
+        </message>
+        <message>
+            <source>Arrow</source>
+            <translation>חץ</translation>
+        </message>
+        <message>
+            <source>Pen</source>
+            <translation>עט</translation>
+        </message>
+        <message>
+            <source>Text · Click to type</source>
+            <translation>טקסט · לחיצה להקלדה</translation>
+        </message>
+        <message>
+            <source>Mosaic · Drag to redact</source>
+            <translation>פסיפס · גרירה להסתרה</translation>
+        </message>
+        <message>
+            <source>Number · Click to add</source>
+            <translation>מספר · לחיצה להוספה</translation>
+        </message>
+        <message>
+            <source>Zoom out</source>
+            <translation>הקטנה</translation>
+        </message>
+        <message>
+            <source>Zoom in</source>
+            <translation>הגדלה</translation>
+        </message>
+        <message>
+            <source>Continue capture · Keeps annotations</source>
+            <translation>המשך צילום · הסימונים נשמרים</translation>
+        </message>
+        <message>
+            <source>Scrolling capture</source>
+            <translation>צילום בגלילה</translation>
+        </message>
+        <message>
+            <source>Undo</source>
+            <translation>ביטול</translation>
+        </message>
+        <message>
+            <source>Redo</source>
+            <translation>ביצוע מחדש</translation>
+        </message>
+        <message>
+            <source>Copy screenshot</source>
+            <translation>העתקת צילום המסך</translation>
+        </message>
+        <message>
+            <source>Save PNG</source>
+            <translation>שמירת ⁦PNG⁩</translation>
         </message>
         <message>
             <source>Rounded rectangle</source>
@@ -80,20 +76,12 @@
             <translation>מלבן מלא</translation>
         </message>
         <message>
-            <source>Ellipse</source>
-            <translation>אליפסה</translation>
-        </message>
-        <message>
             <source>Filled ellipse</source>
             <translation>אליפסה מלאה</translation>
         </message>
         <message>
             <source>Spotlight</source>
             <translation>זרקור</translation>
-        </message>
-        <message>
-            <source>Arrow</source>
-            <translation>חץ</translation>
         </message>
         <message>
             <source>Curved arrow</source>
@@ -108,24 +96,24 @@
             <translation>קו</translation>
         </message>
         <message>
-            <source>Pen</source>
-            <translation>עט</translation>
-        </message>
-        <message>
             <source>Highlighter</source>
             <translation>מדגש</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>צבע: יש לבחור צבע מוגדר מראש או לגרור על לוח הצבעים</translation>
+            <source>Color</source>
+            <translation>צבע</translation>
         </message>
         <message>
-            <source>Light toolbar</source>
-            <translation>סרגל כלים בהיר</translation>
+            <source>Light</source>
+            <translation>בהיר</translation>
         </message>
         <message>
-            <source>Dark toolbar</source>
-            <translation>סרגל כלים כהה</translation>
+            <source>Dark</source>
+            <translation>כהה</translation>
+        </message>
+        <message>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>⁦Enter⁩: אישור · ⁦Shift+Enter⁩: שורה חדשה · ⁦Alt⁩: אישור וחזרה לכלי הקודם</translation>
         </message>
     </context>
     <context>

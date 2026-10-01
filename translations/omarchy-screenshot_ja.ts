@@ -4,72 +4,68 @@
     <context>
         <name>AnnotationToolbar</name>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>選択：ハンドルをドラッグしてサイズを変更します。矢印キーで 1 px 拡大、Shift+矢印キーで 1 px 縮小します</translation>
-        </message>
-        <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>長方形：枠線のみ、角丸、塗りつぶしの長方形を選びます</translation>
-        </message>
-        <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>楕円：枠線のみの楕円、塗りつぶし楕円、スポットライトを選びます</translation>
-        </message>
-        <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>矢印：直線矢印、曲線矢印、両端矢印、または直線を選びます</translation>
-        </message>
-        <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>描画：ペンまたは蛍光ペンを選びます</translation>
-        </message>
-        <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>テキスト：クリックして入力し、Shift+Enter で改行します。Alt で確定し、前のツールに戻ります</translation>
-        </message>
-        <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>モザイク：ドラッグして長方形の範囲を選択します</translation>
-        </message>
-        <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>番号付きマーカー：クリックして次の番号を配置します</translation>
-        </message>
-        <message>
-            <source>Zoom out of the long image (-)</source>
-            <translation>長い画像を縮小（-）</translation>
-        </message>
-        <message>
-            <source>Zoom in on the long image (=)</source>
-            <translation>長い画像を拡大（=）</translation>
-        </message>
-        <message>
-            <source>Resume (H): keep capturing downward and keep existing annotations</source>
-            <translation>再開（H）：下方向へのキャプチャを続け、既存の注釈を保持します</translation>
-        </message>
-        <message>
-            <source>Scrolling capture (H): scroll automatically and stitch a long image</source>
-            <translation>スクロールキャプチャ（H）：自動でスクロールして長い画像につなぎ合わせます</translation>
-        </message>
-        <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>元に戻す：最後の注釈を削除します</translation>
-        </message>
-        <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>やり直す：取り消した注釈を復元します</translation>
-        </message>
-        <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>コピー：スクリーンショットをクリップボードにコピーします</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>保存：スクリーンショットを PNG として保存します</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>選択 · 矢印キーで拡大、Shift+矢印キーで縮小（1 px）</translation>
         </message>
         <message>
             <source>Rectangle</source>
             <translation>長方形</translation>
+        </message>
+        <message>
+            <source>Ellipse</source>
+            <translation>楕円</translation>
+        </message>
+        <message>
+            <source>Arrow</source>
+            <translation>矢印</translation>
+        </message>
+        <message>
+            <source>Pen</source>
+            <translation>ペン</translation>
+        </message>
+        <message>
+            <source>Text · Click to type</source>
+            <translation>テキスト · クリックして入力</translation>
+        </message>
+        <message>
+            <source>Mosaic · Drag to redact</source>
+            <translation>モザイク · ドラッグして隠す</translation>
+        </message>
+        <message>
+            <source>Number · Click to add</source>
+            <translation>番号 · クリックして追加</translation>
+        </message>
+        <message>
+            <source>Zoom out</source>
+            <translation>縮小</translation>
+        </message>
+        <message>
+            <source>Zoom in</source>
+            <translation>拡大</translation>
+        </message>
+        <message>
+            <source>Continue capture · Keeps annotations</source>
+            <translation>キャプチャを続行 · 注釈を保持</translation>
+        </message>
+        <message>
+            <source>Scrolling capture</source>
+            <translation>スクロールキャプチャ</translation>
+        </message>
+        <message>
+            <source>Undo</source>
+            <translation>元に戻す</translation>
+        </message>
+        <message>
+            <source>Redo</source>
+            <translation>やり直す</translation>
+        </message>
+        <message>
+            <source>Copy screenshot</source>
+            <translation>スクリーンショットをコピー</translation>
+        </message>
+        <message>
+            <source>Save PNG</source>
+            <translation>PNG で保存</translation>
         </message>
         <message>
             <source>Rounded rectangle</source>
@@ -80,20 +76,12 @@
             <translation>塗りつぶし長方形</translation>
         </message>
         <message>
-            <source>Ellipse</source>
-            <translation>楕円</translation>
-        </message>
-        <message>
             <source>Filled ellipse</source>
             <translation>塗りつぶし楕円</translation>
         </message>
         <message>
             <source>Spotlight</source>
             <translation>スポットライト</translation>
-        </message>
-        <message>
-            <source>Arrow</source>
-            <translation>矢印</translation>
         </message>
         <message>
             <source>Curved arrow</source>
@@ -108,24 +96,24 @@
             <translation>直線</translation>
         </message>
         <message>
-            <source>Pen</source>
-            <translation>ペン</translation>
-        </message>
-        <message>
             <source>Highlighter</source>
             <translation>蛍光ペン</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>色：プリセットを選ぶか、パレット上でドラッグします</translation>
+            <source>Color</source>
+            <translation>色</translation>
         </message>
         <message>
-            <source>Light toolbar</source>
-            <translation>明るいツールバー</translation>
+            <source>Light</source>
+            <translation>ライト</translation>
         </message>
         <message>
-            <source>Dark toolbar</source>
-            <translation>暗いツールバー</translation>
+            <source>Dark</source>
+            <translation>ダーク</translation>
+        </message>
+        <message>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter で確定 · Shift+Enter で改行 · Alt で確定して前のツールに戻る</translation>
         </message>
     </context>
     <context>

@@ -4,72 +4,68 @@
     <context>
         <name>AnnotationToolbar</name>
         <message>
-            <source>Selection: drag handles to resize; arrow keys expand by 1 px, Shift+arrow keys shrink by 1 px</source>
-            <translation>Selectie: sleep de handgrepen om het formaat te wijzigen; pijltjestoetsen vergroten met 1 px, Shift+pijltjestoetsen verkleinen met 1 px</translation>
-        </message>
-        <message>
-            <source>Rectangles: choose an outline, rounded or filled rectangle</source>
-            <translation>Rechthoeken: kies een omlijnde, afgeronde of gevulde rechthoek</translation>
-        </message>
-        <message>
-            <source>Ellipses: choose an outline, filled ellipse or spotlight</source>
-            <translation>Ellipsen: kies een omlijnde ellips, gevulde ellips of uitlichting</translation>
-        </message>
-        <message>
-            <source>Arrows: choose a straight, curved, double-headed arrow or line</source>
-            <translation>Pijlen: kies een rechte, gebogen of tweepuntige pijl of een lijn</translation>
-        </message>
-        <message>
-            <source>Drawing: choose a pen or highlighter</source>
-            <translation>Tekenen: kies een pen of markeerstift</translation>
-        </message>
-        <message>
-            <source>Text: click to type, Shift+Enter for a new line; Alt confirms and returns to the previous tool</source>
-            <translation>Tekst: klik om te typen, Shift+Enter voor een nieuwe regel; Alt bevestigt en keert terug naar het vorige gereedschap</translation>
-        </message>
-        <message>
-            <source>Mosaic: drag to select a rectangular area</source>
-            <translation>Mozaïek: sleep om een rechthoekig gebied te selecteren</translation>
-        </message>
-        <message>
-            <source>Numbered marker: click to place the next number</source>
-            <translation>Genummerde markering: klik om het volgende nummer te plaatsen</translation>
-        </message>
-        <message>
-            <source>Zoom out of the long image (-)</source>
-            <translation>Uitzoomen op de lange afbeelding (-)</translation>
-        </message>
-        <message>
-            <source>Zoom in on the long image (=)</source>
-            <translation>Inzoomen op de lange afbeelding (=)</translation>
-        </message>
-        <message>
-            <source>Resume (H): keep capturing downward and keep existing annotations</source>
-            <translation>Hervatten (H): ga verder met vastleggen naar beneden en behoud bestaande annotaties</translation>
-        </message>
-        <message>
-            <source>Scrolling capture (H): scroll automatically and stitch a long image</source>
-            <translation>Scrollende opname (H): scrol automatisch en voeg samen tot één lange afbeelding</translation>
-        </message>
-        <message>
-            <source>Undo: remove the last annotation</source>
-            <translation>Ongedaan maken: verwijder de laatste annotatie</translation>
-        </message>
-        <message>
-            <source>Redo: restore the undone annotation</source>
-            <translation>Opnieuw uitvoeren: herstel de ongedaan gemaakte annotatie</translation>
-        </message>
-        <message>
-            <source>Copy: copy the screenshot to the clipboard</source>
-            <translation>Kopiëren: kopieer de schermafbeelding naar het klembord</translation>
-        </message>
-        <message>
-            <source>Save: save the screenshot as PNG</source>
-            <translation>Opslaan: sla de schermafbeelding op als PNG</translation>
+            <source>Selection · Arrow keys expand, Shift+arrows shrink (1 px)</source>
+            <translation>Selectie · Pijltjestoetsen vergroten, Shift+pijltjestoetsen verkleinen (1 px)</translation>
         </message>
         <message>
             <source>Rectangle</source>
             <translation>Rechthoek</translation>
+        </message>
+        <message>
+            <source>Ellipse</source>
+            <translation>Ellips</translation>
+        </message>
+        <message>
+            <source>Arrow</source>
+            <translation>Pijl</translation>
+        </message>
+        <message>
+            <source>Pen</source>
+            <translation>Pen</translation>
+        </message>
+        <message>
+            <source>Text · Click to type</source>
+            <translation>Tekst · Klik om te typen</translation>
+        </message>
+        <message>
+            <source>Mosaic · Drag to redact</source>
+            <translation>Mozaïek · Sleep om inhoud te verbergen</translation>
+        </message>
+        <message>
+            <source>Number · Click to add</source>
+            <translation>Nummer · Klik om toe te voegen</translation>
+        </message>
+        <message>
+            <source>Zoom out</source>
+            <translation>Uitzoomen</translation>
+        </message>
+        <message>
+            <source>Zoom in</source>
+            <translation>Inzoomen</translation>
+        </message>
+        <message>
+            <source>Continue capture · Keeps annotations</source>
+            <translation>Opname voortzetten · Annotaties blijven behouden</translation>
+        </message>
+        <message>
+            <source>Scrolling capture</source>
+            <translation>Scrollopname</translation>
+        </message>
+        <message>
+            <source>Undo</source>
+            <translation>Ongedaan maken</translation>
+        </message>
+        <message>
+            <source>Redo</source>
+            <translation>Opnieuw uitvoeren</translation>
+        </message>
+        <message>
+            <source>Copy screenshot</source>
+            <translation>Schermafbeelding kopiëren</translation>
+        </message>
+        <message>
+            <source>Save PNG</source>
+            <translation>PNG opslaan</translation>
         </message>
         <message>
             <source>Rounded rectangle</source>
@@ -80,20 +76,12 @@
             <translation>Gevulde rechthoek</translation>
         </message>
         <message>
-            <source>Ellipse</source>
-            <translation>Ellips</translation>
-        </message>
-        <message>
             <source>Filled ellipse</source>
             <translation>Gevulde ellips</translation>
         </message>
         <message>
             <source>Spotlight</source>
             <translation>Uitlichten</translation>
-        </message>
-        <message>
-            <source>Arrow</source>
-            <translation>Pijl</translation>
         </message>
         <message>
             <source>Curved arrow</source>
@@ -108,24 +96,24 @@
             <translation>Lijn</translation>
         </message>
         <message>
-            <source>Pen</source>
-            <translation>Pen</translation>
-        </message>
-        <message>
             <source>Highlighter</source>
             <translation>Markeerstift</translation>
         </message>
         <message>
-            <source>Color: choose a preset or drag the palette</source>
-            <translation>Kleur: kies een vooraf ingestelde kleur of sleep over het palet</translation>
+            <source>Color</source>
+            <translation>Kleur</translation>
         </message>
         <message>
-            <source>Light toolbar</source>
-            <translation>Lichte werkbalk</translation>
+            <source>Light</source>
+            <translation>Licht</translation>
         </message>
         <message>
-            <source>Dark toolbar</source>
-            <translation>Donkere werkbalk</translation>
+            <source>Dark</source>
+            <translation>Donker</translation>
+        </message>
+        <message>
+            <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
+            <translation>Enter: bevestigen · Shift+Enter: nieuwe regel · Alt: bevestigen en terug naar het vorige gereedschap</translation>
         </message>
     </context>
     <context>
