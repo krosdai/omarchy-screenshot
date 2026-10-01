@@ -138,10 +138,10 @@ include(GNUInstallDirs)
 install(TARGETS omarchy-screenshot RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # systemd starts the resident daemon on the first request and lets it exit
-# when idle. A per-user install (~/.local) should point this at
-# ~/.local/share/systemd/user.
-set(SYSTEMD_USER_UNIT_DIR "${CMAKE_INSTALL_PREFIX}/lib/systemd/user"
-    CACHE PATH "Where to install the systemd user units")
+# when idle. Relative to the install prefix, so `--prefix` relocates it; a
+# per-user install (~/.local) should point this at ~/.local/share/systemd/user.
+set(SYSTEMD_USER_UNIT_DIR "lib/systemd/user"
+    CACHE STRING "Where to install the systemd user units")
 configure_file(systemd/omarchy-screenshot.service.in
     "${CMAKE_CURRENT_BINARY_DIR}/omarchy-screenshot.service" @ONLY)
 install(FILES
