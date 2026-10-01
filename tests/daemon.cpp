@@ -14,11 +14,33 @@
 #include <QTemporaryDir>
 #include <QTest>
 
+#include <chrono>
 #include <cstring>
+#include <future>
+#include <poll.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/un.h>
 #include <unistd.h>
+
+// forwardCaptureRequest() waits for the daemon's answer, so the client runs
+// on its own thread while the test plays the daemon.
+static std::future<bool> forwardLater(const std::string &path) {
+  return std::async(std::launch::async,
+                    [path] { return forwardCaptureRequest(path); });
+}
+
+// Drains until the expected number of requests arrived or two seconds pass.
+static int takeWithin(int listener, int expected) {
+  int taken = 0;
+  const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+  while (taken < expected && std::chrono::steady_clock::now() < deadline) {
+    pollfd ready{listener, POLLIN, 0};
+    poll(&ready, 1, 50);
+    taken += takeCaptureRequests(listener);
+  }
+  return taken;
+}
 
 class DaemonTest : public QObject {
   Q_OBJECT
@@ -62,12 +84,33 @@ private slots:
     QCOMPARE(second, -1);
     QCOMPARE(secondLock, -1);
 
-    QVERIFY(forwardCaptureRequest(path));
-    QVERIFY(forwardCaptureRequest(path));
-    QCOMPARE(takeCaptureRequests(listener), 2);
+    auto firstRequest = forwardLater(path);
+    auto secondRequest = forwardLater(path);
+    QCOMPARE(takeWithin(listener, 2), 2);
+    QVERIFY(firstRequest.get());
+    QVERIFY(secondRequest.get());
     QCOMPARE(takeCaptureRequests(listener), 0);
     close(listener);
     close(lock);
+  }
+
+  // A daemon that exits before accepting leaves the request unanswered, and
+  // the client must then capture itself rather than report success.
+  void unansweredRequestFallsBack() {
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const std::string path = dir.filePath(QStringLiteral("daemon.sock")).toStdString();
+    int listener = -1;
+    int lock = -1;
+    std::string error;
+    QCOMPARE(listenForCaptureRequests(path, &listener, &lock, &error),
+             ListenResult::Listening);
+    auto pending = forwardLater(path);
+    pollfd queued{listener, POLLIN, 0};
+    QCOMPARE(poll(&queued, 1, 2000), 1);
+    close(listener);
+    close(lock);
+    QVERIFY(!pending.get());
   }
 
   // systemd can hold the socket with no daemon behind it; a daemon started
@@ -97,8 +140,9 @@ private slots:
     const int stalled = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
     QCOMPARE(::connect(stalled, reinterpret_cast<const sockaddr *>(&address), sizeof address), 0);
     QCOMPARE(send(stalled, "cap", 3, MSG_NOSIGNAL), ssize_t(3));
-    QVERIFY(forwardCaptureRequest(path));
-    QCOMPARE(takeCaptureRequests(held), 1);
+    auto request = forwardLater(path);
+    QCOMPARE(takeWithin(held, 1), 1);
+    QVERIFY(request.get());
     close(other);
     close(stalled);
     close(held);
@@ -119,8 +163,9 @@ private slots:
     QVERIFY(!forwardCaptureRequest(path));
     QCOMPARE(listenForCaptureRequests(path, &listener, &lock, &error),
              ListenResult::Listening);
-    QVERIFY(forwardCaptureRequest(path));
-    QCOMPARE(takeCaptureRequests(listener), 1);
+    auto request = forwardLater(path);
+    QCOMPARE(takeWithin(listener, 1), 1);
+    QVERIFY(request.get());
     close(listener);
     close(lock);
 

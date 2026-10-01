@@ -40,6 +40,7 @@ int connectTo(const std::string &path) {
 }
 
 constexpr char captureRequest[] = "capture\n";
+constexpr char captureAccepted[] = "ok\n";
 
 std::string systemError(const char *what) {
   return std::string(what) + ": " + std::strerror(errno);
@@ -58,10 +59,24 @@ bool forwardCaptureRequest(const std::string &path) {
   const int fd = connectTo(path);
   if (fd < 0)
     return false;
-  const ssize_t written =
-      send(fd, captureRequest, sizeof captureRequest - 1, MSG_NOSIGNAL);
+  if (send(fd, captureRequest, sizeof captureRequest - 1, MSG_NOSIGNAL) !=
+      ssize_t(sizeof captureRequest - 1)) {
+    close(fd);
+    return false;
+  }
+  // A daemon that exits before accepting closes the connection unanswered,
+  // and the caller then captures itself. Under systemd the request instead
+  // waits for the restarted daemon, which can take a moment to answer.
+  const timeval timeout{10, 0};
+  setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof timeout);
+  char reply[sizeof captureAccepted - 1];
+  const ssize_t received = recv(fd, reply, sizeof reply, MSG_WAITALL);
+  const bool timedOut = received < 0 && (errno == EAGAIN || errno == EWOULDBLOCK);
   close(fd);
-  return written == ssize_t(sizeof captureRequest - 1);
+  // A daemon too slow to answer is still alive; capturing here as well
+  // would show two overlays.
+  return timedOut || (received == ssize_t(sizeof reply) &&
+                      std::memcmp(reply, captureAccepted, sizeof reply) == 0);
 }
 
 int activatedSocket(pid_t self, const char *listenPid, const char *listenFds) {
@@ -175,6 +190,8 @@ int takeCaptureRequests(int listener) {
         recv(client, buffer, sizeof buffer, MSG_WAITALL) ==
             ssize_t(sizeof buffer) &&
         std::memcmp(buffer, captureRequest, sizeof buffer) == 0;
+    if (request)
+      send(client, captureAccepted, sizeof captureAccepted - 1, MSG_NOSIGNAL);
     close(client);
     requests += request;
   }

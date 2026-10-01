@@ -387,7 +387,10 @@ int main(int argc, char **argv) {
   // waits in the pipe until it runs.
   std::unique_ptr<QSocketNotifier> quitSignals;
   if (daemon &&
-      socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, signalPipe) == 0) {
+      // Nonblocking, so a burst of signals can never stall the handler; one
+      // unread byte is enough to wake the event loop.
+      socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC | SOCK_NONBLOCK, 0,
+                 signalPipe) == 0) {
     quitSignals = std::make_unique<QSocketNotifier>(signalPipe[0],
                                                     QSocketNotifier::Read);
     QObject::connect(quitSignals.get(), &QSocketNotifier::activated, &app,
@@ -950,7 +953,8 @@ int main(int argc, char **argv) {
     QObject::connect(&idleTimer, &QTimer::timeout, &app, [&] {
       if (capturing())
         return;
-      // A request can queue just as the timer fires; serve it, not exit.
+      // Serve a request that queued as the timer fired. One that arrives
+      // after this check is never acknowledged, so its client captures.
       if (takeCaptureRequests(listener) > 0)
         captureAndShow();
       else
