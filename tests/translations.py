@@ -67,14 +67,11 @@ class Translations(unittest.TestCase):
         self.assertEqual(set(self.catalogs), LOCALES)
         with tempfile.TemporaryDirectory() as temp:
             reference = Path(temp) / "reference.ts"
+            # Scan every source so a newly translatable file cannot slip past.
+            sources = sorted([*(args.source / "src").glob("*.cpp"),
+                              *(args.source / "qml").glob("*.qml")])
             subprocess.run([
-                str(args.lupdate), str(args.source / "src/main.cpp"),
-                str(args.source / "src/capturecontroller.cpp"),
-                str(args.source / "src/virtualpointer.cpp"),
-                *(str(args.source / "qml" / name) for name in (
-                    "Overlay.qml", "AnnotationToolbar.qml", "LongOverlay.qml",
-                    "ScrollCapture.qml")),
-                "-locations", "none",
+                str(args.lupdate), *map(str, sources), "-locations", "none",
                 "-ts", str(reference),
             ], check=True, capture_output=True, text=True)
             sources = set(messages(reference))
@@ -92,8 +89,8 @@ class Translations(unittest.TestCase):
                     self.assertTrue(translation.text and translation.text.strip())
                     self.assertEqual(re.findall(r"%\d+", source),
                                      re.findall(r"%\d+", translation.text))
-                    for token in ("Qt", "wl-copy", "tesseract", "PNG", "OCR",
-                                  "Alt", "Enter", "Shift+Enter", "Shift", "1 px"):
+                    for token in ("Qt", "wl-copy", "PNG", "Alt", "Enter", "Shift+Enter",
+                                  "Shift", "Ctrl", "Esc", "1 px"):
                         if token in source:
                             self.assertIn(token, translation.text)
 

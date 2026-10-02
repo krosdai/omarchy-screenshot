@@ -217,6 +217,26 @@ TestCase {
         compare(captureController.annotationColor, "#ff9d42")
         compare(longToolbar.colorPanelVisible, false)
     }
+    // A resident daemon reuses the toolbar, so nothing may stay open into the
+    // next capture.
+    function test_close_popups_for_next_capture() {
+        let color = visualItem(normalToolbar, "colorButton")
+        mouseClick(color, color.width / 2, color.height / 2)
+        tryCompare(normalToolbar, "colorPanelVisible", true)
+        normalToolbar.closePopups()
+        compare(normalToolbar.colorPanelVisible, false)
+
+        let group = visualItem(normalToolbar, "tool_rect_group")
+        mouseClick(group, group.width / 2, group.height / 2)
+        tryCompare(normalToolbar, "variantPanelVisible", true)
+        normalToolbar.closePopups()
+        compare(normalToolbar.variantPanelVisible, false)
+
+        normalToolbar.showToolbarTooltip("hint", color)
+        normalToolbar.closePopups()
+        wait(500)
+        compare(normalToolbar.toolbarTooltipVisible, false)
+    }
     function test_palette_allows_toolbar_shortcuts() {
         let normalColor = visualItem(normalToolbar, "colorButton")
         mouseClick(normalColor, normalColor.width / 2, normalColor.height / 2)

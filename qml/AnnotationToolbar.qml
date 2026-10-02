@@ -154,6 +154,13 @@ Item {
         toolbarTooltipVisible = false
     }
 
+    // Closes popups left open by the previous capture in a resident process.
+    function closePopups() {
+        colorPanel.visible = false
+        variantPanel.visible = false
+        hideToolbarTooltip()
+    }
+
     Timer {
         id: tooltipDelay
         interval: 450

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "capturecontroller.h"
+#include "daemonsocket.h"
 #include "longimageitem.h"
 #include "virtualpointer.h"
 #include "selftestimage.h"
@@ -28,6 +29,8 @@
 #include <QRegion>
 #include <QProcess>
 #include <QSettings>
+#include <QSocketNotifier>
+#include <QSurfaceFormat>
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QTest>
@@ -36,9 +39,15 @@
 #include <QTranslator>
 
 #include <functional>
+#include <chrono>
 #include <cmath>
+#include <csignal>
+#include <poll.h>
+#include <sys/socket.h>
+#include <unistd.h>
 #include <memory>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 class CaptureImageProvider final : public QQuickImageProvider {
@@ -49,8 +58,9 @@ public:
 
   QImage requestImage(const QString &id, QSize *size,
                       const QSize &requestedSize) override {
+    // "<kind>/<screen>/<generation>"; the generation only defeats caching.
     const QStringList parts = id.split(QLatin1Char('/'));
-    if (parts.size() != 2)
+    if (parts.size() < 2)
       return {};
     bool valid = false;
     const int index = parts[1].toInt(&valid);
@@ -135,7 +145,21 @@ static QQuickItem *findQuickItem(QQuickItem *root, const QString &name) {
   return nullptr;
 }
 
+namespace {
+int signalPipe[2] = {-1, -1};
+
+void requestQuit(int) {
+  const char byte = 0;
+  [[maybe_unused]] const ssize_t written = write(signalPipe[1], &byte, 1);
+}
+} // namespace
+
 int main(int argc, char **argv) {
+  // A plain launch hands the capture to the resident daemon, or to the
+  // systemd socket that starts one, and exits before Qt starts. Nothing
+  // listens unless the user enabled resident mode.
+  if (argc == 1 && forwardCaptureRequest(daemonSocketPath()))
+    return 0;
   QGuiApplication app(argc, argv);
   app.setApplicationName(QStringLiteral("omarchy-screenshot"));
   app.setOrganizationName(QStringLiteral("Omarchy"));
@@ -152,6 +176,12 @@ int main(int argc, char **argv) {
     options.append(QCommandLineOption(test));
     options.last().setFlags(QCommandLineOption::HiddenFromHelp);
   }
+  // Resident mode; the README documents both options.
+  options.append(QCommandLineOption(QStringLiteral("daemon")));
+  options.append(QCommandLineOption(QStringLiteral("idle-timeout"), QString(),
+                                    QStringLiteral("seconds")));
+  for (int i = options.size() - 2; i < options.size(); ++i)
+    options[i].setFlags(QCommandLineOption::HiddenFromHelp);
   QCommandLineParser languageParser;
   languageParser.addHelpOption();
   languageParser.addOptions(options);
@@ -317,6 +347,65 @@ int main(int argc, char **argv) {
     QTextStream(stdout) << "Scroll stitcher overlap, fixed bands, regular text and hint exclusion OK\n";
     return 0;
   }
+
+  // Claim the request socket before capturing anything, so a second daemon
+  // leaves quietly instead of flashing a capture nobody asked for.
+  const bool daemon = parser.isSet(QStringLiteral("daemon"));
+  bool idleTimeoutValid = true;
+  const int idleTimeout =
+      parser.value(QStringLiteral("idle-timeout")).toInt(&idleTimeoutValid);
+  if (parser.isSet(QStringLiteral("idle-timeout")) &&
+      (!idleTimeoutValid || idleTimeout < 0)) {
+    qCritical() << "--idle-timeout expects a number of seconds";
+    return 1;
+  }
+  int listener = -1;
+  // Held until exit; it makes this process the socket's only owner.
+  int socketLock = -1;
+  std::string ownedSocket;
+  if (daemon) {
+    listener = activatedSocket();
+    if (listener < 0) {
+      const std::string path = daemonSocketPath();
+      std::string listenError;
+      switch (listenForCaptureRequests(path, &listener, &socketLock,
+                                       &listenError)) {
+      case ListenResult::AlreadyRunning:
+        QTextStream(stdout) << "A daemon is already listening on "
+                            << QString::fromStdString(path) << '\n';
+        return 0;
+      case ListenResult::Failed:
+        qCritical().noquote() << QString::fromStdString(listenError);
+        return 1;
+      case ListenResult::Listening:
+        ownedSocket = path;
+        break;
+      }
+    }
+  }
+  // Stop requests (systemctl stop, Ctrl+C) must clean up even while the
+  // daemon is still starting; a signal that arrives before the event loop
+  // waits in the pipe until it runs.
+  std::unique_ptr<QSocketNotifier> quitSignals;
+  if (daemon &&
+      // Nonblocking, so a burst of signals can never stall the handler; one
+      // unread byte is enough to wake the event loop.
+      socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC | SOCK_NONBLOCK, 0,
+                 signalPipe) == 0) {
+    quitSignals = std::make_unique<QSocketNotifier>(signalPipe[0],
+                                                    QSocketNotifier::Read);
+    QObject::connect(quitSignals.get(), &QSocketNotifier::activated, &app,
+                     &QCoreApplication::quit);
+    for (const int signal : {SIGTERM, SIGINT, SIGHUP})
+      std::signal(signal, requestQuit);
+  }
+  struct SocketCleanup {
+    const std::string &path;
+    ~SocketCleanup() {
+      if (!path.empty())
+        unlink(path.c_str());
+    }
+  } socketCleanup{ownedSocket};
 
   std::unique_ptr<QTemporaryDir> testSettings;
   if (app.arguments().contains(QStringLiteral("--self-test")) ||
@@ -553,14 +642,20 @@ int main(int argc, char **argv) {
   engine.addImageProvider(QStringLiteral("captures"),
                           new CaptureImageProvider(&controller));
   const bool uiTest = app.arguments().contains(QStringLiteral("--ui-self-test"));
-  if (!uiTest)
+  if (!uiTest && !daemon)
     QObject::connect(&controller, &CaptureController::done, &app,
                      &QCoreApplication::quit);
 
   std::vector<std::unique_ptr<QQuickView>> views;
-  for (int i = 0; i < controller.monitors().size(); ++i) {
+  auto createView = [&](int i) -> std::unique_ptr<QQuickView> {
     const auto &monitor = controller.monitors()[i];
     auto view = std::make_unique<QQuickView>(&engine, nullptr);
+    // Every clip in the overlay is an axis-aligned rectangle, which the scene
+    // graph scissors; a 5K depth/stencil buffer would only hold ~60 MB.
+    QSurfaceFormat format = view->format();
+    format.setDepthBufferSize(0);
+    format.setStencilBufferSize(0);
+    view->setFormat(format);
     view->setResizeMode(QQuickView::SizeRootObjectToView);
     view->setColor(Qt::transparent);
     view->setFlags(Qt::FramelessWindowHint);
@@ -588,8 +683,14 @@ int main(int argc, char **argv) {
         QUrl(QStringLiteral("qrc:/qt/qml/OmarchyScreenshot/Overlay.qml")));
     if (view->status() != QQuickView::Ready) {
       qCritical() << "Cannot load Overlay.qml for" << monitor.name;
-      return 1;
+      return {};
     }
+    return view;
+  };
+  for (int i = 0; i < controller.monitors().size(); ++i) {
+    auto view = createView(i);
+    if (!view)
+      return 1;
     views.push_back(std::move(view));
   }
   if (!controller.finishCapture(&error)) {
@@ -603,15 +704,18 @@ int main(int argc, char **argv) {
     const auto *image =
         root->findChild<QObject *>(QStringLiteral("screenCaptureImage"));
     const QString expectedSource =
-        QStringLiteral("image://captures/screen/%1").arg(i);
+        QStringLiteral("image://captures/screen/%1/%2")
+            .arg(i)
+            .arg(controller.captureGeneration());
     if (root->property("screenIndex").toInt() != i || !image ||
         image->property("source").toUrl().toString() != expectedSource) {
       qCritical() << "Wrong image source for" << monitor.name;
       return 1;
     }
-    view->show();
+    if (!daemon)
+      view->show();
   }
-  if (!views.empty())
+  if (!views.empty() && !daemon)
     (uiTest ? views.front() : views.back())->requestActivate();
 
   std::unique_ptr<QQuickView> scrollBar;
@@ -716,8 +820,11 @@ int main(int argc, char **argv) {
         scrollBar->hide();
       if (longView)
         longView->hide();
-      for (auto &view : views)
-        view->show();
+      // A resident daemon resetting for the next capture has no screenshot
+      // to return to.
+      if (controller.imagesReady())
+        for (auto &view : views)
+          view->show();
     }
   });
   // Unmap whichever overlay is showing as soon as an export starts. Success
@@ -764,6 +871,127 @@ int main(int argc, char **argv) {
   });
   QObject::connect(&controller, &CaptureController::scrollAwaitingPaneChanged,
                    &app, [&] { QTimer::singleShot(0, &app, updateScrollInputMask); });
+
+  // Resident mode keeps the engine, views and graphics state alive between
+  // captures, so a request only has to capture and show. Exiting is the only
+  // way to return the driver's GPU buffers, so an idle daemon can quit and
+  // let systemd start a fresh one on the next request.
+  std::unique_ptr<QSocketNotifier> requests;
+  QTimer idleTimer;
+  idleTimer.setSingleShot(true);
+  idleTimer.setInterval(std::chrono::seconds(idleTimeout));
+  // A press during an export asks for the next capture; it waits for done().
+  bool captureQueued = false;
+  // The connections below call these, so they live as long as main().
+  auto overlayVisible = [&] {
+    return !views.empty() && views.back()->isVisible();
+  };
+  // A capture lasts until it is copied, saved or cancelled, and scrolling
+  // capture or an export hides the overlay along the way.
+  auto capturing = [&] {
+    return overlayVisible() || controller.exporting() ||
+           controller.scrollState() !=
+               int(CaptureController::ScrollState::Idle);
+  };
+  auto becomeIdle = [&] {
+    for (const auto &view : views)
+      view->hide();
+    // Scroll views are rare and bound to one output, so they are rebuilt
+    // on use. done() can come from their own key handler, hence later.
+    if (scrollBar)
+      scrollBar.release()->deleteLater();
+    if (longView)
+      longView.release()->deleteLater();
+    // reset() clears the status, which must not reveal what an export hid.
+    hiddenForExport.clear();
+    controller.saveAnnotationColor();
+    controller.reset();
+    if (idleTimeout > 0)
+      idleTimer.start();
+  };
+  auto showOverlay = [&] {
+    idleTimer.stop();
+    const auto &monitors = controller.monitors();
+    for (int i = 0; i < monitors.size(); ++i) {
+      QQuickItem *root = views[i]->rootObject();
+      root->setProperty("screenRect", monitors[i].geometry);
+      QMetaObject::invokeMethod(root, "resetForCapture");
+      views[i]->show();
+    }
+    views.back()->requestActivate();
+  };
+  auto captureAndShow = [&] {
+    if (capturing()) {
+      if (controller.exporting())
+        captureQueued = true;
+      else if (overlayVisible())
+        views.back()->requestActivate();
+      return;
+    }
+    controller.reset();
+    QString captureError;
+    if (!controller.startCapture(&captureError) ||
+        !controller.finishCapture(&captureError)) {
+      qWarning().noquote() << captureError;
+      becomeIdle();
+      return;
+    }
+    // Outputs can change while the daemon waits; views follow the screens.
+    const auto &monitors = controller.monitors();
+    bool sameOutputs = views.size() == size_t(monitors.size());
+    for (int i = 0; sameOutputs && i < monitors.size(); ++i)
+      sameOutputs = views[i]->screen() == monitors[i].screen;
+    if (!sameOutputs) {
+      views.clear();
+      for (int i = 0; i < monitors.size(); ++i)
+        if (auto view = createView(i))
+          views.push_back(std::move(view));
+      if (views.size() != size_t(monitors.size())) {
+        views.clear();
+        becomeIdle();
+        return;
+      }
+    }
+    showOverlay();
+  };
+  if (daemon) {
+    QObject::connect(&idleTimer, &QTimer::timeout, &app, [&] {
+      if (capturing())
+        return;
+      // Serve a request that queued as the timer fired. One that arrives
+      // after this check is never acknowledged, so its client captures.
+      if (takeCaptureRequests(listener) > 0)
+        captureAndShow();
+      else
+        QCoreApplication::quit();
+    });
+    QObject::connect(&controller, &CaptureController::done, &app, [&] {
+      becomeIdle();
+      if (std::exchange(captureQueued, false))
+        QTimer::singleShot(0, &app, captureAndShow);
+    });
+    // A failed export brings the overlay back, so a queued press was only
+    // about the capture still on screen.
+    QObject::connect(&controller, &CaptureController::statusChanged, &app, [&] {
+      if (!controller.status().isEmpty())
+        captureQueued = false;
+    });
+    // Draining every queued request coalesces repeated presses.
+    requests = std::make_unique<QSocketNotifier>(listener, QSocketNotifier::Read);
+    QObject::connect(requests.get(), &QSocketNotifier::activated, &app,
+                     [listener, captureAndShow] {
+                       if (takeCaptureRequests(listener) > 0)
+                         captureAndShow();
+                     });
+    // Socket activation starts the daemon for a request that is already
+    // waiting; the capture taken while starting up is the one it asked for.
+    pollfd pending{listener, POLLIN, 0};
+    if (poll(&pending, 1, 0) > 0 && takeCaptureRequests(listener) > 0)
+      showOverlay();
+    else
+      becomeIdle();
+  }
+
   if (app.arguments().contains(QStringLiteral("--scroll-ui-integration-test"))) {
     const auto waitFor = [&](const std::function<bool()> &ready, int timeout = 10000) {
       QElapsedTimer elapsed;
