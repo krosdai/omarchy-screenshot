@@ -30,7 +30,6 @@
 #include <QProcess>
 #include <QSettings>
 #include <QSocketNotifier>
-#include <QSurfaceFormat>
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QTest>
@@ -650,12 +649,8 @@ int main(int argc, char **argv) {
   auto createView = [&](int i) -> std::unique_ptr<QQuickView> {
     const auto &monitor = controller.monitors()[i];
     auto view = std::make_unique<QQuickView>(&engine, nullptr);
-    // Every clip in the overlay is an axis-aligned rectangle, which the scene
-    // graph scissors; a 5K depth/stencil buffer would only hold ~60 MB.
-    QSurfaceFormat format = view->format();
-    format.setDepthBufferSize(0);
-    format.setStencilBufferSize(0);
-    view->setFormat(format);
+    // Qt Quick uses depth testing to order opaque images, including mosaic
+    // patches above the captured screen. Keep its default depth/stencil buffer.
     view->setResizeMode(QQuickView::SizeRootObjectToView);
     view->setColor(Qt::transparent);
     view->setFlags(Qt::FramelessWindowHint);
@@ -1207,6 +1202,8 @@ int main(int argc, char **argv) {
   bool mosaicExportChanged = false;
   bool rectangleShapeWorked = false;
   bool mosaicPixelsVisible = false;
+  bool mosaicDraftWindowMatchesImage = false;
+  bool mosaicWindowMatchesImage = false;
   bool mosaicMaskTransparent = false;
   bool dragBorderPixelsVisible = false;
   bool dragBorderGone = false;
@@ -1220,11 +1217,40 @@ int main(int argc, char **argv) {
   bool exportedTextRows = false;
   bool doubleClickCopied = false;
   if (uiTest) {
+    const auto windowShowsMosaic = [&] {
+      // grabToImage() renders into an offscreen target with its own depth
+      // buffer, so it cannot detect incorrect stacking in the actual window.
+      const auto &monitor = controller.monitors()[0];
+      const QImage window = selfTestLogicalImage(
+          views[0]->grabWindow(), QSizeF(views[0]->width(), views[0]->height()));
+      if (window.width() <= 650 || window.height() <= 450 ||
+          monitor.mosaicImage.isNull())
+        return false;
+      int matches = 0;
+      int samples = 0;
+      // Sample block centers inside the mosaic, away from its drag border.
+      for (int y = 306; y < 450; y += 12)
+        for (int x = 306; x < 650; x += 12) {
+          const QColor expected = monitor.mosaicImage.pixelColor(
+              x * monitor.mosaicImage.width() / monitor.geometry.width(),
+              y * monitor.mosaicImage.height() / monitor.geometry.height());
+          const QColor actual = window.pixelColor(x, y);
+          ++samples;
+          if (qAbs(expected.red() - actual.red()) <= 1 &&
+              qAbs(expected.green() - actual.green()) <= 1 &&
+              qAbs(expected.blue() - actual.blue()) <= 1)
+            ++matches;
+        }
+      if (matches != samples)
+        QTextStream(stdout) << "Mosaic window diagnostic: " << matches << "/"
+                            << samples << " samples match\n";
+      return matches == samples;
+    };
     controller.pointerPress(0, 100, 100);
     controller.pointerMove(0, 900, 600);
     controller.pointerRelease(0, 900, 600);
     baseline = controller.renderedImage();
-    QTimer::singleShot(100, &app, [&] {
+    QTimer::singleShot(100, &app, [&, windowShowsMosaic] {
       views[0]->requestActivate();
       auto displayedAction = [&](int index) {
         QVariant action;
@@ -1529,7 +1555,10 @@ int main(int argc, char **argv) {
                             .alpha() == 0;
               });
       }
-      QTimer::singleShot(100, &app, [&] {
+      QTimer::singleShot(50, &app, [&, windowShowsMosaic] {
+        mosaicDraftWindowMatchesImage = windowShowsMosaic();
+      });
+      QTimer::singleShot(100, &app, [&, windowShowsMosaic] {
         sendMouse(QEvent::MouseButtonRelease, QPointF(700, 500), Qt::LeftButton,
                   Qt::NoButton);
         dragBorderGone = !views[0]
@@ -1554,7 +1583,8 @@ int main(int argc, char **argv) {
               shape.contains(monitor.geometry.topLeft() + QPointF(475, 375)) &&
               !shape.contains(monitor.geometry.topLeft() + QPointF(710, 260));
         }
-        QTimer::singleShot(50, &app, [&] {
+        QTimer::singleShot(50, &app, [&, windowShowsMosaic] {
+          mosaicWindowMatchesImage = windowShowsMosaic();
           auto *overlay = views[0]->rootObject()->findChild<QQuickItem *>(
               QStringLiteral("mosaicOverlay"));
           if (!overlay)
@@ -2206,6 +2236,8 @@ int main(int argc, char **argv) {
                           << ", export changed: " << mosaicExportChanged
                           << ", rectangle shape: " << rectangleShapeWorked
                           << ", visible pixels: " << mosaicPixelsVisible
+                          << ", draft window: " << mosaicDraftWindowMatchesImage
+                          << ", committed window: " << mosaicWindowMatchesImage
                           << ", transparent outside: " << mosaicMaskTransparent
                           << ", drag border: " << dragBorderPixelsVisible
                           << ", border gone: " << dragBorderGone
@@ -2240,6 +2272,7 @@ int main(int argc, char **argv) {
                        altFromEditorWorked && altFromToolWorked &&
                        dragPreviewWorked && mosaicExportChanged &&
                        rectangleShapeWorked && mosaicPixelsVisible &&
+                       mosaicDraftWindowMatchesImage && mosaicWindowMatchesImage &&
                        mosaicMaskTransparent && dragBorderPixelsVisible &&
                        dragBorderGone && penDraftWorked && penExportChanged &&
                        penPreviewVisible && textVisible && multilineEditing &&
