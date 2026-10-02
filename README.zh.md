@@ -1,5 +1,7 @@
 # Omarchy Screenshot
 
+[English](README.md) | 简体中文
+
 为 Hyprland / Omarchy 编写的 Qt 6 截图工具。截图前抓取每块显示器的画面，然后在所有显示器上显示冻结的覆盖层。选区使用 Hyprland 全局坐标，因此可以从一块屏幕拖到另一块屏幕。
 
 ## 功能
@@ -55,7 +57,7 @@ OMARCHY_SCREENSHOT_LANGUAGE=ja omarchy-screenshot
 
 ## 构建与运行
 
-在 Arch / Omarchy 上需要 `cmake`、`gcc`、`pkgconf`、`wayland`、`wayland-protocols`、`qt6-base`、`qt6-declarative`、`qt6-wayland`、`qt6-tools`、`layer-shell-qt`、`grim`、`wl-clipboard` 和 `hyprland`。滚动截图使用 Hyprland 暴露的 wlr 虚拟指针协议。程序通过 `ext-image-copy-capture-v1` 协议直接抓取显示器画面；合成器不支持该协议或显示器经过旋转时改用 `grim`。默认构建自动化测试还需要 `python`；只构建程序时可传入 `-DBUILD_TESTING=OFF`。
+在 Arch / Omarchy 上需要 `cmake`、`gcc`、`pkgconf`、`qt6-base`、`qt6-declarative`、`qt6-wayland`、`qt6-tools`、`layer-shell-qt`、`wayland`、`wayland-protocols`、`grim`、`wl-clipboard` 和 `hyprland`。程序通过 `ext-image-copy-capture-v1` 协议直接抓取显示器画面；合成器不支持该协议或显示器经过旋转时改用 `grim`。滚动截图使用 Hyprland 暴露的 wlr 虚拟指针协议。默认构建自动化测试还需要 `python`；只构建程序时可传入 `-DBUILD_TESTING=OFF`。
 
 支持 `x86_64` 和 `aarch64`（64 位 ARM）架构。在 ARM 机器上使用相同的构建命令，CMake 会使用本机工具链生成 ARM 可执行文件；`PKGBUILD` 也声明了这两种架构，无需通过 `makepkg --ignorearch` 跳过架构检查。
 
@@ -82,7 +84,7 @@ cmake --build build -j
 ./build/omarchy-screenshot
 ```
 
-运行 `ctest --test-dir build --output-on-failure`，无需桌面会话即可检查所有翻译的完整性、占位符、内嵌加载和语言优先级／回退。
+运行 `ctest --test-dir build --output-on-failure`，无需桌面会话即可检查所有翻译的完整性、占位符、内嵌加载，以及语言优先级／回退；同时离线检查 1、1.25、1.5 和 2 倍缩放下的光标图标抓取和逻辑坐标像素采样。缩放测试使用独立进程和软件渲染，不修改桌面缩放。`--ui-self-test` 中的光标、马赛克和画笔预览检查也会把抓取图像转换为逻辑尺寸后采样，可直接在 2 倍缩放的 Wayland 会话中运行。
 
 连接至少两块显示器时，可运行 `./build/omarchy-screenshot --self-test`，在内存中检查跨屏选区、撤销与重做及编号标记，不显示覆盖层或保存图片。
 
@@ -91,8 +93,6 @@ cmake --build build -j
 滚动拼接和长图界面可分别运行 `./build/omarchy-screenshot --scroll-stitch-test` 与 `./build/omarchy-screenshot --scroll-ui-self-test` 检查。
 
 工具栏的离线交互检查可运行 `QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME= QT_QUICK_BACKEND=software /usr/lib/qt6/bin/qmltestrunner -input tests`，覆盖分组菜单、调色盘、主题一致性和按钮位置。
-
-构建后运行 `ctest --test-dir build --output-on-failure`，可离线检查 1、1.25、1.5 和 2 倍缩放下的光标图标抓取及逻辑坐标像素采样。测试使用独立进程和软件渲染，不修改桌面缩放。`--ui-self-test` 中的光标、马赛克和画笔预览检查也会将抓取图像转换为逻辑尺寸后采样，可直接在 2 倍缩放的 Wayland 会话中运行。
 
 也可执行 `cmake --install build --prefix ~/.local`，安装到 `~/.local/bin/omarchy-screenshot`。需要在 Hyprland Wayland 会话中运行。
 
@@ -126,11 +126,11 @@ cmake --build build -j
 | Z | 撤销上一步标注 |
 | X | 重做已撤销的标注 |
 | C | 复制截图并退出 |
-| S | 保存截图并退出 |
+| S | 保存截图到图片目录（设置 `OMARCHY_SCREENSHOT_DIR` 时保存到该目录）并退出 |
 | Esc / 右键 | 退出 |
 
 窗口识别用于选择屏幕上的几何区域，截图内容为当时显示在该区域内的像素。被其他窗口遮挡的部分仍会显示遮挡窗口；这一点与单独导出窗口缓冲区的功能不同。
 
 ## 许可证
 
-Copyright (C) 2026 Andy Stewart。本项目源码按 GNU 通用公共许可证第 3 版（`GPL-3.0-only`）发布，许可证全文见 [LICENSE](LICENSE)。随项目提供的 [虚拟指针协议定义](protocols/wlr-virtual-pointer-unstable-v1.xml) 使用 MIT 许可证，许可证文本包含在该文件中。
+Copyright (C) 2026 Andy Stewart。本项目源码按 GNU 通用公共许可证第 3 版（`GPL-3.0-only`）发布，许可证全文见 [LICENSE](LICENSE)。随项目提供的[虚拟指针协议定义](protocols/wlr-virtual-pointer-unstable-v1.xml)使用 MIT 许可证，许可证文本包含在该文件中。
