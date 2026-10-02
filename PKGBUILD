@@ -1,6 +1,6 @@
 # Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 pkgname=omarchy-screenshot
-pkgver=0.1.9
+pkgver=0.1.10
 pkgrel=1
 pkgdesc="Qt 6 screenshot and annotation tool for Omarchy and Hyprland"
 arch=('x86_64' 'aarch64')
