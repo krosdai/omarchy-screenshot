@@ -67,6 +67,8 @@ class CaptureController final : public QObject {
   Q_PROPERTY(bool scrollStopping READ scrollStopping NOTIFY scrollStoppingChanged)
   Q_PROPERTY(QRectF scrollRegion READ scrollRegion NOTIFY scrollStateChanged)
   Q_PROPERTY(bool imagesReady READ imagesReady NOTIFY imagesReadyChanged)
+  // Bumped per capture so image URLs change and QML never shows a stale one.
+  Q_PROPERTY(int captureGeneration READ captureGeneration NOTIFY imagesReadyChanged)
   Q_PROPERTY(bool exporting READ exporting NOTIFY exportingChanged)
 
 public:
@@ -78,6 +80,9 @@ public:
   // the two calls so the caller can load the UI meanwhile.
   bool startCapture(QString *error);
   bool finishCapture(QString *error);
+  // Drops the previous capture and its edits so a resident process can
+  // start the next one from a clean slate.
+  void reset();
   const QVector<CaptureMonitor> &monitors() const { return m_monitors; }
   QRectF selection() const { return m_selection; }
   QRectF hovered() const { return m_hovered; }
@@ -103,6 +108,7 @@ public:
   const QImage &scrollMosaicImage() const { return m_scrollMosaicImage; }
   QRectF scrollRegion() const { return m_scrollRegion; }
   bool imagesReady() const { return m_imagesReady; }
+  int captureGeneration() const { return m_captureGeneration; }
   bool exporting() const { return m_exporting; }
   QImage renderedImage() const;
   void paintScrollPreview(QPainter &painter, const QRectF &source,
@@ -179,6 +185,7 @@ private:
     QString error;
   };
 
+  static QVariantMap defaultToolVariants();
   QPointF globalPoint(int screenIndex, qreal x, qreal y) const;
   QRectF candidateAt(const QPointF &point) const;
   void setSelection(const QRectF &rect);
@@ -214,11 +221,7 @@ private:
   int m_resizeEdges = 0;
   QString m_tool = QStringLiteral("select");
   QString m_toolBeforeText = QStringLiteral("select");
-  QVariantMap m_toolVariants = {
-      {QStringLiteral("rect"), QStringLiteral("rect")},
-      {QStringLiteral("ellipse"), QStringLiteral("ellipse")},
-      {QStringLiteral("arrow"), QStringLiteral("arrow")},
-      {QStringLiteral("pen"), QStringLiteral("pen")}};
+  QVariantMap m_toolVariants = defaultToolVariants();
   QString m_annotationColor = QStringLiteral("#ff4b55");
   bool m_darkToolbar = false;
   qreal m_reviewScale = 1;
@@ -255,6 +258,7 @@ private:
   std::future<CaptureResult> m_capture;
   std::future<QByteArray> m_clients;
   bool m_imagesReady = false;
+  int m_captureGeneration = 0;
   bool m_exporting = false;
   QPointer<QThread> m_exportThread;
 };

@@ -1,0 +1,11 @@
+[Unit]
+Description=Omarchy Screenshot resident overlay
+PartOf=graphical-session.target
+After=graphical-session.target
+Requires=omarchy-screenshot.socket
+
+[Service]
+Type=simple
+# Stay warm for ten minutes after the last capture, then exit to return the
+# GPU buffers; the socket starts a fresh daemon on the next request.
+ExecStart=@CMAKE_INSTALL_FULL_BINDIR@/omarchy-screenshot --daemon --idle-timeout 600
