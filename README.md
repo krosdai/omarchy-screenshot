@@ -157,7 +157,7 @@ The root [PKGBUILD](PKGBUILD) defines the AUR package. `.github/workflows/publis
 | Z | Undo the last annotation |
 | X | Redo an undone annotation |
 | C | Copy the screenshot and exit |
-| S | Save the screenshot and exit |
+| S | Save the screenshot to your Pictures directory, or to `$OMARCHY_SCREENSHOT_DIR` if set, and exit |
 | Esc / right-click | Exit |
 
 Window detection selects a geometric region on the screen; the screenshot contains the pixels visible there at capture time. If another window obscures part of the selected window, the screenshot includes that overlapping window. This is not the same as exporting an individual window's buffer.
