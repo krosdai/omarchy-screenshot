@@ -85,7 +85,7 @@ cmake --build build -j
 ./build/omarchy-screenshot
 ```
 
-Run `ctest --test-dir build --output-on-failure` to check translation completeness, placeholders, embedded catalog loading, and language precedence and fallback, along with cursor-icon grabs and logical-pixel sampling at 1, 1.25, 1.5, and 2x scaling. These tests do not require a desktop session; the scaling tests use separate processes and software rendering and leave the desktop scale untouched. The cursor, mosaic, and pen preview checks in `--ui-self-test` also sample grabs at logical size, so it runs directly in a 2x Wayland session.
+Run `ctest --test-dir build --output-on-failure` to check translation completeness, placeholders, embedded catalog loading, and language precedence and fallback, along with scroll stitching and cursor-icon grabs and logical-pixel sampling at 1, 1.25, 1.5, and 2x scaling. These tests do not require a desktop session; the scaling tests use separate processes and software rendering and leave the desktop scale untouched. The cursor, mosaic, and pen preview checks in `--ui-self-test` also sample grabs at logical size, so it runs directly in a 2x Wayland session.
 
 With at least two monitors connected, run `./build/omarchy-screenshot --self-test` to check cross-monitor selection, undo and redo, and numbered markers in memory, without displaying overlays or saving images.
 

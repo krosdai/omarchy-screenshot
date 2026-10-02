@@ -108,6 +108,10 @@ if(BUILD_TESTING)
             --lupdate $<TARGET_FILE:Qt6::lupdate>
             --source "${CMAKE_CURRENT_SOURCE_DIR}"
     )
+    add_test(NAME scroll-stitch
+        COMMAND omarchy-screenshot --scroll-stitch-test)
+    set_tests_properties(scroll-stitch PROPERTIES
+        ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 endif()
 
 install(TARGETS omarchy-screenshot RUNTIME DESTINATION bin)
