@@ -6,22 +6,12 @@ A Qt 6 screenshot and annotation tool for Hyprland and Omarchy. It captures each
 
 ## Features
 
-- Hover to detect windows in the current workspace and the monitor beneath the pointer, then click to select the highlighted region.
-- Drag to select any rectangle, including across monitors. Move or resize the selection afterward.
-- The selection tool (V) shows eight square resize handles at the corners and edge midpoints, each 9×9 px with a 31×31 px hit area. Regular screenshots and long images share the same handles; on a long image they neither scale with zoom nor get clipped by the image. Arrow keys expand the corresponding edge by 1 px; Shift+arrow keys shrink it by 1 px. Hold a key to keep adjusting. Handles disappear when you switch tools.
-- Annotate with rectangles, ellipses, arrows, a pen, text, rectangular mosaic redaction, lines, a highlighter, spotlights, numbered markers, rounded or filled shapes, and curved or double-headed arrows. Undo and redo are supported. Mosaic redaction shows a temporary border while you drag; the border disappears on release.
-- Rectangles, ellipses, arrows, and pens each have a primary toolbar button. Lines belong to the arrow group; spotlights belong to the ellipse group. Click a group button to choose a style from an icon-only secondary toolbar, or start drawing in a blank area to dismiss it automatically. Each group button shows its current style, which its keyboard shortcut recalls.
-- Pen strokes filter mouse jitter and connect sampled points with smooth quadratic Bézier curves. Preview and export use the same path.
-- The text editor has a transparent background and a dashed border, with vertically centered lines. Use Shift+Enter for a new line.
-- Choose a drawing color from the leftmost toolbar button. Select a preset or drag the palette's hue slider and color area to pick any color. The app remembers your choice between launches. New shapes, pen strokes, text, and temporary mosaic borders use the new color; existing annotations retain theirs.
-- The toolbar uses thin-line icons inspired by QQ's screenshot tool. Switch between light and dark themes at the top of the palette; the app remembers your choice. Selected buttons leave space between the highlight, shortcut, and icon.
-- Annotation shortcuts are within easy reach of the left hand on a QWERTY keyboard. H starts or continues a scrolling capture, and = and - zoom a long image. Toolbar buttons show their shortcut and icon; hover over them for descriptions.
-- Neither regular screenshots nor scrolling captures include the mouse cursor. Copy a PNG to the Wayland clipboard or save it to your Pictures directory. Set `OMARCHY_SCREENSHOT_DIR` to use a different save directory.
-- Before you annotate, click the scrolling capture button to capture a long image. With one window in the selection, capture starts immediately; with several, click the window to capture, or press Esc to cancel. The app captures only where that window and the selection overlap, scrolls with a virtual mouse wheel, and stitches the frames together. It avoids repeating fixed headers and footers, and keeps the long image captured so far if frames cannot be stitched reliably.
-- During scrolling, no preview is shown. Click a blank area of the capture region to stop; moving the mouse does not stop it. The long image then fits on screen at no more than 4/5 of the screen height. After zooming in, drag inside the image with the selection tool (V) to scroll through it, while the border and handles still resize the selection and annotation tools still draw. You can also scroll with the mouse wheel, zoom with Ctrl+wheel, or drag with the middle button, then annotate, copy, or save. Continue capture extends the long image and keeps your annotations; if the window stops responding, click the area that actually scrolls, then click Continue scrolling.
-- Regular screenshots and long images share the toolbar style, grouped icons, and palette. For regular screenshots, the scrolling capture button sits right of the numbered marker; for long images, zoom out, zoom in, and Continue capture sit between the numbered marker and undo.
-- Tooltips, tool names, theme names, hints, and error messages follow the system language. Long text wraps, and Hebrew uses right-to-left layout.
-- Supports negative coordinates, rotated monitors, and mixed scaling. Export combines the images from each monitor.
+- Quickly select a window, a monitor, or any region, across screens, then adjust the selection.
+- Annotate with shapes, arrows, a pen, text, and numbered markers, hide private details with mosaic, and undo or redo.
+- Capture long pages by scrolling, with automatic stitching; continue capturing and annotate the long image.
+- Copy or save in one click, or double-click the selection to copy it.
+- Customize the annotation color and the light or dark theme; the app remembers your preferences.
+- Use it in 42 language or regional variants, with multiple monitors, mixed scaling, and rotated screens.
 
 ## Interface languages
 
