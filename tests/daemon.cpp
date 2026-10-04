@@ -11,6 +11,7 @@
 #include <QJsonObject>
 #include <QScreen>
 #include <QSettings>
+#include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QTest>
 
@@ -264,10 +265,19 @@ private slots:
     screen.fill(Qt::darkGreen);
     QVERIFY(screen.save(temp.filePath(QStringLiteral("screen.png"))));
     QVERIFY(write(QStringLiteral("hyprctl"),
-                  "#!/bin/sh\nif [ \"$2\" = monitors ]; then /usr/bin/cat \"$DAEMON_TEST_DIR/monitors.json\"; else printf '[]'; fi\n", true));
+                  "#!/bin/sh\n"
+                  "if [ \"$2\" = monitors ]; then /usr/bin/cat \"$DAEMON_TEST_DIR/monitors.json\"; "
+                  "elif [ \"$2\" = getoption ]; then printf '{\"bool\":false}'; "
+                  "elif [ \"$1\" = eval ]; then "
+                  "case \"$2\" in *true*) printf hidden > \"$DAEMON_TEST_DIR/cursor\";; "
+                  "*) printf visible > \"$DAEMON_TEST_DIR/cursor\";; esac; printf ok; "
+                  "else printf '[]'; fi\n", true));
     QVERIFY(write(QStringLiteral("grim"),
-                  "#!/bin/sh\n/usr/bin/cat \"$DAEMON_TEST_DIR/screen.png\"\n", true));
+                  "#!/bin/sh\n"
+                  "[ \"$(/usr/bin/cat \"$DAEMON_TEST_DIR/cursor\")\" = hidden ] || exit 1\n"
+                  "/usr/bin/cat \"$DAEMON_TEST_DIR/screen.png\"\n", true));
     qputenv("DAEMON_TEST_DIR", QFile::encodeName(temp.path()));
+    qputenv("XDG_RUNTIME_DIR", QFile::encodeName(temp.path()));
     const QByteArray path = qgetenv("PATH");
     qputenv("PATH", QFile::encodeName(temp.path()));
     qputenv("XDG_SESSION_TYPE", "wayland");
@@ -278,6 +288,10 @@ private slots:
     CaptureController controller;
     QString error;
     QVERIFY2(controller.initialize(&error), qPrintable(error));
+    QFile cursorState(temp.filePath(QStringLiteral("cursor")));
+    QVERIFY(cursorState.open(QIODevice::ReadOnly));
+    QCOMPARE(cursorState.readAll(), QByteArray("visible"));
+    cursorState.close();
     const int firstGeneration = controller.captureGeneration();
     controller.pointerPress(0, 10, 10);
     controller.pointerMove(0, 120, 90);
@@ -291,12 +305,28 @@ private slots:
     QCOMPARE(controller.toolVariants().value(QStringLiteral("rect")).toString(),
              QStringLiteral("fillrect"));
 
+    QSignalSpy pinRequested(&controller, &CaptureController::pinRequested);
+    QSignalSpy done(&controller, &CaptureController::done);
+    const QImage finished = controller.renderedImage();
+    const QRectF selection = controller.selection();
+    controller.pin();
+    QCOMPARE(pinRequested.count(), 1);
+    QCOMPARE(pinRequested.first()[0].value<QImage>(), finished);
+    QCOMPARE(pinRequested.first()[1].toRectF(), selection);
+    QCOMPARE(done.count(), 0);
+    controller.finishPin(false);
+    QVERIFY(controller.selected());
+    QVERIFY(!controller.status().isEmpty());
+    controller.finishPin(true);
+    QCOMPARE(done.count(), 1);
+
     controller.reset();
     QVERIFY(!controller.selected());
     QVERIFY(!controller.imagesReady());
     QVERIFY(controller.selection().isEmpty());
     QVERIFY(controller.annotations().isEmpty());
     QVERIFY(controller.monitors().isEmpty());
+    QCOMPARE(pinRequested.first()[0].value<QImage>(), finished);
     QCOMPARE(controller.tool(), QStringLiteral("select"));
     QCOMPARE(controller.toolVariants().value(QStringLiteral("rect")).toString(),
              QStringLiteral("rect"));

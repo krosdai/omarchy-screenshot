@@ -10,6 +10,7 @@ A Qt 6 screenshot and annotation tool for Hyprland and Omarchy, with frozen over
 - Annotate with shapes, arrows, a pen, text, and numbered markers, hide private details with mosaic, and undo or redo.
 - Capture long pages by scrolling, with automatic stitching; continue capturing and annotate the long image.
 - Copy or save in one click, or double-click the selection to copy it.
+- Pin screenshots and annotations above other windows, keep multiple pins, drag across monitors, and dismiss each with its top-right × button.
 - Customize the annotation color and the light or dark theme; the app remembers your preferences.
 - Use it in 42 language or regional variants, with multiple monitors, mixed scaling, and rotated screens.
 
@@ -38,11 +39,17 @@ A Qt 6 screenshot and annotation tool for Hyprland and Omarchy, with frozen over
 | Alt with the text tool | Confirm the text and return to the previous tool |
 | Z | Undo the last annotation |
 | X | Redo an undone annotation |
+| P / pin button | Pin the selection and annotations to the desktop and finish capturing; long images remain complete and fit on screen |
+| Drag a pinned image / click its top-right × | Move across monitors / dismiss that pin; double-clicking a pin has no action |
 | C | Copy the screenshot and exit |
 | S | Save the screenshot to your Pictures directory, or to `$OMARCHY_SCREENSHOT_DIR` if set, and exit |
 | Esc / right-click | Exit |
 
 Window captures include the pixels visible in the selection, including overlapping windows.
+
+Normal and scrolling captures exclude the pointer, including software cursors changing shape during a frame. Each capture temporarily suppresses compositor cursor rendering and waits about 550 ms for it to take effect, then restores the previous state on success or failure without changing configuration files.
+
+Pins are temporary and are not automatically saved or copied. Existing pins hide during a new capture and return afterward. The process stays alive while pins remain; without resident mode, closing the last pin exits it.
 
 ## Interface languages
 
@@ -90,7 +97,7 @@ cmake --install build
 
 ### Tests
 
-`ctest --test-dir build --output-on-failure` checks translations, scroll stitching, the daemon, and image sampling at different scales without a desktop session. Run these additional checks with `./build/omarchy-screenshot` and the listed options:
+`ctest --test-dir build --output-on-failure` checks translations, scroll stitching, cursor suppression and restoration, the daemon, and image sampling at different scales without a desktop session. Inside Hyprland, `./build/cursor-live-test` checks monitor captures and scrolling frames while the pointer moves across outputs and changes between three shapes; it briefly covers each screen with a solid fixture. Run these additional checks with `./build/omarchy-screenshot` and the listed options:
 
 | Option | Checks |
 | --- | --- |
@@ -98,10 +105,11 @@ cmake --install build
 | `--ui-self-test --language he` | Toolbar, themes, annotations, export, and translated layouts; uses temporary settings |
 | `--scroll-stitch-test` | Scroll stitching |
 | `--scroll-ui-self-test` | Long-image interface |
+| `--pin-ui-self-test` | Pin export, real cross-monitor dragging, multiple pins, capture exclusion, and close button; requires two monitors |
 
 ### Resident mode
 
-Off by default. Reusing Qt and GPU initialization reduces overlay startup on a 5K display from about 230 ms to 60–90 ms; the first capture still needs a normal startup. The daemon exits after 10 idle minutes and uses about 100 MB of RAM plus 320 MB of GPU memory while running.
+Off by default. Reusing Qt and GPU initialization reduces startup overhead; each capture still waits for compositor cursor suppression. The daemon exits after 10 idle minutes and uses about 100 MB of RAM plus 320 MB of GPU memory while running.
 
 ```sh
 systemctl --user enable --now omarchy-screenshot.socket   # Enable

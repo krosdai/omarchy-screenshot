@@ -124,6 +124,8 @@ public:
   Q_INVOKABLE void redo();
   Q_INVOKABLE void copy();
   Q_INVOKABLE void save();
+  Q_INVOKABLE void pin();
+  void finishPin(bool success);
   Q_INVOKABLE void cancel();
   Q_INVOKABLE void setTool(const QString &tool);
   Q_INVOKABLE void restoreToolBeforeText();
@@ -161,6 +163,7 @@ signals:
   void imagesReadyChanged();
   void exportingChanged();
   void done();
+  void pinRequested(const QImage &image, const QRectF &rect);
   void scrollStateChanged();
   void scrollImageChanged();
   void scrollFrameAboutToCapture();
@@ -195,6 +198,7 @@ private:
   void appendAnnotation(const QVariantMap &item);
   void setScrollState(ScrollState state);
   void captureScrollFrame();
+  void finishScrollFrame(const QImage &frame, const QString &error);
   void prepareScrollFrame();
   void prepareScrollStep();
   void sendScrollStep();
@@ -261,4 +265,5 @@ private:
   int m_captureGeneration = 0;
   bool m_exporting = false;
   QPointer<QThread> m_exportThread;
+  QPointer<QThread> m_scrollCaptureThread;
 };

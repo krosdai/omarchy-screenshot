@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 cmake_minimum_required(VERSION 3.21)
-project(omarchy_screenshot VERSION 0.1.10 LANGUAGES C CXX)
+project(omarchy_screenshot VERSION 0.1.11 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -54,6 +54,12 @@ qt_add_executable(omarchy-screenshot
     src/main.cpp
     src/capturecontroller.cpp
     src/capturecontroller.h
+    src/cursorcaptureguard.cpp
+    src/cursorcaptureguard.h
+    src/pinnedimages.cpp
+    src/pinnedimages.h
+    src/pinnedwindows.cpp
+    src/pinnedwindows.h
     src/scrollstitcher.cpp
     src/scrollstitcher.h
     src/longimageitem.cpp
@@ -75,10 +81,11 @@ set_source_files_properties(qml/AnnotationToolbar.qml PROPERTIES QT_RESOURCE_ALI
 set_source_files_properties(qml/LongOverlay.qml PROPERTIES QT_RESOURCE_ALIAS LongOverlay.qml)
 set_source_files_properties(qml/ScrollCapture.qml PROPERTIES QT_RESOURCE_ALIAS ScrollCapture.qml)
 set_source_files_properties(qml/SelectionResizeHandle.qml PROPERTIES QT_RESOURCE_ALIAS SelectionResizeHandle.qml)
+set_source_files_properties(qml/PinOverlay.qml PROPERTIES QT_RESOURCE_ALIAS PinOverlay.qml)
 qt_add_qml_module(omarchy-screenshot
     URI OmarchyScreenshot
     VERSION 1.0
-    QML_FILES qml/Overlay.qml qml/ToolbarGlyph.qml qml/AnnotationToolbar.qml qml/LongOverlay.qml qml/ScrollCapture.qml qml/SelectionResizeHandle.qml
+    QML_FILES qml/Overlay.qml qml/ToolbarGlyph.qml qml/AnnotationToolbar.qml qml/LongOverlay.qml qml/ScrollCapture.qml qml/SelectionResizeHandle.qml qml/PinOverlay.qml
 )
 
 target_link_libraries(omarchy-screenshot PRIVATE
@@ -97,7 +104,7 @@ endforeach()
 qt_add_translations(omarchy-screenshot
     TS_FILES ${screenshot_translations}
     SOURCES src/main.cpp src/capturecontroller.cpp src/virtualpointer.cpp qml/Overlay.qml
-        qml/AnnotationToolbar.qml qml/LongOverlay.qml qml/ScrollCapture.qml
+        qml/AnnotationToolbar.qml qml/LongOverlay.qml qml/ScrollCapture.qml qml/PinOverlay.qml
     LUPDATE_OPTIONS -no-obsolete -locations none
 )
 
@@ -119,6 +126,7 @@ if(BUILD_TESTING)
         tests/daemon.cpp
         src/daemonsocket.cpp
         src/capturecontroller.cpp
+        src/cursorcaptureguard.cpp
         src/scrollstitcher.cpp
         src/virtualpointer.cpp
         ${VIRTUAL_POINTER_CODE}
@@ -132,6 +140,43 @@ if(BUILD_TESTING)
     add_test(NAME daemon COMMAND daemon-test)
     set_tests_properties(daemon PROPERTIES
         ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1")
+
+    qt_add_executable(cursor-capture-test tests/cursorcapture.cpp
+        src/cursorcaptureguard.cpp src/cursorcaptureguard.h)
+    target_include_directories(cursor-capture-test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(cursor-capture-test PRIVATE Qt6::Core Qt6::Test)
+    add_test(NAME cursor-capture COMMAND cursor-capture-test)
+    set_tests_properties(cursor-capture PROPERTIES TIMEOUT 30)
+
+    # Manual compositor integration test; CTest also runs without Wayland.
+    qt_add_executable(cursor-live-test tests/cursor_live.cpp
+        src/capturecontroller.cpp src/cursorcaptureguard.cpp
+        src/scrollstitcher.cpp src/virtualpointer.cpp ${VIRTUAL_POINTER_CODE}
+        src/screencapture.cpp ${protocol_sources})
+    target_include_directories(cursor-live-test PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR})
+    target_link_libraries(cursor-live-test PRIVATE
+        Qt6::Quick Qt6::Test LayerShellQt::Interface PkgConfig::WAYLAND_CLIENT)
+
+    qt_add_executable(pin-test tests/pinnedimages.cpp
+        src/pinnedimages.cpp src/pinnedimages.h
+        src/pinnedwindows.cpp src/pinnedwindows.h)
+    target_include_directories(pin-test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(pin-test PRIVATE Qt6::Quick Qt6::Test LayerShellQt::Interface)
+    target_compile_definitions(pin-test PRIVATE
+        PIN_OVERLAY="${CMAKE_CURRENT_SOURCE_DIR}/qml/PinOverlay.qml")
+    add_test(NAME pins COMMAND pin-test)
+    set_tests_properties(pins PROPERTIES
+        ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORMTHEME=;QT_QUICK_BACKEND=software")
+
+    find_program(QML_TEST_RUNNER NAMES qmltestrunner qmltestrunner6
+        HINTS "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}")
+    if(QML_TEST_RUNNER)
+        add_test(NAME toolbar COMMAND "${QML_TEST_RUNNER}"
+            -input "${CMAKE_CURRENT_SOURCE_DIR}/tests/tst_toolbar.qml")
+        set_tests_properties(toolbar PROPERTIES
+            ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORMTHEME=;QT_QUICK_BACKEND=software")
+    endif()
 endif()
 
 include(GNUInstallDirs)

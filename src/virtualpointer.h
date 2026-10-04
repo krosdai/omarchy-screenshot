@@ -26,6 +26,7 @@ public:
   bool moveTo(const QPointF &point, const QRectF &desktop, QString *error);
   bool refreshFocus(QString *error);
   bool clickAt(const QPointF &point, const QRectF &desktop, QString *error);
+  bool setLeftButtonPressed(bool pressed, QString *error);
   bool scrollAt(const QPointF &point, const QRectF &desktop, int steps,
                 QString *error);
 

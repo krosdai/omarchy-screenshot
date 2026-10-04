@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: təsdiqlə · Shift+Enter: yeni sətir · Alt: təsdiqlə və əvvəlki alətə qayıt</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Ekran görüntüsünü sabitlə</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>Saxlama mümkün deyil: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Ekran görüntüsünü sabitləmək mümkün deyil.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Hyprland-da ekran görüntüləri çəkin və onlara qeydlər əlavə edin.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Sabitlənmiş ekran görüntüsünü bağla</translation>
         </message>
     </context>
 </TS>

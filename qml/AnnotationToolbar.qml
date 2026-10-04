@@ -42,6 +42,7 @@ Item {
     ]).concat([
         {key: "Z", action: "undo", hint: qsTr("Undo")},
         {key: "X", action: "redo", hint: qsTr("Redo")},
+        {key: "P", action: "pin", hint: qsTr("Pin screenshot")},
         {key: "C", action: "copy", hint: qsTr("Copy screenshot")},
         {key: "S", action: "save", hint: qsTr("Save PNG")}
     ])
@@ -207,6 +208,8 @@ Item {
             captureController.adjustSelectionEdge(event.key, (event.modifiers & Qt.ShiftModifier) !== 0)
         else if (captureController.selected && event.key === Qt.Key_C) { root.commitRequested(); captureController.copy() }
         else if (captureController.selected && event.key === Qt.Key_S) { root.commitRequested(); captureController.save() }
+        else if (captureController.selected && event.key === Qt.Key_P &&
+                 event.modifiers === Qt.NoModifier) { root.commitRequested(); captureController.pin() }
         else if (captureController.selected && event.key === Qt.Key_X &&
                  event.modifiers === Qt.NoModifier) captureController.redo()
         else if (captureController.selected && event.key === Qt.Key_Z &&
@@ -376,6 +379,7 @@ Item {
                                 case "undo": captureController.undo(); break
                                 case "copy": captureController.copy(); break
                                 case "save": captureController.save(); break
+                                case "pin": captureController.pin(); break
                                 case "redo": captureController.redo(); break
                                 case "scroll": captureController.startScroll(); break
                                 case "resume": captureController.resumeScroll(); break

@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: confirmare · Shift+Enter: rând nou · Alt: confirmare și revenire la instrumentul anterior</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Fixează captura de ecran</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>Nu se poate salva: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Captura de ecran nu poate fi fixată.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Realizați și adnotați capturi de ecran în Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Închide captura de ecran fixată</translation>
         </message>
     </context>
 </TS>

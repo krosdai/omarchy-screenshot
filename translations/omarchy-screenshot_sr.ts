@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: потврди · Shift+Enter: нови ред · Alt: потврди и врати се на претходну алатку</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Закачи снимак екрана</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>Није могуће сачувати: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Није могуће закачити снимак екрана.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Снимајте екран и додајте напомене у Hyprland-у.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Затвори закачени снимак екрана</translation>
         </message>
     </context>
 </TS>

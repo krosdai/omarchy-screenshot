@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: ຢືນຢັນ · Shift+Enter: ແຖວໃໝ່ · Alt: ຢືນຢັນແລະກັບໄປເຄື່ອງມືກ່ອນໜ້າ</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>ປັກໝຸດຮູບພາບໜ້າຈໍ</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>ບໍ່ສາມາດບັນທຶກ: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>ບໍ່ສາມາດປັກໝຸດຮູບພາບໜ້າຈໍໄດ້.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>ຈັບພາບໜ້າຈໍແລະເພີ່ມຄຳອະທິບາຍປະກອບໃນ Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>ປິດຮູບພາບໜ້າຈໍທີ່ປັກໝຸດ</translation>
         </message>
     </context>
 </TS>

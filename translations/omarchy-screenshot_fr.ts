@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter : confirmer · Shift+Enter : nouvelle ligne · Alt : confirmer et revenir à l’outil précédent</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Épingler la capture</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>Impossible d’enregistrer : %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Impossible d’épingler la capture.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Capturez et annotez des captures d’écran sous Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Fermer la capture épinglée</translation>
         </message>
     </context>
 </TS>

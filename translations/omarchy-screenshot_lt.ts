@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: patvirtinti · Shift+Enter: nauja eilutė · Alt: patvirtinti ir grįžti prie ankstesnio įrankio</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Prisegti ekrano kopiją</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>Nepavyksta įrašyti: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Nepavyko prisegti ekrano kopijos.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Fiksuokite ekrano kopijas ir pridėkite anotacijų Hyprland aplinkoje.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Užverti prisegtą ekrano kopiją</translation>
         </message>
     </context>
 </TS>

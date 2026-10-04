@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: vahvista · Shift+Enter: uusi rivi · Alt: vahvista ja palaa edelliseen työkaluun</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Kiinnitä kuvakaappaus</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>Tallentaminen ei onnistu: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Kuvakaappausta ei voi kiinnittää.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Ota kuvakaappauksia ja lisää niihin merkintöjä Hyprlandissa.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Sulje kiinnitetty kuvakaappaus</translation>
         </message>
     </context>
 </TS>

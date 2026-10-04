@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: kinnita · Shift+Enter: uus rida · Alt: kinnita ja naase eelmise tööriista juurde</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Kinnita kuvatõmmis</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>Salvestamine pole võimalik: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Kuvatõmmist ei saa kinnitada.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Tee Hyprlandis kuvatõmmiseid ja lisa neile märkusi.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Sulge kinnitatud kuvatõmmis</translation>
         </message>
     </context>
 </TS>
