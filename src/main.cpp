@@ -34,6 +34,7 @@
 #include <QScopeGuard>
 #include <QSocketNotifier>
 #include <QSignalSpy>
+#include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QTest>
 #include <QTextStream>
@@ -1129,9 +1130,11 @@ int main(int argc, char **argv) {
       return fail(QStringLiteral("Multiple pins failed"));
     const auto &pinViews = pinWindows.views();
     const QImage preview = selfTestLogicalImage(pinViews[1]->grabWindow(), secondScreen.size());
-    if (!preview.isNull())
+    // The preview holds captured screen pixels, so keep it out of shared /tmp.
+    const QString runtime = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
+    if (!preview.isNull() && !runtime.isEmpty())
       preview.copy(QRect(QPoint(150, 150), QSize(280, 180))).save(
-          QStringLiteral("/tmp/omarchy-pin-preview.png"));
+          runtime + QStringLiteral("/omarchy-pin-preview.png"));
     auto request = std::async(std::launch::async, [&] {
       return forwardCaptureRequest(ownedSocket);
     });
