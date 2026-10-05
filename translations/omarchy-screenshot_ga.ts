@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: deimhnigh · Shift+Enter: líne nua · Alt: deimhnigh agus fill ar an uirlis roimhe seo</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Pionnáil an ghabháil scáileáin</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>Ní féidir sábháil: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Ní féidir an ghabháil scáileáin a phionnáil.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Glac seatanna scáileáin agus cuir nótaí leo ar Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Dún an ghabháil scáileáin phionnáilte</translation>
         </message>
     </context>
 </TS>

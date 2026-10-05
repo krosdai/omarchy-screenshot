@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: apstiprināt · Shift+Enter: jauna rinda · Alt: apstiprināt un atgriezties pie iepriekšējā rīka</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Piespraust ekrānuzņēmumu</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>Nevar saglabāt: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Nevar piespraust ekrānuzņēmumu.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Uzņemiet ekrānuzņēmumus un pievienojiet anotācijas Hyprland vidē.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Aizvērt piesprausto ekrānuzņēmumu</translation>
         </message>
     </context>
 </TS>

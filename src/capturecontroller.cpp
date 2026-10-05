@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "capturecontroller.h"
+#include "cursorcaptureguard.h"
 #include "virtualpointer.h"
 
 #include "screencapture.h"
@@ -46,17 +47,6 @@ QByteArray run(const QString &program, const QStringList &arguments,
     return {};
   }
   return process.readAllStandardOutput();
-}
-
-QImage captureWithoutCursor(const QString &option, const QString &value,
-                            QString *error) {
-  // grim excludes the cursor unless -c is supplied. Use the same cursor-free
-  // capture path for monitor images and every scrolling frame, including resume.
-  // PPM avoids PNG compression while retaining the original pixels.
-  return QImage::fromData(
-      run(QStringLiteral("grim"),
-          {QStringLiteral("-t"), QStringLiteral("ppm"), option, value,
-           QStringLiteral("-")}, error));
 }
 
 bool copyBytes(const QByteArray &bytes, const QString &mimeType,
@@ -190,6 +180,8 @@ CaptureController::CaptureController(QObject *parent) : QObject(parent) {
 }
 
 CaptureController::~CaptureController() {
+  if (m_scrollCaptureThread)
+    m_scrollCaptureThread->wait();
   if (m_exportThread)
     m_exportThread->wait();
   saveAnnotationColor();
@@ -203,6 +195,9 @@ CaptureController::CaptureResult
 CaptureController::captureMonitors(const QStringList &names,
                                    const QList<bool> &direct) {
   CaptureResult result;
+  CursorCaptureGuard cursor(&result.error);
+  if (!cursor.ready())
+    return result;
   QStringList wanted;
   for (int i = 0; i < names.size(); ++i)
     wanted.append(direct[i] ? names[i] : QString());
@@ -605,12 +600,37 @@ void CaptureController::prepareScrollFrame() {
 void CaptureController::captureScrollFrame() {
   if (m_scrollState != ScrollState::Capturing || m_scrollAwaitingPane)
     return;
+  if (m_scrollCaptureThread) {
+    // A cancelled generation may still be restoring the cursor. Keep the UI
+    // responsive while waiting for it before capturing the final/resumed frame.
+    const int generation = m_scrollGeneration;
+    QTimer::singleShot(20, this, [this, generation] {
+      if (generation == m_scrollGeneration)
+        captureScrollFrame();
+    });
+    return;
+  }
   const QRect region = m_scrollRegion.toAlignedRect();
   const QString geometry =
       QStringLiteral("%1,%2 %3x%4")
           .arg(region.x()).arg(region.y()).arg(region.width()).arg(region.height());
-  QString error;
-  const QImage frame = captureWithoutCursor(QStringLiteral("-g"), geometry, &error);
+  const int generation = m_scrollGeneration;
+  m_scrollCaptureThread = QThread::create([this, generation, geometry] {
+    QString error;
+    const QImage frame = captureRegionWithoutCursor(geometry, &error);
+    QMetaObject::invokeMethod(this, [this, generation, frame, error] {
+      if (generation == m_scrollGeneration &&
+          m_scrollState == ScrollState::Capturing && !m_scrollAwaitingPane)
+        finishScrollFrame(frame, error);
+    }, Qt::QueuedConnection);
+  });
+  connect(m_scrollCaptureThread, &QThread::finished, m_scrollCaptureThread,
+          &QObject::deleteLater);
+  m_scrollCaptureThread->start();
+}
+
+void CaptureController::finishScrollFrame(const QImage &frame,
+                                         const QString &error) {
   emit scrollFrameCaptured();
   if (frame.isNull()) {
     setStatus(error.isEmpty() ? tr("Cannot capture the scroll area") : error);
@@ -1588,6 +1608,21 @@ void CaptureController::save() {
     QTextStream(stdout) << path << '\n';
     return QString();
   });
+}
+
+void CaptureController::pin() {
+  if (m_exporting)
+    return;
+  const QImage image = renderedImage();
+  if (!image.isNull())
+    emit pinRequested(image, m_selection);
+}
+
+void CaptureController::finishPin(bool success) {
+  if (success)
+    emit done();
+  else
+    setStatus(tr("Cannot pin screenshot."));
 }
 
 void CaptureController::cancel() { emit done(); }

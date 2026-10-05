@@ -107,6 +107,21 @@ bool VirtualPointer::clickAt(const QPointF &point, const QRectF &desktop,
   return true;
 }
 
+bool VirtualPointer::setLeftButtonPressed(bool pressed, QString *error) {
+  if (!m_pointer)
+    return false;
+  zwlr_virtual_pointer_v1_button(m_pointer, pointerTime(), 0x110,
+                                 pressed ? WL_POINTER_BUTTON_STATE_PRESSED
+                                         : WL_POINTER_BUTTON_STATE_RELEASED);
+  zwlr_virtual_pointer_v1_frame(m_pointer);
+  if (wl_display_roundtrip(m_display) < 0) {
+    if (error)
+      *error = tr("Cannot send a mouse click");
+    return false;
+  }
+  return true;
+}
+
 bool VirtualPointer::refreshFocus(QString *error) {
   if (!m_pointer)
     return false;

@@ -4,6 +4,8 @@
 #include "capturecontroller.h"
 #include "daemonsocket.h"
 #include "longimageitem.h"
+#include "pinnedimages.h"
+#include "pinnedwindows.h"
 #include "virtualpointer.h"
 #include "selftestimage.h"
 
@@ -29,8 +31,8 @@
 #include <QRegion>
 #include <QProcess>
 #include <QSettings>
+#include <QScopeGuard>
 #include <QSocketNotifier>
-#include <QSurfaceFormat>
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QTest>
@@ -156,11 +158,12 @@ void requestQuit(int) {
 
 int main(int argc, char **argv) {
   // A plain launch hands the capture to the resident daemon, or to the
-  // systemd socket that starts one, and exits before Qt starts. Nothing
-  // listens unless the user enabled resident mode.
+  // systemd socket that starts one, and exits before Qt starts. A standalone
+  // process with pinned images also listens until its last pin is closed.
   if (argc == 1 && forwardCaptureRequest(daemonSocketPath()))
     return 0;
   QGuiApplication app(argc, argv);
+  app.setQuitOnLastWindowClosed(false);
   app.setApplicationName(QStringLiteral("omarchy-screenshot"));
   app.setOrganizationName(QStringLiteral("Omarchy"));
 
@@ -172,7 +175,8 @@ int main(int argc, char **argv) {
         QStringLiteral("scroll-stitch-test"),
         QStringLiteral("scroll-ui-self-test"),
         QStringLiteral("scroll-integration-test"),
-        QStringLiteral("scroll-ui-integration-test")}) {
+        QStringLiteral("scroll-ui-integration-test"),
+        QStringLiteral("pin-ui-self-test")}) {
     options.append(QCommandLineOption(test));
     options.last().setFlags(QCommandLineOption::HiddenFromHelp);
   }
@@ -411,6 +415,7 @@ int main(int argc, char **argv) {
   if (app.arguments().contains(QStringLiteral("--self-test")) ||
       app.arguments().contains(QStringLiteral("--ui-self-test")) ||
       app.arguments().contains(QStringLiteral("--scroll-ui-self-test")) ||
+      app.arguments().contains(QStringLiteral("--pin-ui-self-test")) ||
       app.arguments().contains(QStringLiteral("--scroll-ui-integration-test"))) {
     testSettings = std::make_unique<QTemporaryDir>();
     QSettings::setDefaultFormat(QSettings::IniFormat);
@@ -642,20 +647,16 @@ int main(int argc, char **argv) {
   engine.addImageProvider(QStringLiteral("captures"),
                           new CaptureImageProvider(&controller));
   const bool uiTest = app.arguments().contains(QStringLiteral("--ui-self-test"));
-  if (!uiTest && !daemon)
-    QObject::connect(&controller, &CaptureController::done, &app,
-                     &QCoreApplication::quit);
+  const bool pinUiTest = app.arguments().contains(QStringLiteral("--pin-ui-self-test"));
+  PinnedImages pins;
+  PinnedWindows pinWindows(&engine, &pins);
 
   std::vector<std::unique_ptr<QQuickView>> views;
   auto createView = [&](int i) -> std::unique_ptr<QQuickView> {
     const auto &monitor = controller.monitors()[i];
     auto view = std::make_unique<QQuickView>(&engine, nullptr);
-    // Every clip in the overlay is an axis-aligned rectangle, which the scene
-    // graph scissors; a 5K depth/stencil buffer would only hold ~60 MB.
-    QSurfaceFormat format = view->format();
-    format.setDepthBufferSize(0);
-    format.setStencilBufferSize(0);
-    view->setFormat(format);
+    // Qt Quick uses depth testing to order opaque images, including mosaic
+    // patches above the captured screen. Keep its default depth/stencil buffer.
     view->setResizeMode(QQuickView::SizeRootObjectToView);
     view->setColor(Qt::transparent);
     view->setFlags(Qt::FramelessWindowHint);
@@ -906,11 +907,15 @@ int main(int argc, char **argv) {
     hiddenForExport.clear();
     controller.saveAnnotationColor();
     controller.reset();
-    if (idleTimeout > 0)
+    pinWindows.setSuspended(false);
+    if (!daemon && pins.count() == 0 && !captureQueued && !pinUiTest)
+      QCoreApplication::quit();
+    else if (daemon && idleTimeout > 0 && pins.count() == 0)
       idleTimer.start();
   };
   auto showOverlay = [&] {
     idleTimer.stop();
+    pinWindows.setSuspended(true);
     const auto &monitors = controller.monitors();
     for (int i = 0; i < monitors.size(); ++i) {
       QQuickItem *root = views[i]->rootObject();
@@ -928,6 +933,9 @@ int main(int argc, char **argv) {
         views.back()->requestActivate();
       return;
     }
+    pinWindows.setSuspended(true);
+    // Commit the hidden pin surfaces before taking the next screenshot.
+    QGuiApplication::sync();
     controller.reset();
     QString captureError;
     if (!controller.startCapture(&captureError) ||
@@ -938,6 +946,11 @@ int main(int argc, char **argv) {
     }
     // Outputs can change while the daemon waits; views follow the screens.
     const auto &monitors = controller.monitors();
+    if (pins.count() > 0 && !pinWindows.setMonitors(monitors)) {
+      qWarning() << "Cannot update pinned screenshot outputs";
+      becomeIdle();
+      return;
+    }
     bool sameOutputs = views.size() == size_t(monitors.size());
     for (int i = 0; sameOutputs && i < monitors.size(); ++i)
       sameOutputs = views[i]->screen() == monitors[i].screen;
@@ -954,9 +967,76 @@ int main(int argc, char **argv) {
     }
     showOverlay();
   };
+  auto listenForRequests = [&] {
+    if (requests || listener < 0)
+      return;
+    requests = std::make_unique<QSocketNotifier>(listener, QSocketNotifier::Read);
+    QObject::connect(requests.get(), &QSocketNotifier::activated, &app,
+                     [listener, captureAndShow] {
+                       if (takeCaptureRequests(listener) > 0)
+                         captureAndShow();
+                     });
+  };
+  if (!uiTest) {
+    QObject::connect(&controller, &CaptureController::done, &app, [&] {
+      becomeIdle();
+      if (std::exchange(captureQueued, false))
+        QTimer::singleShot(0, &app, captureAndShow);
+    });
+    // A failed export restores the current capture instead of serving a
+    // request queued while it was exporting.
+    QObject::connect(&controller, &CaptureController::statusChanged, &app, [&] {
+      if (!controller.status().isEmpty())
+        captureQueued = false;
+    });
+  }
+  QObject::connect(&controller, &CaptureController::pinRequested, &app,
+                   [&](const QImage &image, QRectF rect) {
+    if (!pinWindows.setMonitors(controller.monitors())) {
+      controller.finishPin(false);
+      return;
+    }
+    if (controller.scrollState() == int(CaptureController::ScrollState::Reviewing)) {
+      const QRectF screen = scrollScreenRect();
+      const qreal scale = std::min({controller.property("reviewScale").toReal(),
+                                    (screen.width() - 60) / image.width(),
+                                    (screen.height() * .8) / image.height()});
+      rect = QRectF(screen.topLeft() + QPointF(30, 30), QSizeF(image.size()) * scale);
+    }
+    const bool added = pins.add(image, rect) >= 0;
+    // Without resident mode a pin keeps this process alive. Let subsequent
+    // plain launches reuse it, so older pins can be excluded from captures.
+    if (added && !uiTest && !daemon && !requests) {
+      const std::string path = pinUiTest
+          ? testSettings->filePath(QStringLiteral("omarchy-screenshot.sock")).toStdString()
+          : daemonSocketPath();
+      std::string listenError;
+      if (listenForCaptureRequests(path, &listener, &socketLock, &listenError) ==
+          ListenResult::Listening) {
+        ownedSocket = path;
+        listenForRequests();
+      } else if (!listenError.empty()) {
+        qWarning().noquote() << QString::fromStdString(listenError);
+      }
+    }
+    controller.finishPin(added);
+  });
+  QObject::connect(&pins, &PinnedImages::countChanged, &app, [&] {
+    if (pins.count() > 0)
+      idleTimer.stop();
+    else if (!capturing()) {
+      if (!daemon && !pinUiTest)
+        QTimer::singleShot(0, &app, [&] {
+          if (!capturing() && pins.count() == 0)
+            QCoreApplication::quit();
+        });
+      else if (daemon && idleTimeout > 0)
+        idleTimer.start();
+    }
+  });
   if (daemon) {
     QObject::connect(&idleTimer, &QTimer::timeout, &app, [&] {
-      if (capturing())
+      if (capturing() || pins.count() > 0)
         return;
       // Serve a request that queued as the timer fired. One that arrives
       // after this check is never acknowledged, so its client captures.
@@ -965,24 +1045,8 @@ int main(int argc, char **argv) {
       else
         QCoreApplication::quit();
     });
-    QObject::connect(&controller, &CaptureController::done, &app, [&] {
-      becomeIdle();
-      if (std::exchange(captureQueued, false))
-        QTimer::singleShot(0, &app, captureAndShow);
-    });
-    // A failed export brings the overlay back, so a queued press was only
-    // about the capture still on screen.
-    QObject::connect(&controller, &CaptureController::statusChanged, &app, [&] {
-      if (!controller.status().isEmpty())
-        captureQueued = false;
-    });
     // Draining every queued request coalesces repeated presses.
-    requests = std::make_unique<QSocketNotifier>(listener, QSocketNotifier::Read);
-    QObject::connect(requests.get(), &QSocketNotifier::activated, &app,
-                     [listener, captureAndShow] {
-                       if (takeCaptureRequests(listener) > 0)
-                         captureAndShow();
-                     });
+    listenForRequests();
     // Socket activation starts the daemon for a request that is already
     // waiting; the capture taken while starting up is the one it asked for.
     pollfd pending{listener, POLLIN, 0};
@@ -990,6 +1054,118 @@ int main(int argc, char **argv) {
       showOverlay();
     else
       becomeIdle();
+  }
+
+  if (pinUiTest) {
+    const auto fail = [&](const QString &message) {
+      QTextStream(stderr) << message << ": " << error << '\n';
+      return 2;
+    };
+    const auto monitors = controller.monitors();
+    if (monitors.size() < 2)
+      return fail(QStringLiteral("Pin self-test needs two monitors"));
+    const QRectF firstScreen = monitors[0].geometry;
+    const QRectF secondScreen = monitors[1].geometry;
+    QRectF desktop;
+    for (const auto &monitor : monitors)
+      desktop = desktop.united(monitor.geometry);
+    controller.pointerPress(0, 100, 100);
+    controller.pointerMove(0, 360, 260);
+    controller.pointerRelease(0, 360, 260);
+    controller.setTool(QStringLiteral("fillrect"));
+    controller.pointerPress(0, 120, 120);
+    controller.pointerMove(0, 150, 150);
+    controller.pointerRelease(0, 150, 150);
+    const QImage finished = controller.renderedImage();
+    const QRectF original = controller.selection();
+    views[0]->rootObject()->forceActiveFocus();
+    QKeyEvent pinKey(QEvent::KeyPress, Qt::Key_P, Qt::NoModifier, QStringLiteral("p"));
+    QCoreApplication::sendEvent(views[0].get(), &pinKey);
+    QTest::qWait(150);
+    if (pins.count() != 1 || pins.image(1) != finished || controller.selected() ||
+        overlayVisible() || pins.geometry(1) != original) {
+      qWarning() << "Pin completion diagnostic:" << pins.count()
+                 << (pins.image(1) == finished) << controller.selected()
+                 << overlayVisible() << pins.geometry(1) << original;
+      return fail(QStringLiteral("Pin shortcut, annotation export or capture completion failed"));
+    }
+    VirtualPointer input;
+    const auto release = qScopeGuard([&] { input.setLeftButtonPressed(false, &error); });
+    const QPointF grip(70, 70);
+    const QPointF start = original.topLeft() + grip;
+    const QPointF target = secondScreen.topLeft() + QPointF(120, 120) + grip;
+    if (!input.moveTo(start, desktop, &error))
+      return fail(QStringLiteral("Cannot position pointer"));
+    QTest::qWait(60);
+    if (!input.setLeftButtonPressed(true, &error))
+      return fail(QStringLiteral("Cannot press pointer"));
+    QTest::qWait(50);
+    if (pins.draggingId() != 1)
+      return fail(QStringLiteral("Pin did not receive real pointer press"));
+    if (!input.moveTo(target, desktop, &error))
+      return fail(QStringLiteral("Cannot drag across outputs"));
+    QTest::qWait(100);
+    // Continue after the entire image left its original output: the grab
+    // must remain alive until the physical button is released.
+    const QPointF finalTarget = target + QPointF(40, 40);
+    if (!input.moveTo(finalTarget, desktop, &error))
+      return fail(QStringLiteral("Cannot continue cross-output drag"));
+    QTest::qWait(80);
+    input.setLeftButtonPressed(false, &error);
+    QTest::qWait(60);
+    const QRectF moved = pins.geometry(1);
+    if (QLineF(moved.topLeft(), secondScreen.topLeft() + QPointF(160, 160)).length() > 3 ||
+        moved.size() != original.size() || pins.draggingId() != -1)
+      return fail(QStringLiteral("Cross-output drag changed size or lost its grab"));
+    QImage marker(80, 60, QImage::Format_RGB32);
+    marker.fill(QColor("#ed12b7"));
+    const QRectF markerRect(firstScreen.topLeft() + QPointF(450, 300), QSizeF(80, 60));
+    const int markerId = pins.add(marker, markerRect);
+    QTest::qWait(80);
+    if (pins.count() != 2)
+      return fail(QStringLiteral("Multiple pins failed"));
+    const auto &pinViews = pinWindows.views();
+    const QImage preview = selfTestLogicalImage(pinViews[1]->grabWindow(), secondScreen.size());
+    if (!preview.isNull())
+      preview.copy(QRect(QPoint(150, 150), QSize(280, 180))).save(
+          QStringLiteral("/tmp/omarchy-pin-preview.png"));
+    auto request = std::async(std::launch::async, [&] {
+      return forwardCaptureRequest(ownedSocket);
+    });
+    QElapsedTimer requestTime;
+    requestTime.start();
+    while (!overlayVisible() && requestTime.elapsed() < 2000)
+      QTest::qWait(20);
+    if (!overlayVisible() || !request.get())
+      return fail(QStringLiteral("Pinned session did not accept another screenshot request"));
+    QTest::qWait(100);
+    const auto &capturedMonitor = controller.monitors()[0];
+    const QPoint sample(qRound(480 * capturedMonitor.image.width() / firstScreen.width()),
+                         qRound(330 * capturedMonitor.image.height() / firstScreen.height()));
+    if (capturedMonitor.image.pixelColor(sample) == QColor("#ed12b7"))
+      return fail(QStringLiteral("Existing pins leaked into the next capture"));
+    controller.cancel();
+    QTest::qWait(80);
+    if (!input.moveTo(moved.center(), desktop, &error))
+      return fail(QStringLiteral("Cannot point at pin"));
+    QTest::qWait(40);
+    if (!input.clickAt(moved.center(), desktop, &error) ||
+        !input.clickAt(moved.center(), desktop, &error))
+      return fail(QStringLiteral("Cannot double-click pin"));
+    QTest::qWait(80);
+    if (pins.count() != 2)
+      return fail(QStringLiteral("Double-click unexpectedly dismissed a pin"));
+    const QPointF close = PinnedImages::closeRect(moved).center();
+    input.moveTo(close, desktop, &error);
+    QTest::qWait(40);
+    input.clickAt(close, desktop, &error);
+    QTest::qWait(80);
+    if (pins.count() != 1 || !pins.image(1).isNull() || pins.image(markerId).isNull())
+      return fail(QStringLiteral("Close button did not dismiss only its pin"));
+    pins.close(markerId);
+    QTextStream(stdout) << "Pin shortcut, annotations, real cross-output drag, multiple pins, "
+                           "capture exclusion and close button OK\n";
+    return 0;
   }
 
   if (app.arguments().contains(QStringLiteral("--scroll-ui-integration-test"))) {
@@ -1207,6 +1383,8 @@ int main(int argc, char **argv) {
   bool mosaicExportChanged = false;
   bool rectangleShapeWorked = false;
   bool mosaicPixelsVisible = false;
+  bool mosaicDraftWindowMatchesImage = false;
+  bool mosaicWindowMatchesImage = false;
   bool mosaicMaskTransparent = false;
   bool dragBorderPixelsVisible = false;
   bool dragBorderGone = false;
@@ -1220,11 +1398,40 @@ int main(int argc, char **argv) {
   bool exportedTextRows = false;
   bool doubleClickCopied = false;
   if (uiTest) {
+    const auto windowShowsMosaic = [&] {
+      // grabToImage() renders into an offscreen target with its own depth
+      // buffer, so it cannot detect incorrect stacking in the actual window.
+      const auto &monitor = controller.monitors()[0];
+      const QImage window = selfTestLogicalImage(
+          views[0]->grabWindow(), QSizeF(views[0]->width(), views[0]->height()));
+      if (window.width() <= 650 || window.height() <= 450 ||
+          monitor.mosaicImage.isNull())
+        return false;
+      int matches = 0;
+      int samples = 0;
+      // Sample block centers inside the mosaic, away from its drag border.
+      for (int y = 306; y < 450; y += 12)
+        for (int x = 306; x < 650; x += 12) {
+          const QColor expected = monitor.mosaicImage.pixelColor(
+              x * monitor.mosaicImage.width() / monitor.geometry.width(),
+              y * monitor.mosaicImage.height() / monitor.geometry.height());
+          const QColor actual = window.pixelColor(x, y);
+          ++samples;
+          if (qAbs(expected.red() - actual.red()) <= 1 &&
+              qAbs(expected.green() - actual.green()) <= 1 &&
+              qAbs(expected.blue() - actual.blue()) <= 1)
+            ++matches;
+        }
+      if (matches != samples)
+        QTextStream(stdout) << "Mosaic window diagnostic: " << matches << "/"
+                            << samples << " samples match\n";
+      return matches == samples;
+    };
     controller.pointerPress(0, 100, 100);
     controller.pointerMove(0, 900, 600);
     controller.pointerRelease(0, 900, 600);
     baseline = controller.renderedImage();
-    QTimer::singleShot(100, &app, [&] {
+    QTimer::singleShot(100, &app, [&, windowShowsMosaic] {
       views[0]->requestActivate();
       auto displayedAction = [&](int index) {
         QVariant action;
@@ -1529,7 +1736,10 @@ int main(int argc, char **argv) {
                             .alpha() == 0;
               });
       }
-      QTimer::singleShot(100, &app, [&] {
+      QTimer::singleShot(50, &app, [&, windowShowsMosaic] {
+        mosaicDraftWindowMatchesImage = windowShowsMosaic();
+      });
+      QTimer::singleShot(100, &app, [&, windowShowsMosaic] {
         sendMouse(QEvent::MouseButtonRelease, QPointF(700, 500), Qt::LeftButton,
                   Qt::NoButton);
         dragBorderGone = !views[0]
@@ -1554,7 +1764,8 @@ int main(int argc, char **argv) {
               shape.contains(monitor.geometry.topLeft() + QPointF(475, 375)) &&
               !shape.contains(monitor.geometry.topLeft() + QPointF(710, 260));
         }
-        QTimer::singleShot(50, &app, [&] {
+        QTimer::singleShot(50, &app, [&, windowShowsMosaic] {
+          mosaicWindowMatchesImage = windowShowsMosaic();
           auto *overlay = views[0]->rootObject()->findChild<QQuickItem *>(
               QStringLiteral("mosaicOverlay"));
           if (!overlay)
@@ -2206,6 +2417,8 @@ int main(int argc, char **argv) {
                           << ", export changed: " << mosaicExportChanged
                           << ", rectangle shape: " << rectangleShapeWorked
                           << ", visible pixels: " << mosaicPixelsVisible
+                          << ", draft window: " << mosaicDraftWindowMatchesImage
+                          << ", committed window: " << mosaicWindowMatchesImage
                           << ", transparent outside: " << mosaicMaskTransparent
                           << ", drag border: " << dragBorderPixelsVisible
                           << ", border gone: " << dragBorderGone
@@ -2240,6 +2453,7 @@ int main(int argc, char **argv) {
                        altFromEditorWorked && altFromToolWorked &&
                        dragPreviewWorked && mosaicExportChanged &&
                        rectangleShapeWorked && mosaicPixelsVisible &&
+                       mosaicDraftWindowMatchesImage && mosaicWindowMatchesImage &&
                        mosaicMaskTransparent && dragBorderPixelsVisible &&
                        dragBorderGone && penDraftWorked && penExportChanged &&
                        penPreviewVisible && textVisible && multilineEditing &&

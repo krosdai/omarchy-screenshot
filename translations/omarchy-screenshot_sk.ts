@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: potvrdiť · Shift+Enter: nový riadok · Alt: potvrdiť a vrátiť sa k predchádzajúcemu nástroju</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Pripnúť snímku obrazovky</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>Nedá sa uložiť: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Snímku obrazovky nemožno pripnúť.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Vytvárajte a anotujte snímky obrazovky v Hyprlande.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Zavrieť pripnutú snímku obrazovky</translation>
         </message>
     </context>
 </TS>

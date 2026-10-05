@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: επιβεβαίωση · Shift+Enter: νέα γραμμή · Alt: επιβεβαίωση και επιστροφή στο προηγούμενο εργαλείο</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Καρφίτσωμα στιγμιότυπου</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>Αδυναμία αποθήκευσης: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Δεν είναι δυνατό το καρφίτσωμα του στιγμιότυπου.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Λήψη και σχολιασμός στιγμιότυπων οθόνης στο Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Κλείσιμο καρφιτσωμένου στιγμιότυπου</translation>
         </message>
     </context>
 </TS>

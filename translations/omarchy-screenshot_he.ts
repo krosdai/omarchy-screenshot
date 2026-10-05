@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>⁦Enter⁩: אישור · ⁦Shift+Enter⁩: שורה חדשה · ⁦Alt⁩: אישור וחזרה לכלי הקודם</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>הצמדת צילום מסך</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>לא ניתן לשמור: ⁨%1⁩</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>לא ניתן להצמיד את צילום המסך.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>צילום מסך והוספת הערות ב־Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>סגירת צילום המסך המוצמד</translation>
         </message>
     </context>
 </TS>

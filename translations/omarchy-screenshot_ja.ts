@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter で確定 · Shift+Enter で改行 · Alt で確定して前のツールに戻る</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>スクリーンショットを固定</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>保存できません：%1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>スクリーンショットを固定できません。</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Hyprland でスクリーンショットを撮影し、注釈を追加します。</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>固定したスクリーンショットを閉じる</translation>
         </message>
     </context>
 </TS>

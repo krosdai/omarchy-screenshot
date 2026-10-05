@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: megerősítés · Shift+Enter: új sor · Alt: megerősítés és visszatérés az előző eszközhöz</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Képernyőkép rögzítése</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>Nem lehet menteni: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>A képernyőkép nem rögzíthető.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Képernyőképek készítése és megjegyzésekkel ellátása Hyprland alatt.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Rögzített képernyőkép bezárása</translation>
         </message>
     </context>
 </TS>

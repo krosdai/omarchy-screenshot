@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter 確認 · Shift+Enter 換行 · Alt 確認並返回上個工具</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>貼圖置頂</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>無法儲存：%1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>無法將截圖置頂。</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>在 Hyprland 上擷取螢幕畫面並加上標註。</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>關閉貼圖</translation>
         </message>
     </context>
 </TS>

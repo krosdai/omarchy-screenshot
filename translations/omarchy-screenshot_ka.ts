@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: დადასტურება · Shift+Enter: ახალი ხაზი · Alt: დადასტურება და წინა ხელსაწყოზე დაბრუნება</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>ეკრანის სურათის მიმაგრება</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>შენახვა შეუძლებელია: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>ეკრანის სურათის მიმაგრება ვერ მოხერხდა.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>გადაიღეთ ეკრანის სურათები და დაამატეთ ანოტაციები Hyprland-ში.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>მიმაგრებული ეკრანის სურათის დახურვა</translation>
         </message>
     </context>
 </TS>

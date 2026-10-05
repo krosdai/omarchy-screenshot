@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: тасдиқ · Shift+Enter: сатри нав · Alt: тасдиқ ва бозгашт ба абзори пешина</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Маҳкам кардани акси экран</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>Захира кардан ғайриимкон аст: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Акси экранро маҳкам кардан имконнопазир аст.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Дар Hyprland аксҳои экран гиред ва ба онҳо шарҳҳо илова кунед.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Пӯшидани акси маҳкамшудаи экран</translation>
         </message>
     </context>
 </TS>

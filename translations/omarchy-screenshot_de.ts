@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: bestätigen · Shift+Enter: neue Zeile · Alt: bestätigen und zum vorherigen Werkzeug zurückkehren</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Screenshot anheften</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>Speichern nicht möglich: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Screenshot kann nicht angeheftet werden.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Bildschirmfotos unter Hyprland aufnehmen und mit Anmerkungen versehen.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Angehefteten Screenshot schließen</translation>
         </message>
     </context>
 </TS>

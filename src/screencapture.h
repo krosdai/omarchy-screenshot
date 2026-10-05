@@ -11,3 +11,7 @@
 // Wayland connection. A null image means the caller must capture that output
 // another way (protocol missing, transformed output, failure or timeout).
 QList<QImage> captureOutputs(const QStringList &names, int timeoutMs);
+
+// Scrolling frames use grim's region support, with the same compositor cursor
+// suppression as monitor captures. The geometry is in logical desktop pixels.
+QImage captureRegionWithoutCursor(const QString &geometry, QString *error);

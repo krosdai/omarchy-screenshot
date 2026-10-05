@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: bekræft · Shift+Enter: ny linje · Alt: bekræft og vend tilbage til forrige værktøj</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Fastgør skærmbillede</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,10 @@
             <source>Cannot save: %1</source>
             <translation>Kan ikke gemme: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Kan ikke fastgøre skærmbilledet.</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +288,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Tag og annotér skærmbilleder i Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Luk fastgjort skærmbillede</translation>
         </message>
     </context>
 </TS>
