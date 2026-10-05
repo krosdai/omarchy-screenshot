@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: potvrdit · Shift+Enter: nový řádek · Alt: potvrdit a vrátit se k předchozímu nástroji</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Připnout snímek obrazovky</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Nelze uložit: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Snímek obrazovky nelze připnout.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Nelze skrýt kurzor: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>proměnná XDG_RUNTIME_DIR není nastavena</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>nelze otevřít zámek snímání</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>nelze uzamknout stav kurzoru</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>nelze přečíst cursor:invisible</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>nelze spustit obnovení kurzoru</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>nelze potlačit vykreslování kurzoru kompozitorem</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Pořizujte a anotujte snímky obrazovky v Hyprlandu.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Zavřít připnutý snímek obrazovky</translation>
         </message>
     </context>
 </TS>

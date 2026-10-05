@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: επιβεβαίωση · Shift+Enter: νέα γραμμή · Alt: επιβεβαίωση και επιστροφή στο προηγούμενο εργαλείο</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Καρφίτσωμα στιγμιότυπου</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Αδυναμία αποθήκευσης: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Δεν είναι δυνατό το καρφίτσωμα του στιγμιότυπου.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Αδυναμία απόκρυψης του δρομέα: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>η μεταβλητή XDG_RUNTIME_DIR δεν έχει οριστεί</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>αδυναμία ανοίγματος του κλειδώματος λήψης</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>αδυναμία κλειδώματος της κατάστασης του δρομέα</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>αδυναμία ανάγνωσης του cursor:invisible</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>αδυναμία εκκίνησης της επαναφοράς του δρομέα</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>αδυναμία απενεργοποίησης της απόδοσης του δρομέα από τον συνθέτη</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Λήψη και σχολιασμός στιγμιότυπων οθόνης στο Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Κλείσιμο καρφιτσωμένου στιγμιότυπου</translation>
         </message>
     </context>
 </TS>

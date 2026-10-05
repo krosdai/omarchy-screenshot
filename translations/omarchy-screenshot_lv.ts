@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: apstiprināt · Shift+Enter: jauna rinda · Alt: apstiprināt un atgriezties pie iepriekšējā rīka</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Piespraust ekrānuzņēmumu</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Nevar saglabāt: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Nevar piespraust ekrānuzņēmumu.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Nevar paslēpt peles kursoru: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>XDG_RUNTIME_DIR nav iestatīts</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>nevar atvērt uzņemšanas bloķēšanas failu</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>nevar bloķēt kursora stāvokli</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>nevar nolasīt cursor:invisible</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>nevar sākt kursora atjaunošanu</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>nevar atspējot kompozitora kursora zīmēšanu</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Uzņemiet ekrānuzņēmumus un pievienojiet anotācijas Hyprland vidē.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Aizvērt piesprausto ekrānuzņēmumu</translation>
         </message>
     </context>
 </TS>

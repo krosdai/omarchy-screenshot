@@ -310,6 +310,36 @@ Canvas {
             strokePath(undoArrow)
             ctx.restore()
             break
+        case "pin":
+            ctx.save()
+            ctx.translate(12, 12)
+            ctx.rotate(Math.PI / 4)
+            ctx.translate(-12, -12)
+            ctx.lineWidth = 1.7
+            fillPath(() => {
+                roundedRect(8, 3.5, 8, 2.7, 0.9)
+            }, ink)
+            fillPath(() => {
+                ctx.moveTo(9.7, 6.2)
+                ctx.lineTo(14.3, 6.2)
+                ctx.lineTo(14.3, 9.8)
+                ctx.quadraticCurveTo(14.3, 10.7, 15, 11.4)
+                ctx.lineTo(16.5, 13)
+                ctx.quadraticCurveTo(17.1, 13.6, 16.8, 14.3)
+                ctx.quadraticCurveTo(16.6, 14.8, 15.9, 14.8)
+                ctx.lineTo(8.1, 14.8)
+                ctx.quadraticCurveTo(7.4, 14.8, 7.2, 14.3)
+                ctx.quadraticCurveTo(6.9, 13.6, 7.5, 13)
+                ctx.lineTo(9, 11.4)
+                ctx.quadraticCurveTo(9.7, 10.7, 9.7, 9.8)
+                ctx.closePath()
+            }, paper)
+            strokePath(() => {
+                ctx.moveTo(12, 14.8)
+                ctx.lineTo(12, 21)
+            })
+            ctx.restore()
+            break
         case "copy":
             fillPath(() => roundedRect(3.3, 3.3, 12.7, 12.7, 1.5), paper)
             fillPath(() => roundedRect(8, 8, 12.7, 12.7, 1.5), paper)

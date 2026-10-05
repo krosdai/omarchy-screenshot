@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter 确认 · Shift+Enter 换行 · Alt 确认并返回上个工具</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>贴图置顶</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>无法保存：%1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>无法将截图置顶。</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>无法隐藏光标：%1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>未设置 XDG_RUNTIME_DIR</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>无法打开截图锁</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>无法锁定光标状态</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>无法读取 cursor:invisible</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>无法启动光标恢复</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>无法禁止合成器绘制光标</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>在 Hyprland 上截取屏幕并添加标注。</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>关闭贴图</translation>
         </message>
     </context>
 </TS>

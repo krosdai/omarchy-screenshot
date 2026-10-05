@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: ырастоо · Shift+Enter: жаңы сап · Alt: ырастоо жана мурунку куралга кайтуу</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Скриншотту бекитүү</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Сактоо мүмкүн эмес: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Скриншотту бекитүү мүмкүн эмес.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Курсорду жашыруу мүмкүн эмес: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>XDG_RUNTIME_DIR коюлган эмес</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>тартуу кулпун ачуу мүмкүн эмес</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>курсордун абалын кулпулоо мүмкүн эмес</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>cursor:invisible маанисин окуу мүмкүн эмес</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>курсорду калыбына келтирүүнү баштоо мүмкүн эмес</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>композитордун курсорду көрсөтүүсүн өчүрүү мүмкүн эмес</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Hyprland ичинде экран сүрөттөрүн тартып, аларга аннотация кошуңуз.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Бекитилген скриншотту жабуу</translation>
         </message>
     </context>
 </TS>

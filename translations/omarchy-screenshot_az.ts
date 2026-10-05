@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: təsdiqlə · Shift+Enter: yeni sətir · Alt: təsdiqlə və əvvəlki alətə qayıt</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Ekran görüntüsünü sabitlə</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Saxlama mümkün deyil: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Ekran görüntüsünü sabitləmək mümkün deyil.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Kursor gizlədilmir: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>XDG_RUNTIME_DIR təyin edilməyib</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>çəkiliş kilidi faylı açılmır</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>kursor vəziyyəti kilidlənmir</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>cursor:invisible oxunmur</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>kursorun bərpası başladılmır</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>kompozitorun kursor göstərməsi söndürülmür</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Hyprland-da ekran görüntüləri çəkin və onlara qeydlər əlavə edin.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Sabitlənmiş ekran görüntüsünü bağla</translation>
         </message>
     </context>
 </TS>

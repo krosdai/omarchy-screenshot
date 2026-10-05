@@ -29,6 +29,7 @@ TestCase {
         property var toolVariants: ({rect: "rect", ellipse: "ellipse", arrow: "arrow", pen: "pen"})
         property int startCount: 0
         property int resumeCount: 0
+        property int pinCount: 0
         property rect scrollRegion: Qt.rect(40, 100, 1100, 300)
         property int scrollHeight: 0
         property bool scrollAwaitingPane: false
@@ -42,6 +43,7 @@ TestCase {
         function setAnnotationColorFromHsv(h, s, v) { annotationColor = "#ff9d42" }
         function startScroll() { startCount++ }
         function resumeScroll() { resumeCount++ }
+        function pin() { pinCount++ }
     }
     Screenshot.AnnotationToolbar {
         id: normalToolbar
@@ -88,6 +90,7 @@ TestCase {
         captureController.annotations = []
         captureController.startCount = 0
         captureController.resumeCount = 0
+        captureController.pinCount = 0
         normalToolbar.visible = true
         longToolbar.visible = false
         scrollCapture.visible = false
@@ -122,6 +125,34 @@ TestCase {
             verify(label.visible)
             verify(glyph !== null)
         }
+    }
+    function test_pin_button_and_shortcut_data() {
+        return [{tag: "normal", longImage: false}, {tag: "long", longImage: true}]
+    }
+    function test_pin_button_and_shortcut(data) {
+        normalToolbar.visible = !data.longImage
+        longToolbar.visible = data.longImage
+        const toolbar = data.longImage ? longToolbar : normalToolbar
+        const prefix = data.longImage ? "longTool_" : "tool_"
+        const button = visualItem(toolbar, prefix + "pin")
+        verify(button !== null)
+        const copy = visualItem(toolbar, prefix + "copy")
+        verify(button.x + button.width <= copy.x)
+        mouseClick(button, button.width / 2, button.height / 2)
+        compare(captureController.pinCount, 1)
+        testCase.forceActiveFocus()
+        keyClick(Qt.Key_P)
+        compare(captureController.pinCount, 2)
+        keyClick(Qt.Key_P, Qt.ControlModifier)
+        compare(captureController.pinCount, 2)
+        captureController.selected = false
+        keyClick(Qt.Key_P)
+        compare(captureController.pinCount, 2)
+        annotationInput.visible = true
+        annotationInput.forceActiveFocus()
+        keyClick(Qt.Key_P)
+        compare(annotationInput.text, "p")
+        compare(captureController.pinCount, 2)
     }
     function test_h_starts_only_before_annotations() {
         keyClick(Qt.Key_H)

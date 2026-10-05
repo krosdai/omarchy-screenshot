@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: potrdi · Shift+Enter: nova vrstica · Alt: potrdi in se vrni na prejšnje orodje</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Pripni posnetek zaslona</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Ni mogoče shraniti: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Posnetka zaslona ni mogoče pripeti.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Ni mogoče skriti kazalca miške: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>spremenljivka XDG_RUNTIME_DIR ni nastavljena</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>ni mogoče odpreti zaklepa zajema</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>ni mogoče zakleniti stanja kazalca</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>ni mogoče prebrati cursor:invisible</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>ni mogoče zagnati obnovitve kazalca</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>ni mogoče izklopiti izrisovanja kazalca v kompozitorju</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Zajemajte posnetke zaslona in jim dodajajte opombe v Hyprlandu.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Zapri pripeti posnetek zaslona</translation>
         </message>
     </context>
 </TS>

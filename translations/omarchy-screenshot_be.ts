@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: пацвердзіць · Shift+Enter: новы радок · Alt: пацвердзіць і вярнуцца да папярэдняга інструмента</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Замацаваць здымак экрана</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Немагчыма захаваць: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Не ўдалося замацаваць здымак экрана.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Немагчыма схаваць курсор: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>зменная XDG_RUNTIME_DIR не зададзена</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>немагчыма адкрыць файл блакіроўкі здымка</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>немагчыма заблакіраваць стан курсора</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>немагчыма прачытаць cursor:invisible</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>немагчыма запусціць аднаўленне курсора</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>немагчыма адключыць адмалёўку курсора кампазітарам</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Рабіце здымкі экрана і дадавайце анатацыі ў Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Закрыць замацаваны здымак экрана</translation>
         </message>
     </context>
 </TS>

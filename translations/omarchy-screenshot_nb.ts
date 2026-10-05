@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: bekreft · Shift+Enter: ny linje · Alt: bekreft og gå tilbake til forrige verktøy</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Fest skjermbilde</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Kan ikke lagre: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Kan ikke feste skjermbildet.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Kan ikke skjule musepekeren: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>XDG_RUNTIME_DIR er ikke angitt</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>kan ikke åpne opptakslåsen</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>kan ikke låse pekertilstanden</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>kan ikke lese cursor:invisible</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>kan ikke starte gjenoppretting av pekeren</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>kan ikke slå av kompositorens tegning av pekeren</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Ta og kommenter skjermbilder i Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Lukk festet skjermbilde</translation>
         </message>
     </context>
 </TS>

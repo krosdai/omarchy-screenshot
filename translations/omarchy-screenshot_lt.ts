@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: patvirtinti · Shift+Enter: nauja eilutė · Alt: patvirtinti ir grįžti prie ankstesnio įrankio</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Prisegti ekrano kopiją</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Nepavyksta įrašyti: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Nepavyko prisegti ekrano kopijos.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Nepavyksta paslėpti pelės žymeklio: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>XDG_RUNTIME_DIR nenustatytas</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>nepavyksta atverti fiksavimo užrakto</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>nepavyksta užrakinti žymeklio būsenos</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>nepavyksta perskaityti cursor:invisible</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>nepavyksta paleisti žymeklio atkūrimo</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>nepavyksta išjungti kompozitoriaus žymeklio piešimo</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Fiksuokite ekrano kopijas ir pridėkite anotacijų Hyprland aplinkoje.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Užverti prisegtą ekrano kopiją</translation>
         </message>
     </context>
 </TS>

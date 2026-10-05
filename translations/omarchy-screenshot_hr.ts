@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: potvrdi · Shift+Enter: novi redak · Alt: potvrdi i vrati se na prethodni alat</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Prikvači snimku zaslona</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Nije moguće spremiti: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Snimku zaslona nije moguće prikvačiti.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Nije moguće sakriti kursor: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>varijabla XDG_RUNTIME_DIR nije postavljena</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>nije moguće otvoriti zaključavanje snimanja</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>nije moguće zaključati stanje kursora</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>nije moguće pročitati cursor:invisible</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>nije moguće pokrenuti vraćanje kursora</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>nije moguće isključiti iscrtavanje kursora u kompozitoru</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Snimajte zaslon i dodajte bilješke u Hyprlandu.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Zatvori prikvačenu snimku zaslona</translation>
         </message>
     </context>
 </TS>

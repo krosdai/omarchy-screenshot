@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: დადასტურება · Shift+Enter: ახალი ხაზი · Alt: დადასტურება და წინა ხელსაწყოზე დაბრუნება</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>ეკრანის სურათის მიმაგრება</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>შენახვა შეუძლებელია: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>ეკრანის სურათის მიმაგრება ვერ მოხერხდა.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>კურსორის დამალვა შეუძლებელია: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>XDG_RUNTIME_DIR დაყენებული არ არის</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>გადაღების ჩაკეტვის ფაილის გახსნა შეუძლებელია</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>კურსორის მდგომარეობის ჩაკეტვა შეუძლებელია</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>cursor:invisible-ის წაკითხვა შეუძლებელია</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>კურსორის აღდგენის გაშვება შეუძლებელია</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>კომპოზიტორის მიერ კურსორის დახატვის გამორთვა შეუძლებელია</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>გადაიღეთ ეკრანის სურათები და დაამატეთ ანოტაციები Hyprland-ში.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>მიმაგრებული ეკრანის სურათის დახურვა</translation>
         </message>
     </context>
 </TS>

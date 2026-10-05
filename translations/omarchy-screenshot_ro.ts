@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: confirmare · Shift+Enter: rând nou · Alt: confirmare și revenire la instrumentul anterior</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Fixează captura de ecran</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Nu se poate salva: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Captura de ecran nu poate fi fixată.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Nu se poate ascunde cursorul: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>variabila XDG_RUNTIME_DIR nu este setată</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>nu se poate deschide blocarea capturii</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>nu se poate bloca starea cursorului</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>nu se poate citi cursor:invisible</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>nu se poate porni restaurarea cursorului</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>nu se poate dezactiva desenarea cursorului de către compozitor</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Realizați și adnotați capturi de ecran în Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Închide captura de ecran fixată</translation>
         </message>
     </context>
 </TS>

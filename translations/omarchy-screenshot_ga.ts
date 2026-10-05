@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: deimhnigh · Shift+Enter: líne nua · Alt: deimhnigh agus fill ar an uirlis roimhe seo</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Pionnáil an ghabháil scáileáin</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Ní féidir sábháil: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Ní féidir an ghabháil scáileáin a phionnáil.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Ní féidir an cúrsóir a cheilt: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>níl XDG_RUNTIME_DIR socraithe</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>ní féidir an glas gabhála a oscailt</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>ní féidir staid an chúrsóra a ghlasáil</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>ní féidir cursor:invisible a léamh</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>ní féidir athchóiriú an chúrsóra a thosú</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>ní féidir rindreáil an chúrsóra ag an gcomhdhéantóir a chosc</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Glac seatanna scáileáin agus cuir nótaí leo ar Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Dún an ghabháil scáileáin phionnáilte</translation>
         </message>
     </context>
 </TS>

@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "screencapture.h"
+#include "cursorcaptureguard.h"
 
 #include "ext-image-capture-source-v1-client-protocol.h"
 #include "ext-image-copy-capture-v1-client-protocol.h"
 
 #include <QDeadlineTimer>
+#include <QProcess>
 #include <QtGlobal>
 
 #include <wayland-client.h>
@@ -251,6 +253,26 @@ void dispatchUntilFinished(Connection &connection, int timeoutMs) {
   }
 }
 } // namespace
+
+QImage captureRegionWithoutCursor(const QString &geometry, QString *error) {
+  CursorCaptureGuard cursor(error);
+  if (!cursor.ready())
+    return {};
+  QProcess process;
+  // Never request grim's -c, even while compositor rendering is suppressed.
+  // PPM retains original pixels and avoids the cost of PNG compression.
+  process.start(QStringLiteral("grim"),
+                {QStringLiteral("-t"), QStringLiteral("ppm"),
+                 QStringLiteral("-g"), geometry, QStringLiteral("-")});
+  if (!process.waitForStarted(3000) || !process.waitForFinished(15000) ||
+      process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0) {
+    if (error)
+      *error = QStringLiteral("grim: %1").arg(
+          QString::fromUtf8(process.readAllStandardError()).trimmed());
+    return {};
+  }
+  return QImage::fromData(process.readAllStandardOutput());
+}
 
 QList<QImage> captureOutputs(const QStringList &names, int timeoutMs) {
   QList<QImage> images(names.size());

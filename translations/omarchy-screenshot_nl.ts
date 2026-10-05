@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: bevestigen · Shift+Enter: nieuwe regel · Alt: bevestigen en terug naar het vorige gereedschap</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Schermafbeelding vastzetten</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Kan niet opslaan: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Kan de schermafbeelding niet vastzetten.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Kan de muisaanwijzer niet verbergen: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>XDG_RUNTIME_DIR is niet ingesteld</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>kan de opnamevergrendeling niet openen</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>kan de aanwijzerstatus niet vergrendelen</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>kan cursor:invisible niet lezen</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>kan het herstellen van de aanwijzer niet starten</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>kan het tekenen van de aanwijzer door de compositor niet uitschakelen</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Maak en annoteer schermafbeeldingen in Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Vastgezette schermafbeelding sluiten</translation>
         </message>
     </context>
 </TS>

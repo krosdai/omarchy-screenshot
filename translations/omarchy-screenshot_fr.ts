@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter : confirmer · Shift+Enter : nouvelle ligne · Alt : confirmer et revenir à l’outil précédent</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Épingler la capture</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Impossible d’enregistrer : %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Impossible d’épingler la capture.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Impossible de masquer le curseur : %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>la variable XDG_RUNTIME_DIR n’est pas définie</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>impossible d’ouvrir le verrou de capture</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>impossible de verrouiller l’état du curseur</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>impossible de lire cursor:invisible</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>impossible de lancer la restauration du curseur</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>impossible de désactiver l’affichage du curseur par le compositeur</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Capturez et annotez des captures d’écran sous Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Fermer la capture épinglée</translation>
         </message>
     </context>
 </TS>

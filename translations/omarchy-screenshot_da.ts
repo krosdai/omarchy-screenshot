@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: bekræft · Shift+Enter: ny linje · Alt: bekræft og vend tilbage til forrige værktøj</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Fastgør skærmbillede</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Kan ikke gemme: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Kan ikke fastgøre skærmbilledet.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Kan ikke skjule musemarkøren: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>XDG_RUNTIME_DIR er ikke angivet</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>kan ikke åbne optagelåsen</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>kan ikke låse markørens tilstand</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>kan ikke læse cursor:invisible</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>kan ikke starte gendannelse af markøren</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>kan ikke slå compositorens tegning af markøren fra</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Tag og annotér skærmbilleder i Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Luk fastgjort skærmbillede</translation>
         </message>
     </context>
 </TS>

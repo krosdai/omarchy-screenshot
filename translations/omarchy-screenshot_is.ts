@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: staðfesta · Shift+Enter: ný lína · Alt: staðfesta og fara aftur í fyrra verkfæri</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Festa skjámynd</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Ekki er hægt að vista: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Ekki er hægt að festa skjámyndina.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Ekki er hægt að fela músarbendilinn: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>XDG_RUNTIME_DIR er ekki skilgreint</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>ekki er hægt að opna myndatökulásinn</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>ekki er hægt að læsa stöðu bendilsins</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>ekki er hægt að lesa cursor:invisible</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>ekki er hægt að ræsa endurheimt bendilsins</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>ekki er hægt að slökkva á teiknun gluggastjórans á bendlinum</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Taktu skjámyndir og bættu við athugasemdum í Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Loka festri skjámynd</translation>
         </message>
     </context>
 </TS>

@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter で確定 · Shift+Enter で改行 · Alt で確定して前のツールに戻る</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>スクリーンショットを固定</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>保存できません：%1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>スクリーンショットを固定できません。</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>カーソルを非表示にできません：%1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>XDG_RUNTIME_DIR が設定されていません</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>キャプチャ用のロックを開けません</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>カーソル状態をロックできません</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>cursor:invisible を読み取れません</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>カーソルの復元を開始できません</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>コンポジターによるカーソル描画を無効にできません</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Hyprland でスクリーンショットを撮影し、注釈を追加します。</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>固定したスクリーンショットを閉じる</translation>
         </message>
     </context>
 </TS>

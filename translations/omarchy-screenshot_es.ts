@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: confirmar · Shift+Enter: nueva línea · Alt: confirmar y volver a la herramienta anterior</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Fijar captura de pantalla</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>No se puede guardar: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>No se puede fijar la captura de pantalla.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>No se puede ocultar el cursor: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>la variable XDG_RUNTIME_DIR no está definida</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>no se puede abrir el bloqueo de captura</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>no se puede bloquear el estado del cursor</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>no se puede leer cursor:invisible</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>no se puede iniciar la restauración del cursor</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>no se puede desactivar el dibujado del cursor en el compositor</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Capture y anote capturas de pantalla en Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Cerrar captura de pantalla fijada</translation>
         </message>
     </context>
 </TS>

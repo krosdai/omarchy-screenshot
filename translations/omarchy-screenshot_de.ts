@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: bestätigen · Shift+Enter: neue Zeile · Alt: bestätigen und zum vorherigen Werkzeug zurückkehren</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Screenshot anheften</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Speichern nicht möglich: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Screenshot kann nicht angeheftet werden.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Mauszeiger kann nicht ausgeblendet werden: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>XDG_RUNTIME_DIR ist nicht gesetzt</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>die Aufnahmesperre kann nicht geöffnet werden</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>der Zeigerzustand kann nicht gesperrt werden</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>cursor:invisible kann nicht gelesen werden</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>die Wiederherstellung des Zeigers kann nicht gestartet werden</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>das Zeichnen des Zeigers durch den Compositor kann nicht unterdrückt werden</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Bildschirmfotos unter Hyprland aufnehmen und mit Anmerkungen versehen.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Angehefteten Screenshot schließen</translation>
         </message>
     </context>
 </TS>

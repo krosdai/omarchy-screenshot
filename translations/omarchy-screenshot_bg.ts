@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: потвърждаване · Shift+Enter: нов ред · Alt: потвърждаване и връщане към предишния инструмент</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Закачане на екранната снимка</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Не може да се запази: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Екранната снимка не може да се закачи.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Не може да се скрие курсорът: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>променливата XDG_RUNTIME_DIR не е зададена</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>не може да се отвори заключващият файл за заснемане</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>не може да се заключи състоянието на курсора</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>не може да се прочете cursor:invisible</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>не може да се стартира възстановяването на курсора</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>не може да се изключи изобразяването на курсора от композитора</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Заснемайте и анотирайте екранни снимки в Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Затваряне на закачената екранна снимка</translation>
         </message>
     </context>
 </TS>

@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: растау · Shift+Enter: жаңа жол · Alt: растау және алдыңғы құралға оралу</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Скриншотты бекіту</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Сақтау мүмкін емес: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Скриншотты бекіту мүмкін емес.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Тінтуір меңзерін жасыру мүмкін емес: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>XDG_RUNTIME_DIR орнатылмаған</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>түсіру құлпын ашу мүмкін емес</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>меңзер күйін құлыптау мүмкін емес</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>cursor:invisible мәнін оқу мүмкін емес</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>меңзерді қалпына келтіруді бастау мүмкін емес</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>композитордың меңзерді салуын өшіру мүмкін емес</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Hyprland жүйесінде экран суреттерін түсіріп, оларға аңдатпалар қосыңыз.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Бекітілген скриншотты жабу</translation>
         </message>
     </context>
 </TS>

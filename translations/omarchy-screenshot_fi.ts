@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: vahvista · Shift+Enter: uusi rivi · Alt: vahvista ja palaa edelliseen työkaluun</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Kiinnitä kuvakaappaus</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Tallentaminen ei onnistu: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Kuvakaappausta ei voi kiinnittää.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Hiiren osoitinta ei voi piilottaa: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>XDG_RUNTIME_DIR-muuttujaa ei ole asetettu</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>kaappauslukkoa ei voi avata</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>osoittimen tilaa ei voi lukita</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>cursor:invisible-asetusta ei voi lukea</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>osoittimen palautusta ei voi käynnistää</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>koostajan osoittimen piirtoa ei voi estää</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Ota kuvakaappauksia ja lisää niihin merkintöjä Hyprlandissa.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Sulje kiinnitetty kuvakaappaus</translation>
         </message>
     </context>
 </TS>

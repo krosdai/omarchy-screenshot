@@ -115,6 +115,10 @@
             <source>Enter: confirm · Shift+Enter: new line · Alt: confirm &amp; return to previous tool</source>
             <translation>Enter: bekräfta · Shift+Enter: ny rad · Alt: bekräfta och återgå till föregående verktyg</translation>
         </message>
+        <message>
+            <source>Pin screenshot</source>
+            <translation>Fäst skärmbild</translation>
+        </message>
     </context>
     <context>
         <name>CaptureController</name>
@@ -198,6 +202,41 @@
             <source>Cannot save: %1</source>
             <translation>Kan inte spara: %1</translation>
         </message>
+        <message>
+            <source>Cannot pin screenshot.</source>
+            <translation>Kan inte fästa skärmbilden.</translation>
+        </message>
+    </context>
+    <context>
+        <name>CursorCaptureGuard</name>
+        <message>
+            <source>Cannot exclude the cursor: %1</source>
+            <translation>Kan inte dölja muspekaren: %1</translation>
+        </message>
+        <message>
+            <source>XDG_RUNTIME_DIR is not set</source>
+            <translation>XDG_RUNTIME_DIR är inte angiven</translation>
+        </message>
+        <message>
+            <source>cannot open the capture lock</source>
+            <translation>kan inte öppna skärmbildslåset</translation>
+        </message>
+        <message>
+            <source>cannot lock the cursor state</source>
+            <translation>kan inte låsa pekarens tillstånd</translation>
+        </message>
+        <message>
+            <source>cannot read cursor:invisible</source>
+            <translation>kan inte läsa cursor:invisible</translation>
+        </message>
+        <message>
+            <source>cannot start cursor restoration</source>
+            <translation>kan inte starta återställningen av pekaren</translation>
+        </message>
+        <message>
+            <source>cannot suppress compositor cursor rendering</source>
+            <translation>kan inte stänga av kompositorns ritning av pekaren</translation>
+        </message>
     </context>
     <context>
         <name>LongOverlay</name>
@@ -280,6 +319,13 @@
         <message>
             <source>Capture and annotate screenshots on Hyprland.</source>
             <translation>Ta skärmbilder och lägg till anteckningar i Hyprland.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PinOverlay</name>
+        <message>
+            <source>Close pinned screenshot</source>
+            <translation>Stäng fäst skärmbild</translation>
         </message>
     </context>
 </TS>
