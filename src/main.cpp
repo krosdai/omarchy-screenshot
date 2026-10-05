@@ -1003,23 +1003,26 @@ int main(int argc, char **argv) {
                                     (screen.height() * .8) / image.height()});
       rect = QRectF(screen.topLeft() + QPointF(30, 30), QSizeF(image.size()) * scale);
     }
-    const bool added = pins.add(image, rect) >= 0;
     // Without resident mode a pin keeps this process alive. Let subsequent
     // plain launches reuse it, so older pins can be excluded from captures.
-    if (added && !uiTest && !daemon && !requests) {
+    // If another process owns the socket, it serves those launches and cannot
+    // hide this process's pins, so refuse the pin instead of leaking it.
+    if (!uiTest && !daemon && !requests) {
       const std::string path = pinUiTest
           ? testSettings->filePath(QStringLiteral("omarchy-screenshot.sock")).toStdString()
           : daemonSocketPath();
       std::string listenError;
-      if (listenForCaptureRequests(path, &listener, &socketLock, &listenError) ==
+      if (listenForCaptureRequests(path, &listener, &socketLock, &listenError) !=
           ListenResult::Listening) {
-        ownedSocket = path;
-        listenForRequests();
-      } else if (!listenError.empty()) {
-        qWarning().noquote() << QString::fromStdString(listenError);
+        if (!listenError.empty())
+          qWarning().noquote() << QString::fromStdString(listenError);
+        controller.finishPin(false);
+        return;
       }
+      ownedSocket = path;
+      listenForRequests();
     }
-    controller.finishPin(added);
+    controller.finishPin(pins.add(image, rect) >= 0);
   });
   QObject::connect(&pins, &PinnedImages::countChanged, &app, [&] {
     if (pins.count() > 0)
